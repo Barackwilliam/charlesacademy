@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h4>Teachers</h4>
+
+<!-- Top action buttons -->
+<div class="mb-3">
+    <a href="{% url 'add_teacher' %}" class="btn btn-primary">Add Teacher</a>
+    <a href="{% url 'attendance:mark_teacher_attendance' %}" class="btn btn-success">Mark Attendance</a>
+    <a href="{% url 'attendance:teacher_attendance_list' %}" class="btn btn-info">Attendance List</a>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in teachers %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ t.first_name }} {{ t.last_name }}</td>
+            <td>{{ t.email }}</td>
+            <td>
+                {% if t.is_available %}
+                    <span class="badge bg-success">Available</span>
+                {% else %}
+                    <span class="badge bg-danger">Unavailable</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'edit_teacher' t.id %}" class="btn btn-sm btn-warning">Edit</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">No teachers found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Payments</h4>
+<a href="{% url 'fees:record_payment' %}" class="btn btn-primary mb-2">Add Payment</a>
+
+<table class="table table-bordered">
+<tr><th>Student</th><th>Amount</th><th>Date</th><th>Receipt</th></tr>
+{% for p in payments %}
+<tr>
+<td>{{ p.student.full_name }}</td>
+<td>{{ p.amount_paid }}</td>
+<td>{{ p.date }}</td>
+<td>{{ p.receipt_no }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

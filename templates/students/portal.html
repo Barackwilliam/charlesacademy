@@ -1,0 +1,613 @@
+{% extends 'base.html' %}
+{% block page_title %}Student Portal{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Welcome, {{ student.full_name }}!</h1>
+            <p class="text-muted mb-0">Here's your academic overview</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary fs-6 px-3 py-2" id="currentDateTime">
+                <i class="bi bi-calendar-week me-1"></i>
+                Loading date...
+            </span>
+            <a href="{% url 'students:change_password' %}" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-shield-lock me-1"></i> Change Password
+            </a>
+        </div>
+    </div>
+
+    <!-- Student Profile Card -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <!-- Student Avatar -->
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            <div class="student-avatar bg-primary bg-gradient rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                 style="width: 120px; height: 120px;">
+                                <span class="text-white display-5 fw-bold">
+                                    {{ student.full_name|slice:":1"|upper }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Student Details -->
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <h6 class="text-muted mb-1">
+                                            <i class="bi bi-person-badge me-2"></i> Registration Number
+                                        </h6>
+                                        <h5 class="fw-bold">{{ student.registration_number }}</h5>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h6 class="text-muted mb-1">
+                                            <i class="bi bi-building me-2"></i> Class
+                                        </h6>
+                                        <h5 class="fw-bold">{{ student.classroom.name }}</h5>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <h6 class="text-muted mb-1">
+                                            <i class="bi bi-info-circle me-2"></i> Status
+                                        </h6>
+                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i> Active
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h6 class="text-muted mb-1">
+                                            <i class="bi bi-calendar-event me-2"></i> Academic Year
+                                        </h6>
+                                        <h5 class="fw-bold">2024</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Stats -->
+                            <div class="row mt-3">
+                                <div class="col-4 text-center">
+                                    <div class="p-2 bg-light rounded">
+                                        <small class="text-muted d-block">Subjects</small>
+                                        <h4 class="fw-bold mb-0">{{ results|length|default:0 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="p-2 bg-light rounded">
+                                        <small class="text-muted d-block">Attendance</small>
+                                        <h4 class="fw-bold mb-0">{{ attendance|length|default:0 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="p-2 bg-light rounded">
+                                        <small class="text-muted d-block">Performance</small>
+                                        <h4 class="fw-bold mb-0">
+                                            {% if results %}
+                                                {{ results.0.grade|default:"-" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning-charge text-warning me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-primary text-start">
+                            <i class="bi bi-calendar-week me-2"></i> View Timetable
+                        </a>
+                        <a href="#" class="btn btn-outline-success text-start">
+                            <i class="bi bi-file-earmark-text me-2"></i> Download Reports
+                        </a>
+                        <a href="#" class="btn btn-outline-info text-start">
+                            <i class="bi bi-chat-dots me-2"></i> Contact Teacher
+                        </a>
+                        <a href="{% url 'students:change_password' %}" class="btn btn-outline-warning text-start">
+                            <i class="bi bi-shield-lock me-2"></i> Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Performance -->
+    <div class="row mb-4">
+        <!-- Results Section -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-award text-primary me-2"></i>
+                        Academic Results
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-funnel me-1"></i> Filter
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">All Subjects</a></li>
+                            <li><a class="dropdown-item" href="#">This Term</a></li>
+                            <li><a class="dropdown-item" href="#">Previous Term</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in results %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="subject-icon bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="bi bi-journal-text text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold">{{ r.subject }}</h6>
+                                                <small class="text-muted">Term {{ r.term|default:"1" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h4 class="fw-bold mb-0">{{ r.marks }}</h4>
+                                        <small class="text-muted">/100</small>
+                                    </td>
+                                    <td>
+                                        {% if r.grade == 'A' %}
+                                            <span class="badge bg-success rounded-pill px-3 py-2">{{ r.grade }}</span>
+                                        {% elif r.grade == 'B' %}
+                                            <span class="badge bg-info rounded-pill px-3 py-2">{{ r.grade }}</span>
+                                        {% elif r.grade == 'C' %}
+                                            <span class="badge bg-warning rounded-pill px-3 py-2">{{ r.grade }}</span>
+                                        {% elif r.grade == 'D' %}
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">{{ r.grade }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2">{{ r.grade }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ r.remarks|default:"No remarks" }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Performance Summary -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted mb-2">Average Score</h6>
+                                    <div class="d-flex align-items-center">
+                                        <h2 class="fw-bold mb-0" id="averageScore">0/100</h2>
+                                        <div class="ms-3">
+                                            <div class="progress" style="width: 100px; height: 10px;">
+                                                <div class="progress-bar bg-success" style="width: 75%"></div>
+                                            </div>
+                                            <small class="text-muted">Overall Performance</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted mb-2">Best Subject</h6>
+                                    <div class="d-flex align-items-center">
+                                        <div class="subject-icon bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="bi bi-trophy text-success fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-0">
+                                                {% if results %}
+                                                    {{ results.0.subject }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </h5>
+                                            <small class="text-muted">
+                                                {% if results %}
+                                                    {{ results.0.marks }} marks
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-journal-x display-1 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold">No Results Available</h5>
+                        <p class="text-muted">Your academic results will appear here once they are published.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Attendance Section -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calendar-check text-success me-2"></i>
+                        Attendance Records
+                    </h5>
+                </div>
+                
+                <div class="card-body">
+                    {% if attendance %}
+                    <div class="attendance-list">
+                        {% for a in attendance|slice:":10" %}
+                        <div class="attendance-item d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ a.date|date:"M d, Y" }}</h6>
+                                <small class="text-muted">{{ a.date|date:"l" }}</small>
+                            </div>
+                            <div>
+                                {% if a.status == 'Present' %}
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i> {{ a.status }}
+                                    </span>
+                                {% elif a.status == 'Absent' %}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        <i class="bi bi-x-circle me-1"></i> {{ a.status }}
+                                    </span>
+                                {% elif a.status == 'Late' %}
+                                    <span class="badge bg-warning rounded-pill px-3 py-2">
+                                        <i class="bi bi-clock me-1"></i> {{ a.status }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2">{{ a.status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Attendance Statistics -->
+                    <div class="attendance-stats mt-4">
+                        <h6 class="fw-bold mb-3">Attendance Summary</h6>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="p-3 bg-success bg-opacity-10 rounded">
+                                    <h3 class="fw-bold text-success mb-0" id="presentCount">0</h3>
+                                    <small class="text-muted">Present</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-danger bg-opacity-10 rounded">
+                                    <h3 class="fw-bold text-danger mb-0" id="absentCount">0</h3>
+                                    <small class="text-muted">Absent</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-warning bg-opacity-10 rounded">
+                                    <h3 class="fw-bold text-warning mb-0" id="lateCount">0</h3>
+                                    <small class="text-muted">Late</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Attendance Rate -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">Overall Attendance Rate</small>
+                                <small class="fw-bold text-success" id="attendanceRate">0%</small>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-calendar-x display-1 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold">No Attendance Records</h5>
+                        <p class="text-muted">Your attendance records will appear here.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- View All Button -->
+                    {% if attendance|length > 10 %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'attendance:my_attendance' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-arrow-right me-1"></i> View All Records
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events & Notices -->
+    <div class="row">
+        <!-- Upcoming Exams -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calendar-event text-danger me-2"></i>
+                        Upcoming Exams
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="upcoming-exams">
+                        {% for i in "123"|make_list %}
+                        <div class="exam-item d-flex align-items-center mb-3 p-3 border rounded">
+                            <div class="exam-date bg-danger bg-opacity-10 rounded text-center me-3" style="min-width: 60px;">
+                                <div class="text-danger fw-bold">{{ forloop.counter|add:10 }}</div>
+                                <small class="text-muted">Nov</small>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 fw-bold">Mathematics Mid-Term</h6>
+                                <small class="text-muted">10:00 AM - 12:00 PM</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-danger">Exam</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Notices -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-megaphone text-info me-2"></i>
+                        Recent Notices
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="notices-list">
+                        {% for i in "123"|make_list %}
+                        <div class="notice-item mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="mb-0 fw-bold">School Meeting - Parents Day</h6>
+                                <small class="text-muted">2 days ago</small>
+                            </div>
+                            <p class="text-muted mb-2">Annual parents-teachers meeting scheduled for next Friday.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Styles */
+    .student-avatar {
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
+    }
+    
+    .student-avatar:hover {
+        transform: scale(1.05);
+    }
+    
+    .subject-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .subject-icon:hover {
+        transform: rotate(15deg);
+        background-color: rgba(67, 97, 238, 0.2) !important;
+    }
+    
+    .attendance-item {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .attendance-item:hover {
+        background-color: rgba(0,0,0,0.02);
+        transform: translateX(5px);
+    }
+    
+    .exam-date {
+        transition: all 0.3s ease;
+    }
+    
+    .exam-item:hover .exam-date {
+        background-color: rgba(220, 53, 69, 0.2) !important;
+        transform: scale(1.1);
+    }
+    
+    .notice-item {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .notice-item:hover {
+        background-color: rgba(0,0,0,0.02);
+        padding: 1rem !important;
+        border-radius: 8px;
+    }
+    
+    .progress-bar {
+        transition: width 1.5s ease-in-out;
+    }
+    
+    .badge.rounded-pill {
+        padding: 0.5em 1em;
+    }
+    
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+        .student-avatar {
+            width: 80px !important;
+            height: 80px !important;
+        }
+        
+        .display-5 {
+            font-size: 2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializePortal();
+    });
+
+    function initializePortal() {
+        // Update date and time
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        
+        // Calculate average score
+        calculateAverageScore();
+        
+        // Calculate attendance statistics
+        calculateAttendanceStats();
+        
+        // Animate progress bars
+        animateProgressBars();
+    }
+
+    function updateDateTime() {
+        const now = new Date();
+        const dateTimeElement = document.getElementById('currentDateTime');
+        
+        if (dateTimeElement) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const formattedDateTime = now.toLocaleDateString('en-US', options);
+            dateTimeElement.innerHTML = `<i class="bi bi-calendar-week me-1"></i>${formattedDateTime}`;
+        }
+    }
+
+    function calculateAverageScore() {
+        const resultRows = document.querySelectorAll('tbody tr');
+        if (resultRows.length > 0) {
+            let totalMarks = 0;
+            resultRows.forEach(row => {
+                const marksCell = row.querySelector('td:nth-child(2) h4');
+                if (marksCell) {
+                    const marks = parseInt(marksCell.textContent) || 0;
+                    totalMarks += marks;
+                }
+            });
+            
+            const average = totalMarks / resultRows.length;
+            const averageElement = document.getElementById('averageScore');
+            if (averageElement) {
+                averageElement.textContent = `${average.toFixed(1)}/100`;
+            }
+        }
+    }
+
+    function calculateAttendanceStats() {
+        const attendanceItems = document.querySelectorAll('.attendance-item');
+        let present = 0, absent = 0, late = 0;
+        
+        attendanceItems.forEach(item => {
+            const badge = item.querySelector('.badge');
+            if (badge) {
+                const text = badge.textContent.trim();
+                if (text.includes('Present')) present++;
+                else if (text.includes('Absent')) absent++;
+                else if (text.includes('Late')) late++;
+            }
+        });
+        
+        const total = present + absent + late;
+        const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+        
+        // Update counts
+        document.getElementById('presentCount').textContent = present;
+        document.getElementById('absentCount').textContent = absent;
+        document.getElementById('lateCount').textContent = late;
+        document.getElementById('attendanceRate').textContent = `${rate}%`;
+        
+        // Update progress bar
+        const progressBar = document.querySelector('.attendance-stats .progress-bar');
+        if (progressBar) {
+            progressBar.style.width = `${rate}%`;
+        }
+    }
+
+    function animateProgressBars() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const originalWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.width = originalWidth;
+            }, 300);
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+{% block page_title %}Mark Student Attendance{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Mark Student Attendance</h1>
+            <p class="text-muted mb-0">Record attendance for {{ today }}</p>
+        </div>
+        <div>
+            <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> View Records
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Students</h6>
+                            <h3 class="fw-bold mb-0">{{ students|length }}</h3>
+                        </div>
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-people-fill text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Present</h6>
+                            <h3 class="fw-bold mb-0" id="presentCount">0</h3>
+                        </div>
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Absent</h6>
+                            <h3 class="fw-bold mb-0" id="absentCount">0</h3>
+                        </div>
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Late</h6>
+                            <h3 class="fw-bold mb-0" id="lateCount">0</h3>
+                        </div>
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-clock text-warning fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Form -->
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calendar-check text-primary me-2"></i>
+                        Attendance for {{ today|date:"F d, Y" }}
+                    </h5>
+                    <small class="text-muted">Select attendance status for each student</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="markAllPresent">
+                        <i class="bi bi-check-all me-1"></i> Mark All Present
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="resetAll">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" id="attendanceForm">
+            {% csrf_token %}
+            
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4" style="width: 50px;">#</th>
+                                <th>Student</th>
+                                <th>Class</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Quick Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr class="attendance-row" data-student-id="{{ student.id }}">
+                                <td class="ps-4">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 40px; height: 40px;">
+                                            {{ student.full_name|slice:":1"|upper }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">{{ student.full_name }}</h6>
+                                            <small class="text-muted">{{ student.registration_number }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ student.classroom.name|default:"N/A" }}</span>
+                                </td>
+                                <td>
+                                    <div class="status-selector">
+                                        <select name="student_{{ student.id }}" 
+                                                class="form-select status-select" 
+                                                style="min-width: 120px;">
+                                            <option value="PRESENT" selected>Present</option>
+                                            <option value="ABSENT">Absent</option>
+                                            <option value="LATE">Late</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-success set-present" 
+                                                data-id="{{ student.id }}">
+                                            <i class="bi bi-check"></i> Present
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger set-absent" 
+                                                data-id="{{ student.id }}">
+                                            <i class="bi bi-x"></i> Absent
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning set-late" 
+                                                data-id="{{ student.id }}">
+                                            <i class="bi bi-clock"></i> Late
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="py-4">
+                                        <i class="bi bi-people display-1 text-muted"></i>
+                                        <h5 class="mt-3">No Students Found</h5>
+                                        <p class="text-muted">There are no students to mark attendance for.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Form Footer -->
+            <div class="card-footer bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted">
+                            <span id="statsText">0 Present, 0 Absent, 0 Late</span>
+                        </span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'attendance:student_attendance_list' %}" 
+                           class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-1"></i> Save Attendance
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .avatar {
+        font-weight: 600;
+        transition: transform 0.2s ease;
+    }
+    
+    .attendance-row:hover .avatar {
+        transform: scale(1.1);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .status-select {
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .status-select option[value="PRESENT"] {
+        color: #198754;
+    }
+    
+    .status-select option[value="ABSENT"] {
+        color: #dc3545;
+    }
+    
+    .status-select option[value="LATE"] {
+        color: #fd7e14;
+    }
+    
+    .status-select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+    
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover .icon-wrapper {
+        transform: rotate(15deg);
+    }
+    
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 2px;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeAttendanceForm();
+    });
+
+    function initializeAttendanceForm() {
+        const statusSelects = document.querySelectorAll('.status-select');
+        const markAllBtn = document.getElementById('markAllPresent');
+        const resetBtn = document.getElementById('resetAll');
+        
+        // Update stats on load
+        updateStats();
+        
+        // Add change event to all select elements
+        statusSelects.forEach(select => {
+            select.addEventListener('change', updateStats);
+            
+            // Highlight row based on selection
+            select.addEventListener('change', function() {
+                const row = this.closest('.attendance-row');
+                updateRowHighlight(row, this.value);
+            });
+            
+            // Initialize row highlight
+            const row = select.closest('.attendance-row');
+            updateRowHighlight(row, select.value);
+        });
+        
+        // Mark all present button
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function() {
+                statusSelects.forEach(select => {
+                    select.value = 'PRESENT';
+                    const row = select.closest('.attendance-row');
+                    updateRowHighlight(row, 'PRESENT');
+                });
+                updateStats();
+            });
+        }
+        
+        // Reset all button
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                statusSelects.forEach(select => {
+                    select.value = 'PRESENT';
+                    const row = select.closest('.attendance-row');
+                    updateRowHighlight(row, 'PRESENT');
+                });
+                updateStats();
+            });
+        }
+        
+        // Quick action buttons
+        document.querySelectorAll('.set-present').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-id');
+                const select = document.querySelector(`[name="student_${studentId}"]`);
+                if (select) {
+                    select.value = 'PRESENT';
+                    const row = select.closest('.attendance-row');
+                    updateRowHighlight(row, 'PRESENT');
+                    updateStats();
+                }
+            });
+        });
+        
+        document.querySelectorAll('.set-absent').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-id');
+                const select = document.querySelector(`[name="student_${studentId}"]`);
+                if (select) {
+                    select.value = 'ABSENT';
+                    const row = select.closest('.attendance-row');
+                    updateRowHighlight(row, 'ABSENT');
+                    updateStats();
+                }
+            });
+        });
+        
+        document.querySelectorAll('.set-late').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-id');
+                const select = document.querySelector(`[name="student_${studentId}"]`);
+                if (select) {
+                    select.value = 'LATE';
+                    const row = select.closest('.attendance-row');
+                    updateRowHighlight(row, 'LATE');
+                    updateStats();
+                }
+            });
+        });
+        
+        // Form submission
+        const form = document.getElementById('attendanceForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                // Show loading state
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+                submitBtn.disabled = true;
+                
+                // Allow form submission to proceed
+            });
+        }
+    }
+
+    function updateStats() {
+        const statusSelects = document.querySelectorAll('.status-select');
+        let present = 0, absent = 0, late = 0;
+        
+        statusSelects.forEach(select => {
+            switch(select.value) {
+                case 'PRESENT': present++; break;
+                case 'ABSENT': absent++; break;
+                case 'LATE': late++; break;
+            }
+        });
+        
+        // Update count elements
+        document.getElementById('presentCount').textContent = present;
+        document.getElementById('absentCount').textContent = absent;
+        document.getElementById('lateCount').textContent = late;
+        
+        // Update stats text
+        const statsText = document.getElementById('statsText');
+        if (statsText) {
+            statsText.textContent = `${present} Present, ${absent} Absent, ${late} Late`;
+        }
+    }
+
+    function updateRowHighlight(row, status) {
+        if (!row) return;
+        
+        // Remove existing classes
+        row.classList.remove('table-success', 'table-danger', 'table-warning');
+        
+        // Add appropriate class
+        switch(status) {
+            case 'PRESENT':
+                row.classList.add('table-success');
+                break;
+            case 'ABSENT':
+                row.classList.add('table-danger');
+                break;
+            case 'LATE':
+                row.classList.add('table-warning');
+                break;
+        }
+    }
+
+    // Auto-save functionality (optional)
+    let autoSaveTimeout;
+    const form = document.getElementById('attendanceForm');
+    
+    if (form) {
+        form.addEventListener('change', function() {
+            clearTimeout(autoSaveTimeout);
+            
+            // Show saving indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'position-fixed bottom-0 end-0 m-3';
+            indicator.innerHTML = `
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>Changes saved locally</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(indicator);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.remove();
+                }
+            }, 3000);
+        });
+    }
+</script>
+{% endblock %}

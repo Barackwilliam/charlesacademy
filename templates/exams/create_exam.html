@@ -1,0 +1,609 @@
+{% extends 'base.html' %}
+{% block page_title %}Create New Exam{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Create New Exam</h1>
+            <p class="text-muted mb-0">Schedule a new examination for students</p>
+        </div>
+        <div>
+            <a href="{% url 'exams:exam_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Exams
+            </a>
+        </div>
+    </div>
+
+    <!-- Exam Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <form method="post" id="examForm">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-journal-text me-2"></i>
+                                Exam Details
+                            </h6>
+                            
+                            <div class="row g-3">
+                                <!-- Exam Name -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium">Exam Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-card-heading text-muted"></i>
+                                        </span>
+                                        <input type="text" 
+                                               name="name" 
+                                               class="form-control"
+                                               placeholder="e.g., Mid-Term Examination"
+                                               required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Subject -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium">Subject</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-book text-muted"></i>
+                                        </span>
+                                        <select name="subject" class="form-select" required>
+                                            <option value="" selected disabled>Select Subject</option>
+                                            <option value="Entrepreneurship">Entrepreneurship</option>
+                                            <option value="Graphics Design">Graphics Design</option>
+                                            <option value="Website Design">Website Design</option>
+                                            <option value="French Class">French Class</option>
+                                            <option value="Kiswahili Class">Kiswahili Class</option>
+                                            <option value="English Class">English Class</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                       <!-- Class Selection -->
+<div class="mb-4">
+    <h6 class="fw-bold mb-3 text-primary">
+        <i class="bi bi-people me-2"></i>
+        Target Classes
+    </h6>
+    
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="class-selection">
+                <div class="row">
+                    <!-- Entrepreneurship Class -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="Entrepreneurship" id="entrepreneurship">
+                            <label class="form-check-label w-100" for="entrepreneurship">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-briefcase text-primary fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Entrepreneurship</h6>
+                                    <small class="text-muted">Business skills class</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Graphics Design Class -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="Graphics Design" id="graphics">
+                            <label class="form-check-label w-100" for="graphics">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-palette text-success fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Graphics Design</h6>
+                                    <small class="text-muted">Design & creativity</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Website Design Class -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="Website Design" id="website">
+                            <label class="form-check-label w-100" for="website">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-code-slash text-info fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Website Design</h6>
+                                    <small class="text-muted">Web development</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- French Class -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="French Class" id="french">
+                            <label class="form-check-label w-100" for="french">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-translate text-warning fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">French Class</h6>
+                                    <small class="text-muted">Language learning</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Kiswahili Class -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="Kiswahili Class" id="kiswahili">
+                            <label class="form-check-label w-100" for="kiswahili">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-translate text-danger fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Kiswahili Class</h6>
+                                    <small class="text-muted">Local language</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- English Class -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="English Class" id="english">
+                            <label class="form-check-label w-100" for="english">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-purple bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-book text-purple fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">English Class</h6>
+                                    <small class="text-muted">International language</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- All Classes -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check card-class">
+                            <input class="form-check-input" type="checkbox" name="classes" value="All Classes" id="allClasses">
+                            <label class="form-check-label w-100" for="allClasses">
+                                <div class="card border-0 shadow-sm h-100 text-center p-3">
+                                    <div class="icon-wrapper bg-secondary bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                        <i class="bi bi-people-fill text-secondary fs-3"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">All Classes</h6>
+                                    <small class="text-muted">Select all subjects</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-purple {
+        background-color: #8b5cf6 !important;
+    }
+    
+    .text-purple {
+        color: #8b5cf6 !important;
+    }
+</style>
+
+<script>
+    // Update JavaScript to work with subject classes
+    document.addEventListener('DOMContentLoaded', function() {
+        // All classes checkbox functionality
+        const allClassesCheckbox = document.getElementById('allClasses');
+        const classCheckboxes = document.querySelectorAll('input[name="classes"]:not(#allClasses)');
+        
+        if (allClassesCheckbox) {
+            allClassesCheckbox.addEventListener('change', function() {
+                classCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                    triggerCardHighlight(checkbox);
+                });
+            });
+        }
+        
+        // Individual class checkbox functionality
+        classCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                triggerCardHighlight(this);
+                updateAllClassesCheckbox();
+            });
+        });
+        
+        function triggerCardHighlight(checkbox) {
+            const label = document.querySelector(`label[for="${checkbox.id}"]`);
+            if (label) {
+                const card = label.querySelector('.card');
+                if (card) {
+                    if (checkbox.checked) {
+                        card.style.borderColor = '#4361ee';
+                        card.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                    } else {
+                        card.style.borderColor = '';
+                        card.style.backgroundColor = '';
+                    }
+                }
+            }
+        }
+        
+        function updateAllClassesCheckbox() {
+            if (allClassesCheckbox) {
+                const checkedCount = Array.from(classCheckboxes).filter(cb => cb.checked).length;
+                allClassesCheckbox.checked = checkedCount === classCheckboxes.length;
+                allClassesCheckbox.indeterminate = checkedCount > 0 && checkedCount < classCheckboxes.length;
+                triggerCardHighlight(allClassesCheckbox);
+            }
+        }
+    });
+</script>
+                        
+                        <!-- Date & Time -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                Schedule
+                            </h6>
+                            
+                            <div class="row g-3">
+                                <!-- Exam Date -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium">Exam Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-calendar text-muted"></i>
+                                        </span>
+                                        <input type="date" 
+                                               name="exam_date" 
+                                               class="form-control"
+                                               required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Start Time -->
+                                <div class="col-md-3">
+                                    <label class="form-label fw-medium">Start Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-clock text-muted"></i>
+                                        </span>
+                                        <input type="time" 
+                                               name="start_time" 
+                                               class="form-control"
+                                               required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Duration -->
+                                <div class="col-md-3">
+                                    <label class="form-label fw-medium">Duration (Hours)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-hourglass text-muted"></i>
+                                        </span>
+                                        <select name="duration" class="form-select" required>
+                                            <option value="1">1 Hour</option>
+                                            <option value="1.5">1.5 Hours</option>
+                                            <option value="2">2 Hours</option>
+                                            <option value="2.5">2.5 Hours</option>
+                                            <option value="3">3 Hours</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Additional Details
+                            </h6>
+                            
+                            <div class="row g-3">
+                                <!-- Maximum Marks -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-medium">Maximum Marks</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-bar-chart text-muted"></i>
+                                        </span>
+                                        <input type="number" 
+                                               name="max_marks" 
+                                               class="form-control"
+                                               placeholder="100"
+                                               value="100"
+                                               required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Exam Type -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-medium">Exam Type</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-tag text-muted"></i>
+                                        </span>
+                                        <select name="exam_type" class="form-select" required>
+                                            <option value="Mid-Term">Mid-Term</option>
+                                            <option value="Final">Final</option>
+                                            <option value="Quiz">Quiz</option>
+                                            <option value="Test">Test</option>
+                                            <option value="Assignment">Assignment</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Room Number -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-medium">Room Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-door-open text-muted"></i>
+                                        </span>
+                                        <input type="text" 
+                                               name="room" 
+                                               class="form-control"
+                                               placeholder="e.g., Room 101">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Instructions -->
+                            <div class="mt-3">
+                                <label class="form-label fw-medium">Instructions</label>
+                                <textarea name="instructions" 
+                                          class="form-control" 
+                                          rows="3"
+                                          placeholder="Enter exam instructions for students..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between pt-4 border-top">
+                            <a href="{% url 'exams:exam_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i> Create Exam
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Preview Card -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-lightbulb text-warning me-3 mt-1"></i>
+                        <div>
+                            <small class="fw-medium">Quick Tips</small>
+                            <p class="text-muted mb-0 small">
+                                Ensure the exam date is at least 2 days ahead to allow students to prepare. 
+                                All selected classes will receive notifications about this exam.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Styles */
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+    
+    .form-control, .form-select {
+        border-left: none;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+    
+    .input-group .form-control:focus {
+        border-left: 1px solid #4361ee;
+    }
+    
+    /* Class Selection Cards */
+    .card-class .card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    
+    .card-class .form-check-input {
+        display: none;
+    }
+    
+    .card-class .form-check-input:checked + label .card {
+        border-color: #4361ee;
+        background-color: rgba(67, 97, 238, 0.05);
+        transform: translateY(-5px);
+    }
+    
+    .card-class .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    }
+    
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+        
+        .row.g-3 {
+            gap: 1rem;
+        }
+        
+        .card-class .card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set minimum date to tomorrow
+        const dateInput = document.querySelector('input[type="date"]');
+        if (dateInput) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+        }
+        
+        // Set default start time to 9:00 AM
+        const timeInput = document.querySelector('input[type="time"]');
+        if (timeInput) {
+            timeInput.value = '09:00';
+        }
+        
+        // All classes checkbox functionality
+        const allClassesCheckbox = document.getElementById('allClasses');
+        const classCheckboxes = document.querySelectorAll('input[name="classes"]:not(#allClasses)');
+        
+        if (allClassesCheckbox) {
+            allClassesCheckbox.addEventListener('change', function() {
+                classCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                    triggerCardHighlight(checkbox);
+                });
+            });
+        }
+        
+        // Individual class checkbox functionality
+        classCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                triggerCardHighlight(this);
+                updateAllClassesCheckbox();
+            });
+        });
+        
+        function triggerCardHighlight(checkbox) {
+            const label = document.querySelector(`label[for="${checkbox.id}"]`);
+            if (label) {
+                const card = label.querySelector('.card');
+                if (card) {
+                    if (checkbox.checked) {
+                        card.style.borderColor = '#4361ee';
+                        card.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                    } else {
+                        card.style.borderColor = '';
+                        card.style.backgroundColor = '';
+                    }
+                }
+            }
+        }
+        
+        function updateAllClassesCheckbox() {
+            if (allClassesCheckbox) {
+                const checkedCount = Array.from(classCheckboxes).filter(cb => cb.checked).length;
+                allClassesCheckbox.checked = checkedCount === classCheckboxes.length;
+                allClassesCheckbox.indeterminate = checkedCount > 0 && checkedCount < classCheckboxes.length;
+                triggerCardHighlight(allClassesCheckbox);
+            }
+        }
+        
+        // Form validation
+        const form = document.getElementById('examForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Validate at least one class is selected
+                const selectedClasses = Array.from(classCheckboxes).filter(cb => cb.checked);
+                if (selectedClasses.length === 0) {
+                    e.preventDefault();
+                    showAlert('Please select at least one class for the exam.', 'warning');
+                    return false;
+                }
+                
+                // Validate date is not in the past
+                if (dateInput && new Date(dateInput.value) < new Date()) {
+                    e.preventDefault();
+                    showAlert('Exam date cannot be in the past.', 'warning');
+                    dateInput.focus();
+                    return false;
+                }
+                
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creating...';
+                submitBtn.disabled = true;
+                
+                // Reset button after 3 seconds (in case submission fails)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            });
+        }
+        
+        // Auto-fill exam name based on subject and date
+        const subjectSelect = document.querySelector('select[name="subject"]');
+        const examNameInput = document.querySelector('input[name="name"]');
+        
+        if (subjectSelect && examNameInput) {
+            subjectSelect.addEventListener('change', function() {
+                if (!examNameInput.value) {
+                    const date = dateInput ? dateInput.value : '';
+                    const dateStr = date ? new Date(date).toLocaleDateString('en-US', { month: 'short' }) : '';
+                    examNameInput.value = `${this.value} ${dateStr} Exam`;
+                }
+            });
+        }
+    });
+    
+    function showAlert(message, type) {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+        alert.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

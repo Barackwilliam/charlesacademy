@@ -1,0 +1,35 @@
+<!-- teachers/dashboard.html -->
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Welcome {{ teacher.first_name }}</h3>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5>My Subjects</h5>
+            <ul>
+                {% for s in subjects %}
+                    <li>{{ s.name }}</li>
+                {% empty %}
+                    <li>No subjects assigned</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5>My Classes</h5>
+            <ul>
+                {% for c in classes %}
+                    <li>{{ c.name }}</li>
+                {% empty %}
+                    <li>No classes assigned</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

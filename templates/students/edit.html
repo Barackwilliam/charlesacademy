@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block page_title %}Edit Student{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Edit Student</h1>
+            <p class="text-muted mb-0">Update student information</p>
+        </div>
+        <div>
+            <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Student Info Card -->
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <!-- Student Preview -->
+                    <div class="text-center mb-4">
+                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <span class="fs-3 fw-bold">{{ student.full_name|slice:":1"|upper }}</span>
+                        </div>
+                        <h5 class="fw-bold">{{ student.full_name }}</h5>
+                        <p class="text-muted">{{ student.registration_number }}</p>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Full Name</label>
+                            <input type="text" 
+                                   name="full_name" 
+                                   value="{{ student.full_name }}"
+                                   class="form-control" 
+                                   placeholder="Student's full name"
+                                   required>
+                        </div>
+
+                        <!-- Classroom -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Class</label>
+                            <select name="classroom" class="form-select">
+                                {% for c in classes %}
+                                    <option value="{{ c.id }}"
+                                        {% if c == student.classroom %}selected{% endif %}>
+                                        {{ c.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="ACTIVE" {% if student.status == 'ACTIVE' %}selected{% endif %}>Active</option>
+                                <option value="GRADUATED" {% if student.status == 'GRADUATED' %}selected{% endif %}>Graduated</option>
+                                <option value="TRANSFERRED" {% if student.status == 'TRANSFERRED' %}selected{% endif %}>Transferred</option>
+                            </select>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i> Update
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar {
+        transition: transform 0.3s ease;
+    }
+    
+    .avatar:hover {
+        transform: scale(1.05);
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+    
+    .btn {
+        padding: 0.5rem 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                form.classList.add('was-validated');
+            }
+        });
+    });
+</script>
+{% endblock %}

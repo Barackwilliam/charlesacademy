@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Fee Report – {{ student.full_name }}</h4>
+
+<p><b>Total Fee:</b> {{ total_fee }}</p>
+<p><b>Total Paid:</b> {{ total_paid }}</p>
+<p><b>Balance:</b> {{ balance }}</p>
+
+<table class="table table-bordered">
+<tr><th>Date</th><th>Amount</th><th>Receipt</th></tr>
+{% for p in payments %}
+<tr>
+<td>{{ p.date }}</td>
+<td>{{ p.amount_paid }}</td>
+<td>{{ p.receipt_no }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

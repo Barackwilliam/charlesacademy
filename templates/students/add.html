@@ -1,0 +1,736 @@
+{% extends 'base.html' %}
+{% block page_title %}Add New Student{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Register New Student</h1>
+            <p class="text-muted mb-0">Fill in the student details below to register them in the system</p>
+        </div>
+        <div>
+            <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Students
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person-plus-fill text-primary me-2"></i>
+                        Student Information
+                    </h5>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="POST" id="studentForm" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Student Information Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-person-badge me-2"></i>
+                                Personal Details
+                            </h6>
+                            
+                            <div class="row g-3">
+                                <!-- Full Name -->
+                                <div class="col-md-12">
+                                    <label for="full_name" class="form-label fw-medium">
+                                        <i class="bi bi-person me-1"></i> Full Name
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-person text-muted"></i>
+                                        </span>
+                                        <input type="text" 
+                                               name="full_name" 
+                                               id="full_name"
+                                               class="form-control" 
+                                               placeholder="Enter student's full name"
+                                               required
+                                               autofocus>
+                                        <div class="invalid-feedback">
+                                            Please enter the student's full name.
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Enter the student's complete name (First Name Middle Name Last Name)
+                                    </small>
+                                </div>
+                                
+                                <!-- Email (Optional) -->
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-medium">
+                                        <i class="bi bi-envelope me-1"></i> Email Address
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-envelope text-muted"></i>
+                                        </span>
+                                        <input type="email" 
+                                               name="email" 
+                                               id="email"
+                                               class="form-control" 
+                                               placeholder="student@example.com">
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        Optional - For communication purposes
+                                    </small>
+                                </div>
+                                
+                                <!-- Phone Number (Optional) -->
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label fw-medium">
+                                        <i class="bi bi-phone me-1"></i> Phone Number
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-phone text-muted"></i>
+                                        </span>
+                                        <input type="tel" 
+                                               name="phone" 
+                                               id="phone"
+                                               class="form-control" 
+                                               placeholder="+255 XXX XXX XXX">
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        Optional - Parent/Guardian contact
+                                    </small>
+                                </div>
+                                
+                                <!-- Date of Birth (Optional) -->
+                                <div class="col-md-6">
+                                    <label for="dob" class="form-label fw-medium">
+                                        <i class="bi bi-calendar3 me-1"></i> Date of Birth
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-calendar3 text-muted"></i>
+                                        </span>
+                                        <input type="date" 
+                                               name="dob" 
+                                               id="dob"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                
+                                <!-- Gender (Optional) -->
+                                <div class="col-md-6">
+                                    <label for="gender" class="form-label fw-medium">
+                                        <i class="bi bi-gender-ambiguous me-1"></i> Gender
+                                    </label>
+                                    <select name="gender" id="gender" class="form-select">
+                                        <option value="">Select Gender</option>
+                                        <option value="MALE">Male</option>
+                                        <option value="FEMALE">Female</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Academic Information Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-mortarboard me-2"></i>
+                                Academic Information
+                            </h6>
+                            
+                            <div class="row g-3">
+                                <!-- Classroom Selection -->
+                                <div class="col-md-6">
+                                    <label for="classroom" class="form-label fw-medium">
+                                        <i class="bi bi-building me-1"></i> Class/Form
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-building text-muted"></i>
+                                        </span>
+                                        <select name="classroom" 
+                                                id="classroom" 
+                                                class="form-select" 
+                                                required>
+                                            <option value="" selected disabled>Select a class</option>
+                                            {% for c in classes %}
+                                                <option value="{{ c.id }}">{{ c.name }}</option>
+                                            {% empty %}
+                                                <option value="" disabled>No classes available</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please select a class for the student.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Registration Number (Optional) -->
+                                <div class="col-md-6">
+                                    <label for="reg_number" class="form-label fw-medium">
+                                        <i class="bi bi-card-text me-1"></i> Registration Number
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-123 text-muted"></i>
+                                        </span>
+                                        <input type="text" 
+                                               name="registration_number" 
+                                               id="reg_number"
+                                               class="form-control" 
+                                               placeholder="Auto-generated if empty">
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        Leave empty for automatic generation
+                                    </small>
+                                </div>
+                                
+                                <!-- Admission Date -->
+                                <div class="col-md-6">
+                                    <label for="admission_date" class="form-label fw-medium">
+                                        <i class="bi bi-calendar-check me-1"></i> Admission Date
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-calendar-check text-muted"></i>
+                                        </span>
+                                        <input type="date" 
+                                               name="admission_date" 
+                                               id="admission_date"
+                                               class="form-control"
+                                               value="{{ today|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Selection -->
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label fw-medium">
+                                        <i class="bi bi-info-circle me-1"></i> Student Status
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-info-circle text-muted"></i>
+                                        </span>
+                                        <select name="status" id="status" class="form-select">
+                                            <option value="ACTIVE" selected>Active</option>
+                                            <option value="GRADUATED">Graduated</option>
+                                            <option value="TRANSFERRED">Transferred</option>
+                                            <option value="INACTIVE">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Emergency Contact Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-telephone me-2"></i>
+                                Emergency Contact (Optional)
+                            </h6>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="emergency_name" class="form-label fw-medium">
+                                        <i class="bi bi-person-circle me-1"></i> Contact Person
+                                    </label>
+                                    <input type="text" 
+                                           name="emergency_contact_name" 
+                                           id="emergency_name"
+                                           class="form-control" 
+                                           placeholder="Name of guardian">
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="emergency_phone" class="form-label fw-medium">
+                                        <i class="bi bi-telephone-forward me-1"></i> Contact Phone
+                                    </label>
+                                    <input type="tel" 
+                                           name="emergency_contact_phone" 
+                                           id="emergency_phone"
+                                           class="form-control" 
+                                           placeholder="Emergency contact number">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                            <div>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Reset Form
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'students:student_list' %}" class="btn btn-outline-danger">
+                                    <i class="bi bi-x-circle me-1"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-circle me-1"></i> Save Student
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Help & Preview -->
+        <div class="col-lg-4">
+            <!-- Help Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-info-circle text-info me-2"></i>
+                        Quick Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <small>Required fields are marked with <span class="text-danger">*</span></small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-lightning-fill text-warning me-2"></i>
+                            <small>Registration numbers auto-generate if left empty</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-people-fill text-primary me-2"></i>
+                            <small>Class selection determines student grouping</small>
+                        </li>
+                        <li>
+                            <i class="bi bi-shield-check text-success me-2"></i>
+                            <small>All data is securely stored and encrypted</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Preview Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-eye text-primary me-2"></i>
+                        Student Preview
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="avatar-preview bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <span class="text-primary fs-2 fw-bold" id="avatarInitial">S</span>
+                        </div>
+                        <h5 id="previewName" class="fw-bold mb-1">Student Name</h5>
+                        <p class="text-muted mb-2" id="previewClass">Not Assigned</p>
+                    </div>
+                    
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">Status</small>
+                                <span class="badge bg-success" id="previewStatus">Active</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">Registration</small>
+                                <small class="fw-medium" id="previewReg">Auto</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block">Total Students</small>
+                            <h5 class="fw-bold mb-0">245</h5>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">In Selected Class</small>
+                            <h5 class="fw-bold mb-0" id="classCount">0</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Styles */
+    .card {
+        transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .avatar-preview {
+        transition: all 0.3s ease;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+    }
+    
+    .input-group .form-control:focus {
+        border-left: 1px solid #4361ee;
+    }
+    
+    /* Validation styles */
+    .was-validated .form-control:invalid,
+    .was-validated .form-select:invalid {
+        border-color: #dc3545;
+    }
+    
+    .was-validated .form-control:valid,
+    .was-validated .form-select:valid {
+        border-color: #198754;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<script>
+    // DOM ready function
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeFormValidation();
+        setupLivePreview();
+        setupFormListeners();
+    });
+
+    function initializeFormValidation() {
+        // Form validation
+        const form = document.getElementById('studentForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+            
+            // If form is valid, show loading state
+            if (form.checkValidity()) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+                submitBtn.disabled = true;
+                
+                // Reset button after 3 seconds (in case submission fails)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+        }, false);
+    }
+
+    function setupLivePreview() {
+        const nameInput = document.getElementById('full_name');
+        const classSelect = document.getElementById('classroom');
+        const statusSelect = document.getElementById('status');
+        const regInput = document.getElementById('reg_number');
+        
+        // Name preview
+        if (nameInput) {
+            nameInput.addEventListener('input', function() {
+                const previewName = document.getElementById('previewName');
+                const avatarInitial = document.getElementById('avatarInitial');
+                
+                if (this.value.trim()) {
+                    previewName.textContent = this.value;
+                    // Get first letter for avatar
+                    avatarInitial.textContent = this.value.charAt(0).toUpperCase();
+                } else {
+                    previewName.textContent = 'Student Name';
+                    avatarInitial.textContent = 'S';
+                }
+            });
+        }
+        
+        // Class preview
+        if (classSelect) {
+            classSelect.addEventListener('change', function() {
+                const previewClass = document.getElementById('previewClass');
+                const selectedOption = this.options[this.selectedIndex];
+                
+                if (this.value) {
+                    previewClass.textContent = selectedOption.text;
+                    updateClassCount(this.value);
+                } else {
+                    previewClass.textContent = 'Not Assigned';
+                }
+            });
+        }
+        
+        // Status preview
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                const previewStatus = document.getElementById('previewStatus');
+                const badge = previewStatus;
+                
+                // Update badge color based on status
+                switch(this.value) {
+                    case 'ACTIVE':
+                        badge.className = 'badge bg-success';
+                        badge.textContent = 'Active';
+                        break;
+                    case 'GRADUATED':
+                        badge.className = 'badge bg-info';
+                        badge.textContent = 'Graduated';
+                        break;
+                    case 'TRANSFERRED':
+                        badge.className = 'badge bg-warning';
+                        badge.textContent = 'Transferred';
+                        break;
+                    case 'INACTIVE':
+                        badge.className = 'badge bg-danger';
+                        badge.textContent = 'Inactive';
+                        break;
+                    default:
+                        badge.className = 'badge bg-secondary';
+                        badge.textContent = this.value;
+                }
+            });
+        }
+        
+        // Registration number preview
+        if (regInput) {
+            regInput.addEventListener('input', function() {
+                const previewReg = document.getElementById('previewReg');
+                if (this.value.trim()) {
+                    previewReg.textContent = this.value;
+                } else {
+                    previewReg.textContent = 'Auto';
+                }
+            });
+        }
+    }
+
+    function updateClassCount(classId) {
+        // This would typically make an API call to get student count for the class
+        // For now, we'll simulate with random data
+        const classCountElement = document.getElementById('classCount');
+        const counts = {
+            '1': 45,
+            '2': 52,
+            '3': 48,
+            '4': 38,
+            '5': 42
+        };
+        
+        if (classId && counts[classId]) {
+            classCountElement.textContent = counts[classId];
+        } else {
+            classCountElement.textContent = '0';
+        }
+    }
+
+    function setupFormListeners() {
+        // Generate registration number button
+        const generateRegBtn = document.createElement('button');
+        generateRegBtn.type = 'button';
+        generateRegBtn.className = 'btn btn-outline-secondary btn-sm mt-2';
+        generateRegBtn.innerHTML = '<i class="bi bi-shuffle me-1"></i> Generate Registration Number';
+        
+        const regInputGroup = document.getElementById('reg_number').parentNode;
+        regInputGroup.parentNode.insertBefore(generateRegBtn, regInputGroup.nextSibling);
+        
+        generateRegBtn.addEventListener('click', function() {
+            const regInput = document.getElementById('reg_number');
+            const currentYear = new Date().getFullYear();
+            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            const classSelect = document.getElementById('classroom');
+            const className = classSelect.value ? classSelect.options[classSelect.selectedIndex].text.substring(0, 3).toUpperCase() : 'GEN';
+            
+            const generatedReg = `${currentYear}/${className}/${randomNum}`;
+            regInput.value = generatedReg;
+            
+            // Update preview
+            document.getElementById('previewReg').textContent = generatedReg;
+            
+            // Show success message
+            showToast('Registration number generated successfully!', 'success');
+        });
+        
+        // Phone number formatting
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (!value.startsWith('255')) {
+                        value = '255' + value;
+                    }
+                    this.value = value.replace(/(\d{3})(\d{3})(\d{3})/, '+$1 $2 $3');
+                }
+            });
+        }
+        
+        // Emergency phone formatting
+        const emergencyPhone = document.getElementById('emergency_phone');
+        if (emergencyPhone) {
+            emergencyPhone.addEventListener('input', function() {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (!value.startsWith('255')) {
+                        value = '255' + value;
+                    }
+                    this.value = value.replace(/(\d{3})(\d{3})(\d{3})/, '+$1 $2 $3');
+                }
+            });
+        }
+        
+        // Auto-fill today's date for admission
+        const admissionDate = document.getElementById('admission_date');
+        if (admissionDate && !admissionDate.value) {
+            const today = new Date().toISOString().split('T')[0];
+            admissionDate.value = today;
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-info-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Initialize and show toast
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        
+        // Remove toast after hiding
+        toast.addEventListener('hidden.bs.toast', function() {
+            document.body.removeChild(toast);
+        });
+    }
+
+    // Auto-save draft functionality
+    let saveTimeout;
+    const form = document.getElementById('studentForm');
+    
+    if (form) {
+        form.addEventListener('input', function() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(function() {
+                const formData = new FormData(form);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                
+                // Save to localStorage
+                localStorage.setItem('studentFormDraft', JSON.stringify(data));
+                
+                // Show auto-save indicator
+                const indicator = document.createElement('small');
+                indicator.className = 'text-muted position-fixed';
+                indicator.style.cssText = 'bottom: 10px; right: 10px; font-size: 0.8rem;';
+                indicator.innerHTML = '<i class="bi bi-save me-1"></i> Draft saved';
+                indicator.id = 'saveIndicator';
+                
+                const existingIndicator = document.getElementById('saveIndicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+                
+                document.body.appendChild(indicator);
+                
+                // Remove indicator after 2 seconds
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.remove();
+                    }
+                }, 2000);
+            }, 1000);
+        });
+        
+        // Load draft on page load
+        const draft = localStorage.getItem('studentFormDraft');
+        if (draft) {
+            const data = JSON.parse(draft);
+            for (const key in data) {
+                const element = form.querySelector(`[name="${key}"]`);
+                if (element && data[key]) {
+                    element.value = data[key];
+                    
+                    // Trigger change events for preview
+                    if (element.dispatchEvent) {
+                        element.dispatchEvent(new Event('input'));
+                        element.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+            
+            // Show draft loaded message
+            setTimeout(() => {
+                showToast('Draft restored from previous session', 'info');
+            }, 500);
+        }
+        
+        // Clear draft on successful submit
+        form.addEventListener('submit', function() {
+            localStorage.removeItem('studentFormDraft');
+        });
+    }
+</script>
+{% endblock %}

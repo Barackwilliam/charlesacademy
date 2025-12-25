@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% block page_title %}Fees Management{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Fees Management</h1>
+            <p class="text-muted mb-0">Manage fee structures, payments, and student dues</p>
+        </div>
+        <div>
+            <a href="{% url 'fees:add_fee_structure' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> New Fee Structure
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Collected</h6>
+                            <h3 class="fw-bold mb-0" id="totalCollected">Tsh. 0</h3>
+                        </div>
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-cash-stack text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending Dues</h6>
+                            <h3 class="fw-bold mb-0" id="pendingDues">Tsh.0</h3>
+                        </div>
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-clock-history text-danger fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Fee Structures</h6>
+                            <h3 class="fw-bold mb-0">{{ structures|length }}</h3>
+                        </div>
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-list-check text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Collection Rate</h6>
+                            <h3 class="fw-bold mb-0" id="collectionRate">0%</h3>
+                        </div>
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-percent text-info fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <a href="{% url 'fees:add_fee_structure' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm action-card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-plus-circle text-primary fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Add Fee Structure</h5>
+                                <p class="text-muted mb-0 small">Define class fee structures</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <a href="{% url 'fees:record_payment' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm action-card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-cash-coin text-success fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Record Payment</h5>
+                                <p class="text-muted mb-0 small">Record student payments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <a href="{% url 'fees:payment_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm action-card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-receipt text-info fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">View Payments</h5>
+                                <p class="text-muted mb-0 small">All payment records</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 mb-3">
+            <a href="{% url 'fees:due_fee_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm action-card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-exclamation-triangle text-danger fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Due Fees</h5>
+                                <p class="text-muted mb-0 small">Pending fee payments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Fee Structures Table -->
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-currency-dollar text-primary me-2"></i>
+                    Fee Structures
+                </h5>
+                <div class="d-flex gap-2">
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Search..." id="searchInput">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="feeTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Class</th>
+                            <th>Total Fee</th>
+                            <th>Breakdown</th>
+                            <th>Student Count</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in structures %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="class-icon bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="bi bi-building text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ f.classroom.name }}</h6>
+                                        <small class="text-muted">{{ f.classroom.code|default:f.classroom.name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <h5 class="fw-bold text-success mb-0">TSH.{{ f.total_fee }}</h5>
+                            </td>
+                            <td>
+                                <div class="breakdown">
+                                    {% if f.tuition_fee %}
+                                        <span class="badge bg-secondary me-1">Tuition: Tsh{{ f.tuition_fee }}</span>
+                                    {% endif %}
+                                    {% if f.exam_fee %}
+                                        <span class="badge bg-info me-1">Exam: Tsh.{{ f.exam_fee }}</span>
+                                    {% endif %}
+                                    {% if f.library_fee %}
+                                        <span class="badge bg-warning me-1">Library: Tsh.{{ f.library_fee }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-people text-muted me-2"></i>
+                                    <span class="fw-medium">{{ f.student_count|default:"0" }} students</span>
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'students:student_list' %}?class={{ f.classroom.id }}"
+                                       class="btn btn-outline-primary">
+                                        <i class="bi bi-people me-1"></i> Reports
+                                    </a>
+                                    <a href="#" class="btn btn-outline-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="py-5">
+                                    <i class="bi bi-cash-coin display-1 text-muted"></i>
+                                    <h5 class="mt-3">No Fee Structures</h5>
+                                    <p class="text-muted">Create your first fee structure to get started</p>
+                                    <a href="{% url 'fees:add_fee_structure' %}" class="btn btn-primary mt-2">
+                                        <i class="bi bi-plus-circle me-1"></i> Create Fee Structure
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Table Footer -->
+        <div class="card-footer bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted">
+                        Showing {{ structures|length }} fee structures
+                    </span>
+                </div>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-download me-1"></i> Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-clock-history text-info me-2"></i>
+                        Recent Payments
+                    </h5>
+                </div>
+                <div class="card-body">
+                   
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'fees:payment_list' %}" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-arrow-right me-1"></i> View All Payments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                        Top Due Fees
+                    </h5>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'fees:due_fee_list' %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-arrow-right me-1"></i> View All Dues
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .action-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .action-card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+    
+    .class-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .table-hover tbody tr:hover .class-icon {
+        transform: rotate(15deg);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.02);
+    }
+    
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover .icon-wrapper {
+        transform: rotate(15deg);
+    }
+    
+    .avatar {
+        font-weight: 600;
+    }
+    
+    .payment-item, .due-item {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .payment-item:hover, .due-item:hover {
+        background-color: rgba(0,0,0,0.02);
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 8px;
+    }
+    
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 2px;
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeFeesDashboard();
+    });
+
+    function initializeFeesDashboard() {
+        // Calculate statistics
+        calculateFeeStats();
+        
+        // Initialize search
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', searchTable);
+        }
+    }
+
+    function calculateFeeStats() {
+        // Calculate total fee amount from structures
+        const feeRows = document.querySelectorAll('tbody tr');
+        let totalFee = 0;
+        
+        feeRows.forEach(row => {
+            const feeElement = row.querySelector('td:nth-child(2) h5');
+            if (feeElement) {
+                const feeText = feeElement.textContent.replace('$', '').trim();
+                totalFee += parseFloat(feeText) || 0;
+            }
+        });
+        
+        // Sample calculations (in real app, these would come from backend)
+        const totalCollected = totalFee * 0.75; // 75% collected
+        const pendingDues = totalFee - totalCollected;
+        const collectionRate = totalFee > 0 ? Math.round((totalCollected / totalFee) * 100) : 0;
+        
+        // Update statistics
+        document.getElementById('totalCollected').textContent = '$' + totalCollected.toLocaleString();
+        document.getElementById('pendingDues').textContent = '$' + pendingDues.toLocaleString();
+        document.getElementById('collectionRate').textContent = collectionRate + '%';
+    }
+
+    function searchTable() {
+        const searchValue = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#feeTable tbody tr');
+        
+        rows.forEach(row => {
+            const className = row.querySelector('td:first-child h6').textContent.toLowerCase();
+            const classCode = row.querySelector('td:first-child small').textContent.toLowerCase();
+            
+            if (className.includes(searchValue) || classCode.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

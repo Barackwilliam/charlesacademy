@@ -1,0 +1,11 @@
+{% for a in announcements %}
+<div class="alert alert-info">
+<b>{{ a.title }}</b><br>
+{{ a.message }}
+</div>
+{% endfor %}
+from accounts.models import User
+
+u = User.objects.get(username='system')
+u.role = 'ADMIN'
+u.save()

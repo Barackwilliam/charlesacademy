@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charles Academy | Welcome Students</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --school-blue: #1e40af;
+            --school-yellow: #fbbf24;
+            --accent-purple: #8b5cf6;
+            --accent-teal: #0d9488;
+            --light-bg: #f0f9ff;
+            --dark-text: #1e293b;
+            --gradient-blue: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            --gradient-yellow: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --radius-lg: 24px;
+            --radius-sm: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        body.dark-mode {
+            --light-bg: #0f172a;
+            --dark-text: #f1f5f9;
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Modern Header */
+        .header {
+            background: white;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 12px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .header {
+            background: #1e293b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-blue);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .logo-icon::after {
+            content: '🎓';
+            position: absolute;
+            font-size: 16px;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            color: var(--school-blue);
+            line-height: 1.2;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .logo-text h1 {
+            color: #60a5fa;
+        }
+
+        .logo-text span {
+            font-size: 13px;
+            color: var(--accent-teal);
+            font-weight: 600;
+            display: block;
+        }
+
+        /* Modern Header Elements */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .digital-clock {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 14px;
+            background: rgba(30, 64, 175, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--school-blue);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .digital-clock {
+            background: rgba(96, 165, 250, 0.2);
+            color: #93c5fd;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 200px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border-radius: 20px;
+            border: 2px solid rgba(30, 64, 175, 0.1);
+            background: white;
+            font-size: 14px;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        body.dark-mode .search-bar input {
+            background: #334155;
+            border-color: #475569;
+            color: white;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--school-blue);
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 64, 175, 0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--school-blue);
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(30, 64, 175, 0.2);
+            transform: rotate(15deg);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: rgba(96, 165, 250, 0.2);
+            color: #93c5fd;
+        }
+
+        /* Get Started & Login Buttons in Header */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn, .get-started-btn {
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-btn {
+            background: transparent;
+            color: var(--school-blue);
+            border: 2px solid var(--school-blue);
+        }
+
+        .login-btn:hover {
+            background: rgba(30, 64, 175, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .get-started-btn {
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .get-started-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+        }
+
+        .student-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--dark-text);
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(30, 64, 175, 0.1);
+            color: var(--school-blue);
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .nav-item:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        .nav-item.active {
+            background: var(--school-blue);
+            color: white;
+        }
+
+        body.dark-mode .nav-item.active {
+            background: #3b82f6;
+        }
+
+        .nav-item .notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-purple);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .student-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .student-avatar {
+            border-color: #1e293b;
+        }
+
+        .mobile-menu {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--school-blue);
+        }
+
+        /* Modern Hero Section */
+        .hero {
+            padding: 140px 0 80px;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .hero {
+            background: linear-gradient(135deg, #0c4a6e 0%, #1e3a8a 100%);
+        }
+
+        .hero-bg-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .hero-bg-elements i {
+            position: absolute;
+            font-size: 40px;
+            color: rgba(30, 64, 175, 0.1);
+        }
+
+        body.dark-mode .hero-bg-elements i {
+            color: rgba(96, 165, 250, 0.1);
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-text h2 {
+            font-size: 52px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--school-blue) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .hero-text h2 {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text h2 span {
+            color: var(--school-yellow);
+            -webkit-text-fill-color: var(--school-yellow);
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #475569;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .hero-text p {
+            color: #cbd5e1;
+        }
+
+        /* Get Started Button in Hero Section */
+        .hero-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .hero-get-started {
+            padding: 14px 32px;
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .hero-get-started:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(30, 64, 175, 0.4);
+        }
+
+        /* Modern Stats with Progress Rings */
+        .hero-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .stat {
+            text-align: center;
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .progress-ring {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .stat-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--school-blue);
+            display: block;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .stat-number {
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .stat-label {
+            color: #94a3b8;
+        }
+
+        /* Floating Cards - Enhanced */
+        .hero-visual {
+            position: relative;
+        }
+
+        .floating-cards {
+            position: relative;
+            height: 400px;
+        }
+
+        .student-card {
+            position: absolute;
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            width: 280px;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-mode .student-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .card-1 {
+            top: 0;
+            left: 0;
+            z-index: 3;
+            transform: rotate(-5deg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+        }
+
+        body.dark-mode .card-1 {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+        }
+
+        .card-2 {
+            top: 40px;
+            right: 0;
+            z-index: 2;
+            transform: rotate(3deg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 249, 255, 0.9) 100%);
+        }
+
+        body.dark-mode .card-2 {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(12, 74, 110, 0.9) 100%);
+        }
+
+        .card-3 {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) rotate(1deg);
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(239, 246, 255, 0.9) 100%);
+        }
+
+        body.dark-mode .card-3 {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(30, 58, 138, 0.9) 100%);
+        }
+
+        .student-card:hover {
+            transform: translateY(-10px) rotate(0deg) !important;
+            box-shadow: var(--hover-shadow);
+            z-index: 10 !important;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .card-title h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .card-title h4 {
+            color: white;
+        }
+
+        .card-title span {
+            font-size: 14px;
+            color: var(--accent-teal);
+        }
+
+        .card-content {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .card-content {
+            color: #94a3b8;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(30, 64, 175, 0.1);
+            color: var(--school-blue);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .card-badge {
+            background: rgba(96, 165, 250, 0.2);
+            color: #93c5fd;
+        }
+
+        /* Quick Access - Enhanced */
+        .quick-access {
+            padding: 80px 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .section-header h3 {
+            font-size: 36px;
+            color: var(--dark-text);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .section-header h3 {
+            color: #f1f5f9;
+        }
+
+        .section-header p {
+            color: #64748b;
+            max-width: 500px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .section-header p {
+            color: #94a3b8;
+        }
+
+        .access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .access-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-decoration: none;
+            color: var(--dark-text);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        body.dark-mode .access-card {
+            background: #1e293b;
+            color: #f1f5f9;
+        }
+
+        .access-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--school-blue);
+        }
+
+        body.dark-mode .access-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .access-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .access-card:hover::before {
+            left: 100%;
+        }
+
+        .access-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .access-icon.timetable { background: var(--gradient-blue); }
+        .access-icon.assignments { background: var(--gradient-yellow); }
+        .access-icon.grades { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
+        .access-icon.resources { background: linear-gradient(135deg, var(--accent-teal), #0d9488); }
+        .access-icon.community { background: linear-gradient(135deg, #10b981, #059669); }
+        .access-icon.events { background: linear-gradient(135deg, #f97316, #ea580c); }
+
+        .access-card h4 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .access-card p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .access-card p {
+            color: #94a3b8;
+        }
+
+        .badge-new {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-purple);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .login-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        body.dark-mode .login-container {
+            background: #1e293b;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--school-blue);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h3 {
+            font-size: 28px;
+            color: var(--dark-text);
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .login-header h3 {
+            color: #f1f5f9;
+        }
+
+        .login-header p {
+            color: #64748b;
+        }
+
+        body.dark-mode .login-header p {
+            color: #94a3b8;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--dark-text);
+            font-size: 14px;
+        }
+
+        body.dark-mode .form-group label {
+            color: #cbd5e1;
+        }
+
+        .form-group input {
+            padding: 14px 16px;
+            border: 2px solid rgba(30, 64, 175, 0.1);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            transition: var(--transition);
+            background: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body.dark-mode .form-group input {
+            background: #334155;
+            border-color: #475569;
+            color: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--school-blue);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remember-me input {
+            accent-color: var(--school-blue);
+        }
+
+        .forgot-password {
+            color: var(--school-blue);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .submit-btn {
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        body.dark-mode .signup-link {
+            color: #94a3b8;
+        }
+
+        .signup-link a {
+            color: var(--school-blue);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Get Started Modal */
+        .get-started-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .get-started-modal.active {
+            display: flex;
+        }
+
+        .get-started-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        body.dark-mode .get-started-container {
+            background: #1e293b;
+        }
+
+        .get-started-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .get-started-header h3 {
+            font-size: 32px;
+            background: linear-gradient(135deg, var(--school-blue) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .get-started-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            border: 2px solid rgba(30, 64, 175, 0.1);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--dark-text);
+            background: white;
+        }
+
+        body.dark-mode .option-card {
+            background: #334155;
+            border-color: #475569;
+            color: #f1f5f9;
+        }
+
+        .option-card:hover {
+            border-color: var(--school-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .option-content h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .option-content p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        body.dark-mode .option-content p {
+            color: #94a3b8;
+        }
+
+        /* Modern Features */
+        .student-features {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 40px 40px 0 0;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .student-features {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 35px 30px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .feature-card {
+            background: #1e293b;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-blue);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            color: var(--school-blue);
+            font-size: 28px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .feature-icon {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+            color: #93c5fd;
+        }
+
+        .feature-card h4 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--dark-text);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .feature-card h4 {
+            color: #f1f5f9;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .feature-card p {
+            color: #94a3b8;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .feature-list li {
+            color: #cbd5e1;
+        }
+
+        .feature-list i {
+            color: var(--accent-teal);
+            font-size: 14px;
+        }
+
+        /* Upcoming Events */
+        .events {
+            padding: 80px 0;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border-left: 5px solid var(--school-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .event-card {
+            background: #1e293b;
+            border-left-color: #3b82f6;
+        }
+
+        .event-card:hover {
+            transform: translateX(10px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .event-date {
+            display: inline-block;
+            background: var(--school-blue);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .event-date {
+            background: #3b82f6;
+        }
+
+        .event-card h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .event-card h4 {
+            color: #f1f5f9;
+        }
+
+        .event-card p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .event-card p {
+            color: #94a3b8;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        /* Student Testimonials */
+        .testimonials {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--school-blue) 0%, #3b82f6 100%);
+            color: white;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .testimonials {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        }
+
+        .testimonials h3 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
+
+        .testimonial-slider {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .testimonial {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .testimonial-text {
+            font-size: 18px;
+            font-style: italic;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .author-info h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .author-info span {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-text);
+            color: white;
+            padding: 60px 0 30px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .footer {
+            background: #0f172a;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 12px;
+        }
+
+        .footer-col a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-col a:hover {
+            color: var(--school-yellow);
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--school-yellow);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* Cursor Animation */
+        .cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Error Message */
+        .error-message {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-message i {
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .header-right {
+                gap: 15px;
+            }
+            
+            .search-bar {
+                width: 180px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+            
+            .hero-text h2 {
+                font-size: 42px;
+            }
+            
+            .floating-cards {
+                height: 350px;
+            }
+            
+            .header-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .student-nav {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .hero {
+                padding: 120px 0 60px;
+            }
+            
+            .hero-text h2 {
+                font-size: 36px;
+            }
+            
+            .hero-stats {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-get-started, .hero-login-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-text h2 {
+                font-size: 28px;
+            }
+            
+            .floating-cards {
+                height: 300px;
+            }
+            
+            .student-card {
+                width: 240px;
+                padding: 20px;
+            }
+            
+            .access-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .stat-number {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">CA</div>
+                <div class="logo-text">
+                    <h1>Charles Academy</h1>
+                    <span>Student Portal</span>
+                </div>
+            </a>
+            
+            <!-- Modern Header Elements -->
+            <div class="header-right">
+                <div class="digital-clock" id="digitalClock">
+                    <span id="time"></span> • <span id="date"></span>
+                </div>
+                
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search assignments, notes..." id="searchInput">
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <!-- Auth Buttons -->
+                <div class="auth-buttons">
+                    <button class="login-btn" id="headerLoginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="get-started-btn" id="headerGetStartedBtn">
+                        <i class="fas fa-rocket"></i> Get Started
+                    </button>
+                </div>
+                
+                <div class="student-nav">
+                    <a href="#dashboard" class="nav-item active">
+                        <i class="fas fa-home"></i>
+                        <span class="notification">3</span>
+                    </a>
+                    <a href="#notifications" class="nav-item" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification">5</span>
+                    </a>
+                    <div class="student-avatar" id="studentProfile">
+                        JS
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mobile-menu" id="mobileMenu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-container">
+            <button class="close-modal" id="closeLoginModal">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="login-header">
+                <h3>Welcome Back</h3>
+                <p>Sign in to your account</p>
+            </div>
+            
+            <form class="login-form" id="loginForm" method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                {% if error %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="rememberMe" name="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                
+                <div class="signup-link">
+                    Don't have an account? <a href="#" id="signupLink">Contact Admin</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Get Started Modal -->
+    <div class="get-started-modal" id="getStartedModal">
+        <div class="get-started-container">
+            <button class="close-modal" id="closeGetStartedModal">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="get-started-header">
+                <h3>Get Started</h3>
+                <p>Join Charles Academy Today</p>
+            </div>
+            
+            <div class="get-started-options">
+                <div class="option-card" id="studentOption">
+                    <div class="option-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="option-content">
+                        <h4>Student Account</h4>
+                        <p>Access courses, assignments, and learning resources</p>
+                    </div>
+                </div>
+                
+                <div class="option-card" id="teacherOption">
+                    <div class="option-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="option-content">
+                        <h4>Teacher Account</h4>
+                        <p>Manage classes, assignments, and student progress</p>
+                    </div>
+                </div>
+                
+                <div class="option-card" id="parentOption">
+                    <div class="option-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="option-content">
+                        <h4>Parent Account</h4>
+                        <p>Monitor your child's progress and school updates</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-redirect" style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(30, 64, 175, 0.1);">
+                <p style="color: #64748b; margin-bottom: 15px;">Already have an account?</p>
+                <button class="get-started-btn" id="getStartedLoginBtn" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login to Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="close-notifications" id="closeNotifications">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <!-- Notifications will be added here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg-elements" id="bgElements"></div>
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h2>
+                    <span id="auto-typing"></span><span class="cursor">|</span>
+                </h2>
+                
+                <p>Access your classes, assignments, grades, and learning resources all in one place.</p>
+                
+                <!-- Get Started & Login Buttons in Hero -->
+                <div class="hero-actions">
+                    <button class="hero-get-started" id="heroGetStartedBtn">
+                        <i class="fas fa-rocket"></i> Get Started Free
+                    </button>
+                    
+                    <button class="login-btn" id="heroLoginBtn" style="font-size: 16px; padding: 14px 32px;">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <svg class="progress-ring" viewBox="0 0 100 100">
+                            <circle class="progress-ring-circle" stroke="rgba(30, 64, 175, 0.2)" stroke-width="6" fill="transparent" r="45" cx="50" cy="50"/>
+                            <circle class="progress-ring-circle" id="assignmentsRing" stroke="#1e40af" stroke-width="6" fill="transparent" r="45" cx="50" cy="50" stroke-dasharray="282.6" stroke-dashoffset="56.52"/>
+                        </svg>
+                        <div class="stat-content">
+                            <span class="stat-number" id="activeAssignments">5</span>
+                            <span class="stat-label">Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat">
+                        <svg class="progress-ring" viewBox="0 0 100 100">
+                            <circle class="progress-ring-circle" stroke="rgba(30, 64, 175, 0.2)" stroke-width="6" fill="transparent" r="45" cx="50" cy="50"/>
+                            <circle class="progress-ring-circle" id="gradesRing" stroke="#1e40af" stroke-width="6" fill="transparent" r="45" cx="50" cy="50" stroke-dasharray="282.6" stroke-dashoffset="36.74"/>
+                        </svg>
+                        <div class="stat-content">
+                            <span class="stat-number" id="averageGrade">87%</span>
+                            <span class="stat-label">Average</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat">
+                        <svg class="progress-ring" viewBox="0 0 100 100">
+                            <circle class="progress-ring-circle" stroke="rgba(30, 64, 175, 0.2)" stroke-width="6" fill="transparent" r="45" cx="50" cy="50"/>
+                            <circle class="progress-ring-circle" id="attendanceRing" stroke="#1e40af" stroke-width="6" fill="transparent" r="45" cx="50" cy="50" stroke-dasharray="282.6" stroke-dashoffset="11.3"/>
+                        </svg>
+                        <div class="stat-content">
+                            <span class="stat-number" id="attendanceRate">96%</span>
+                            <span class="stat-label">Attendance</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="floating-cards">
+                    <div class="student-card card-1">
+                        <div class="card-header">
+                            <div class="card-avatar">AS</div>
+                            <div class="card-title">
+                                <h4>Alice jesca</h4>
+                                <span>Graphics Design</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            "This portal made studying so much easier!"
+                        </div>
+                        <span class="card-badge">Top Student</span>
+                    </div>
+                    
+                    <div class="student-card card-2">
+                        <div class="card-header">
+                            <div class="card-avatar">MJ</div>
+                            <div class="card-title">
+                                <h4>Michael kumburu</h4>
+                                <span>Grade 11 | Arts</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            "Love tracking my progress!"
+                        </div>
+                        <span class="card-badge">Most Improved</span>
+                    </div>
+                    
+                    <div class="student-card card-3">
+                        <div class="card-header">
+                            <div class="card-avatar">SR</div>
+                            <div class="card-title">
+                                <h4>Sarah Roberts</h4>
+                                <span>Grade 10 | Science</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            "Saving time with online submissions!"
+                        </div>
+                        <span class="card-badge">Active Learner</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Access -->
+    <section class="quick-access">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h3>Quick Access</h3>
+                    <p>Everything you need, right at your fingertips</p>
+                </div>
+            </div>
+            
+            <div class="access-grid">
+                <a href="#timetable" class="access-card">
+                    <div class="access-icon timetable">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h4>Timetable</h4>
+                    <p>Daily schedule & classes</p>
+                    <span class="badge-new">Updated</span>
+                </a>
+                
+                <a href="#grades" class="access-card">
+                    <div class="access-icon grades">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Grades</h4>
+                    <p>Check performance</p>
+                </a>
+                
+                <a href="#resources" class="access-card">
+                    <div class="access-icon resources">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h4>Resources</h4>
+                    <p>Notes & materials</p>
+                    <span class="badge-new">New</span>
+                </a>
+                
+                <a href="#community" class="access-card">
+                    <div class="access-icon community">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Community</h4>
+                    <p>Connect & study</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Features -->
+    <section class="student-features">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h3>How This Helps You</h3>
+                    <p>Designed for easier learning</p>
+                </div>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <h4>Everything Together</h4>
+                    <p>All materials organized</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Single login access</li>
+                        <li><i class="fas fa-check"></i> Mobile Friendly</li>
+                        <li><i class="fas fa-check"></i> Easy navigation</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h4>Never Miss</h4>
+                    <p>Stay updated always</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Deadline alerts</li>
+                        <li><i class="fas fa-check"></i> Schedule reminders</li>
+                        <li><i class="fas fa-check"></i> Grade updates</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Track Progress</h4>
+                    <p>See improvements</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Visual tracking</li>
+                        <li><i class="fas fa-check"></i> Attendance records</li>
+                        <li><i class="fas fa-check"></i> Performance analytics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upcoming Events -->
+    <section class="events">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h3>Upcoming Events</h3>
+                    <p>What's happening</p>
+                </div>
+            </div>
+            
+            <div class="events-grid">
+                <div class="event-card">
+                    <div class="event-date">Tomorrow, 3 PM</div>
+                    <h4>Science Fair</h4>
+                    <p>Student projects exhibition</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> Online</span>
+                    </div>
+                </div>
+                
+                <div class="event-card">
+                    <div class="event-date">Friday, 2 PM</div>
+                    <h4>Math session</h4>
+                    <p>Problem-solving session</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> Room 204</span>
+                    </div>
+                </div>
+                
+                <div class="event-card">
+                    <div class="event-date">Next Monday</div>
+                    <h4>Exams Begin</h4>
+                    <p>Check your timetable</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-clock"></i> All Day</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <h3>What Students Say</h3>
+            
+            <div class="testimonial-slider">
+                <div class="testimonial">
+                    <div class="testimonial-text">
+                        "This portal changed how I study. Everything organized in one place!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">DK</div>
+                        <div class="author-info">
+                            <h4>David Kim</h4>
+                            <span>Grade 12, Head Prefect</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Charles Academy</h4>
+                    <p style="color: #cbd5e1; margin-top: 15px; line-height: 1.6;">
+                        Empowering students for excellence.
+                    </p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#dashboard">Dashboard</a></li>
+                        <li><a href="#timetable">Timetable</a></li>
+                        <li><a href="#assignments">Assignments</a></li>
+                        <li><a href="#grades">Grades</a></li>
+                        <li><a href="#resources">Resources</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#help">Help Center</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#tech">Tech Support</a></li>
+                        <li><a href="#feedback">Feedback</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> info@charlesacademy.com</li>
+                        <li><i class="fas fa-phone"></i> +255 789 012 345</li>
+                        <li><i class="fas fa-clock"></i> 8AM - 4PM</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 Charles Academy. Made for students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Typing Animation
+        document.addEventListener("DOMContentLoaded", function () {
+            const texts = [
+                "Welcome..! Ready to Learn?",
+                "Empowering Education",
+                "Smart School System"
+            ];
+
+            let textIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            const speed = 90;
+            const element = document.getElementById("auto-typing");
+
+            function typeLoop() {
+                const current = texts[textIndex];
+
+                if (!isDeleting && charIndex < current.length) {
+                    element.textContent += current.charAt(charIndex);
+                    charIndex++;
+                } 
+                else if (isDeleting && charIndex > 0) {
+                    element.textContent = current.substring(0, charIndex - 1);
+                    charIndex--;
+                } 
+                else if (!isDeleting && charIndex === current.length) {
+                    setTimeout(() => isDeleting = true, 1500);
+                } 
+                else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    textIndex = (textIndex + 1) % texts.length;
+                }
+
+                setTimeout(typeLoop, speed);
+            }
+
+            typeLoop();
+        });
+
+        // Digital Clock
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const date = now.toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
+            
+            document.getElementById('time').textContent = time;
+            document.getElementById('date').textContent = date;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.querySelector('i').className = 'fas fa-sun';
+        }
+
+        // Notifications Panel
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const closeNotifications = document.getElementById('closeNotifications');
+        const notificationsList = document.getElementById('notificationsList');
+
+        // const notifications = [
+        //     {text: "New assignment in Mathematics", time: "10 min ago", new: true},
+        //     {text: "Science grade updated", time: "1 hour ago", new: true},
+        //     {text: "School assembly tomorrow 8AM", time: "2 hours ago", new: false},
+        //     {text: "Library closes early today", time: "3 hours ago", new: false},
+        //     {text: "Sports practice cancelled", time: "5 hours ago", new: false},
+        //     {text: "Math Club meeting Friday", time: "1 day ago", new: false},
+        //     {text: "Science Fair registration open", time: "2 days ago", new: false}
+        // ];
+
+        function loadNotifications() {
+            notificationsList.innerHTML = '';
+            notifications.forEach(notif => {
+                const div = document.createElement('div');
+                div.className = `notification-item ${notif.new ? 'new' : ''}`;
+                div.innerHTML = `
+                    <div>${notif.text}</div>
+                    <div class="notification-time">${notif.time}</div>
+                `;
+                notificationsList.appendChild(div);
+            });
+        }
+
+        notificationsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            notificationsPanel.classList.add('active');
+            loadNotifications();
+        });
+
+        closeNotifications.addEventListener('click', () => {
+            notificationsPanel.classList.remove('active');
+        });
+
+        // Search Functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                alert(`Searching for: "${searchInput.value}"`);
+                searchInput.value = '';
+            }
+        });
+
+        // Progress Rings Animation
+        function animateProgressRings() {
+            const assignmentsRing = document.getElementById('assignmentsRing');
+            const gradesRing = document.getElementById('gradesRing');
+            const attendanceRing = document.getElementById('attendanceRing');
+            
+            const assignments = 5;
+            const grades = 87;
+            const attendance = 96;
+            
+            // Calculate dash offset (282.6 is circumference: 2 * π * 45)
+            const assignmentsOffset = 282.6 - (assignments / 10 * 282.6);
+            const gradesOffset = 282.6 - (grades / 100 * 282.6);
+            const attendanceOffset = 282.6 - (attendance / 100 * 282.6);
+            
+            assignmentsRing.style.strokeDashoffset = assignmentsOffset;
+            gradesRing.style.strokeDashoffset = gradesOffset;
+            attendanceRing.style.strokeDashoffset = attendanceOffset;
+        }
+
+        // Animate stats
+        function animateCounter(element, target, suffix = '') {
+            let current = 0;
+            const increment = target / 30;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + suffix;
+            }, 30);
+        }
+
+        // Modal Functionality
+        const loginModal = document.getElementById('loginModal');
+        const getStartedModal = document.getElementById('getStartedModal');
+        const headerLoginBtn = document.getElementById('headerLoginBtn');
+        const headerGetStartedBtn = document.getElementById('headerGetStartedBtn');
+        const heroLoginBtn = document.getElementById('heroLoginBtn');
+        const heroGetStartedBtn = document.getElementById('heroGetStartedBtn');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const closeGetStartedModal = document.getElementById('closeGetStartedModal');
+        const signupLink = document.getElementById('signupLink');
+        const studentOption = document.getElementById('studentOption');
+        const teacherOption = document.getElementById('teacherOption');
+        const parentOption = document.getElementById('parentOption');
+        const getStartedLoginBtn = document.getElementById('getStartedLoginBtn');
+
+        // Open Login Modal
+        function openLoginModal() {
+            loginModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Open Get Started Modal
+        function openGetStartedModal() {
+            getStartedModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Modals
+        function closeModals() {
+            loginModal.classList.remove('active');
+            getStartedModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event Listeners for Modals
+        headerLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLoginModal();
+        });
+
+        headerGetStartedBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openGetStartedModal();
+        });
+
+        heroLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLoginModal();
+        });
+
+        heroGetStartedBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openGetStartedModal();
+        });
+
+        closeLoginModal.addEventListener('click', closeModals);
+        closeGetStartedModal.addEventListener('click', closeModals);
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal || e.target === getStartedModal) {
+                closeModals();
+            }
+        });
+
+        // Option selection
+        studentOption.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModals();
+            setTimeout(() => {
+                openLoginModal();
+            }, 300);
+        });
+
+        teacherOption.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModals();
+            setTimeout(() => {
+                openLoginModal();
+            }, 300);
+        });
+
+        parentOption.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModals();
+            setTimeout(() => {
+                openLoginModal();
+            }, 300);
+        });
+
+        // Get Started Login Button
+        if (getStartedLoginBtn) {
+            getStartedLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeModals();
+                setTimeout(() => {
+                    openLoginModal();
+                }, 300);
+            });
+        }
+
+        // Signup link
+        if (signupLink) {
+            signupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('Please contact the school administrator to create an account.');
+            });
+        }
+
+        // Escape key to close modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModals();
+            }
+        });
+
+        // Initialize animations
+        window.addEventListener('load', () => {
+            animateCounter(document.getElementById('activeAssignments'), 5);
+            animateCounter(document.getElementById('averageGrade'), 87, '%');
+            animateCounter(document.getElementById('attendanceRate'), 96, '%');
+            animateProgressRings();
+            loadNotifications();
+            
+            // Background elements
+            const bgElements = document.getElementById('bgElements');
+            const icons = ['📚', '🎓', '✏️', '📝', '🔬', '📊'];
+            
+            for (let i = 0; i < 12; i++) {
+                const icon = document.createElement('i');
+                icon.textContent = icons[Math.floor(Math.random() * icons.length)];
+                icon.style.left = `${Math.random() * 100}%`;
+                icon.style.top = `${Math.random() * 100}%`;
+                icon.style.fontSize = `${Math.random() * 30 + 20}px`;
+                icon.style.opacity = `${Math.random() * 0.3 + 0.1}`;
+                icon.style.animation = `float ${Math.random() * 10 + 10}s infinite ease-in-out`;
+                icon.style.animationDelay = `${Math.random() * 5}s`;
+                bgElements.appendChild(icon);
+            }
+        });
+
+        // Mobile Menu
+        const mobileMenu = document.getElementById('mobileMenu');
+        const headerRight = document.querySelector('.header-right');
+        
+        mobileMenu.addEventListener('click', () => {
+            headerRight.style.display = headerRight.style.display === 'flex' ? 'none' : 'flex';
+            headerRight.style.position = 'absolute';
+            headerRight.style.top = '70px';
+            headerRight.style.left = '0';
+            headerRight.style.width = '100%';
+            headerRight.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#1e293b' : 'white';
+            headerRight.style.padding = '20px';
+            headerRight.style.flexDirection = 'column';
+            headerRight.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            headerRight.style.gap = '15px';
+            headerRight.style.alignItems = 'flex-start';
+        });
+
+        // Student profile
+        const studentProfile = document.getElementById('studentProfile');
+        studentProfile.addEventListener('click', () => {
+            alert('👤 Student Profile\n\nName: John Smith\nGrade: 11\nClass: Science\nAverage: 87%\nNext: Math - 10:00 AM');
+        });
+
+        // Access cards interaction
+        document.querySelectorAll('.access-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 200);
+            });
+        });
+
+        // Auto-update notifications
+        setInterval(() => {
+            const badges = document.querySelectorAll('.notification');
+            badges.forEach(badge => {
+                const current = parseInt(badge.textContent);
+                if (current > 0 && Math.random() > 0.7) {
+                    badge.textContent = current + 1;
+                }
+            });
+        }, 15000);
+    </script>
+</body>
+</html>

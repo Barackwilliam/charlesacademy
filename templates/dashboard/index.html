@@ -1,0 +1,734 @@
+{% extends 'base.html' %}
+{% load dashboard_tags %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Admin Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's your system overview.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary fs-6 px-3 py-2" id="currentDateTime">
+                <i class="bi bi-calendar-week me-1"></i>
+                Loading date...
+            </span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <!-- Total Students -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100" style="border-left: 5px solid #4361ee;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Students</h6>
+                            <h2 class="fw-bold mb-0" id="studentsCount">{{ total_students }}</h2>
+                        </div>
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-people-fill text-primary fs-3"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-success">
+                            <i class="bi bi-arrow-up-right me-1"></i>
+                            Active this semester
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Teachers -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100" style="border-left: 5px solid #10b981;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Teachers</h6>
+                            <h2 class="fw-bold mb-0" id="teachersCount">{{ total_teachers }}</h2>
+                        </div>
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-person-badge text-success fs-3"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            Currently active
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classes -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100" style="border-left: 5px solid #f59e0b;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Classes</h6>
+                            <h2 class="fw-bold mb-0" id="classesCount">{{ total_classes }}</h2>
+                        </div>
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-building text-warning fs-3"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-info">
+                            <i class="bi bi-book me-1"></i>
+                            {{ total_subjects }} subjects offered
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100" style="border-left: 5px solid #ef4444;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Subjects</h6>
+                            <h2 class="fw-bold mb-0" id="subjectsCount">{{ total_subjects }}</h2>
+                        </div>
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-book-half text-danger fs-3"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-bar-chart me-1"></i>
+                            Across all classes
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fees Summary -->
+    <div class="row mb-4">
+        <div class="col-xl-6 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-cash-stack text-primary me-2"></i>
+                        Financial Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Fees Collected -->
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded border">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="mb-0">Fees Collected</h6>
+                                        <small class="text-muted">Total received amount</small>
+                                    </div>
+                                    <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2">
+                                        <i class="bi bi-arrow-down-circle text-success fs-4"></i>
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold text-success mb-0">$<span id="feesCollected">{{ fees_collected }}</span></h3>
+                                <div class="progress mt-3" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 75%"></div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">75% of total expected</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Fees Pending -->
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded border">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="mb-0">Fees Pending</h6>
+                                        <small class="text-muted">Awaiting payment</small>
+                                    </div>
+                                    <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-2">
+                                        <i class="bi bi-clock text-warning fs-4"></i>
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold text-warning mb-0">$<span id="feesPending">{{ fees_pending }}</span></h3>
+                                <div class="progress mt-3" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: 25%"></div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">25% remaining</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Revenue -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center p-4 bg-primary bg-opacity-10 rounded">
+                                <div>
+                                    <h6 class="mb-1">Total Expected Revenue</h6>
+                                    <small class="text-muted">This academic year</small>
+                                </div>
+                                <h4 class="fw-bold text-primary mb-0">
+                                    $<span id="totalRevenue">
+                                        {% if fees_collected and fees_pending %}
+                                            {{ fees_collected|add:fees_pending }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </span>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Statistics -->
+        <div class="col-xl-6 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-bar-chart text-success me-2"></i>
+                        System Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Student-Teacher Ratio -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-4 border rounded hover-effect">
+                                <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-people text-info fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Student-Teacher Ratio</h6>
+                                    <p class="text-muted mb-0">
+                                        {% if total_teachers > 0 and total_students > 0 %}
+                                            {{ total_students|floatformat:0 }}:{{ total_teachers|floatformat:0 }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Average Class Size -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-4 border rounded hover-effect">
+                                <div class="icon-wrapper bg-purple bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-diagram-3 text-purple fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Avg. Class Size</h6>
+                                    <p class="text-muted mb-0">
+                                        {% if total_classes > 0 and total_students > 0 %}
+                                            {{ total_students|divide:total_classes|floatformat:0 }} students
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Subjects per Class -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-4 border rounded hover-effect">
+                                <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-journal-text text-warning fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Subjects per Class</h6>
+                                    <p class="text-muted mb-0">
+                                        {% if total_classes > 0 and total_subjects > 0 %}
+                                            {{ total_subjects|divide:total_classes|floatformat:1 }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Collection Rate -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-4 border rounded hover-effect">
+                                <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-percent text-success fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Fee Collection Rate</h6>
+                                    <p class="text-muted mb-0">
+                                        {% if fees_collected and fees_pending %}
+                                            {% widthratio fees_collected fees_collected|add:fees_pending 100 %}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning-charge-fill text-warning me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{% url 'students:student_list' %}" class="text-decoration-none action-link">
+                                <div class="card action-card border-0 shadow-sm h-100 text-center">
+                                    <div class="card-body p-4">
+                                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                            <i class="bi bi-people-fill text-primary fs-3"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Students</h6>
+                                        <small class="text-muted">Manage students</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{% url 'teacher_list' %}" class="text-decoration-none action-link">
+                                <div class="card action-card border-0 shadow-sm h-100 text-center">
+                                    <div class="card-body p-4">
+                                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                            <i class="bi bi-person-badge text-success fs-3"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Teachers</h6>
+                                        <small class="text-muted">Manage teachers</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{% url 'attendance:student_attendance_list' %}" class="text-decoration-none action-link">
+                                <div class="card action-card border-0 shadow-sm h-100 text-center">
+                                    <div class="card-body p-4">
+                                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                            <i class="bi bi-calendar-check text-info fs-3"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Student Attendance</h6>
+                                        <small class="text-muted">Mark/view attendance</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{% url 'attendance:teacher_attendance_list' %}" class="text-decoration-none action-link">
+                                <div class="card action-card border-0 shadow-sm h-100 text-center">
+                                    <div class="card-body p-4">
+                                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                            <i class="bi bi-clipboard-check text-warning fs-3"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Teacher Attendance</h6>
+                                        <small class="text-muted">Staff attendance</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{% url 'exams:exam_list' %}" class="text-decoration-none action-link">
+                                <div class="card action-card border-0 shadow-sm h-100 text-center">
+                                    <div class="card-body p-4">
+                                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                            <i class="bi bi-clipboard-data text-danger fs-3"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Exams</h6>
+                                        <small class="text-muted">Schedule and results</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{% url 'fees:fee_structure_list' %}" class="text-decoration-none action-link">
+                                <div class="card action-card border-0 shadow-sm h-100 text-center">
+                                    <div class="card-body p-4">
+                                        <div class="icon-wrapper bg-purple bg-opacity-10 rounded-circle p-3 mb-3 mx-auto">
+                                            <i class="bi bi-cash-coin text-purple fs-3"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-2">Fees</h6>
+                                        <small class="text-muted">Fee management</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-graph-up text-primary me-2"></i>
+                        Performance Metrics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Student Distribution -->
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 border rounded">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-pie-chart me-2 text-primary"></i>
+                                    Student Distribution
+                                </h6>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <h2 class="fw-bold">{{ total_students }}</h2>
+                                        <small class="text-muted">Total Students</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-success">
+                                            <i class="bi bi-arrow-up me-1"></i>
+                                            <span>Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-primary" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Teacher Distribution -->
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 border rounded">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-bar-chart me-2 text-success"></i>
+                                    Teacher Distribution
+                                </h6>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <h2 class="fw-bold">{{ total_teachers }}</h2>
+                                        <small class="text-muted">Total Teachers</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-info">
+                                            <i class="bi bi-person-check me-1"></i>
+                                            <span>Active Staff</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fee Performance -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="p-4 bg-light rounded border">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-currency-dollar me-2 text-warning"></i>
+                                    Fee Collection Performance
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="p-3">
+                                            <h3 class="fw-bold text-success">${{ fees_collected }}</h3>
+                                            <small class="text-muted">Collected</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="p-3">
+                                            <h3 class="fw-bold text-warning">${{ fees_pending }}</h3>
+                                            <small class="text-muted">Pending</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="p-3">
+                                            <h3 class="fw-bold text-primary">
+                                                {% if fees_collected and fees_pending %}
+                                                    ${{ fees_collected|add:fees_pending }}
+                                                {% else %}
+                                                    $0
+                                                {% endif %}
+                                            </h3>
+                                            <small class="text-muted">Total Expected</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Styles for Dashboard */
+    :root {
+        --primary-color: #4361ee;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #3b82f6;
+        --purple-color: #8b5cf6;
+    }
+    
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+    
+    .action-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        cursor: pointer;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .action-card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+    
+    .hover-effect {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .hover-effect:hover {
+        background-color: rgba(0,0,0,0.02);
+        transform: translateY(-2px);
+    }
+    
+    .bg-purple {
+        background-color: var(--purple-color) !important;
+    }
+    
+    .text-purple {
+        color: var(--purple-color) !important;
+    }
+    
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+    }
+    
+    /* Number animation */
+    .count-up {
+        display: inline-block;
+    }
+    
+    /* Card hover effects */
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Badge styles */
+    .badge {
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .icon-wrapper {
+            padding: 1.5rem !important;
+        }
+        
+        h2.fw-bold {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+
+<script>
+    // DOM ready function
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDashboard();
+        setupEventListeners();
+    });
+
+    function initializeDashboard() {
+        // Initialize date and time
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+
+        // Animate numbers on page load
+        animateNumbers();
+        
+        // Initialize progress bars animation
+        animateProgressBars();
+    }
+
+    function updateDateTime() {
+        const now = new Date();
+        const dateTimeElement = document.getElementById('currentDateTime');
+        
+        if (dateTimeElement) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const formattedDateTime = now.toLocaleDateString('en-US', options);
+            dateTimeElement.innerHTML = `<i class="bi bi-calendar-week me-1"></i>${formattedDateTime}`;
+        }
+    }
+
+    function animateNumbers() {
+        const numbers = [
+            { id: 'studentsCount', value: parseInt('{{ total_students }}') || 0 },
+            { id: 'teachersCount', value: parseInt('{{ total_teachers }}') || 0 },
+            { id: 'classesCount', value: parseInt('{{ total_classes }}') || 0 },
+            { id: 'subjectsCount', value: parseInt('{{ total_subjects }}') || 0 }
+        ];
+        
+        numbers.forEach(item => {
+            const element = document.getElementById(item.id);
+            if (element && item.value > 0) {
+                animateCounter(element, item.value);
+            }
+        });
+        
+        // Animate fee numbers
+        const feesCollected = parseFloat('{{ fees_collected }}') || 0;
+        const feesPending = parseFloat('{{ fees_pending }}') || 0;
+        
+        if (feesCollected > 0) {
+            animateCounter(document.getElementById('feesCollected'), feesCollected);
+        }
+        if (feesPending > 0) {
+            animateCounter(document.getElementById('feesPending'), feesPending);
+        }
+        
+        // Calculate and animate total revenue
+        const totalRevenue = feesCollected + feesPending;
+        if (totalRevenue > 0) {
+            animateCounter(document.getElementById('totalRevenue'), totalRevenue);
+        }
+    }
+
+    function animateCounter(element, target) {
+        const duration = 1500; // 1.5 seconds
+        const step = target / (duration / 16); // 60fps
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                element.textContent = target.toLocaleString();
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current).toLocaleString();
+            }
+        }, 16);
+    }
+
+    function animateProgressBars() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const originalWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.width = originalWidth;
+            }, 300);
+        });
+    }
+
+    function setupEventListeners() {
+        // Action card click effects
+        const actionCards = document.querySelectorAll('.action-card');
+        actionCards.forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Hover effect for system cards
+        const systemCards = document.querySelectorAll('.hover-effect');
+        systemCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '';
+            });
+        });
+
+        // Refresh animation on card hover
+        const statCards = document.querySelectorAll('.card[style*="border-left"]');
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const icon = this.querySelector('.icon-wrapper');
+                if (icon) {
+                    icon.style.transform = 'rotate(15deg)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const icon = this.querySelector('.icon-wrapper');
+                if (icon) {
+                    icon.style.transform = '';
+                }
+            });
+        });
+    }
+
+    // Add custom filter for division
+    function divideFilter(value, divisor) {
+        if (divisor === 0) return 0;
+        return value / divisor;
+    }
+
+    // Register custom filter
+    window.divide = divideFilter;
+</script>
+{% endblock %}
