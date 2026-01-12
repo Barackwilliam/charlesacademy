@@ -12,10 +12,14 @@
             --school-yellow: #fbbf24;
             --accent-purple: #8b5cf6;
             --accent-teal: #0d9488;
+            --parent-green: #10b981;
+            --parent-dark-green: #059669;
             --light-bg: #f0f9ff;
             --dark-text: #1e293b;
             --gradient-blue: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             --gradient-yellow: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --gradient-parent: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-parent-dark: linear-gradient(135deg, #059669 0%, #047857 100%);
             --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             --radius-lg: 24px;
@@ -42,6 +46,8 @@
             --light-bg: #0f172a;
             --dark-text: #f1f5f9;
             --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            --parent-green: #34d399;
+            --parent-dark-green: #10b981;
         }
 
         h1, h2, h3, h4 {
@@ -250,6 +256,200 @@
             box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
         }
 
+        /* PARENT PORTAL BUTTON - Enhanced Design */
+        .parent-portal-btn-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px;
+            background: rgba(16, 185, 129, 0.08);
+            border-radius: 20px;
+            transition: var(--transition);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .parent-portal-btn-container {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .parent-portal-btn-container:hover {
+            background: rgba(16, 185, 129, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+            border-color: var(--parent-green);
+        }
+
+        body.dark-mode .parent-portal-btn-container:hover {
+            background: rgba(52, 211, 153, 0.2);
+            box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+        }
+
+        .parent-portal-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: var(--gradient-parent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            font-family: 'Poppins', sans-serif;
+            min-width: 170px;
+            justify-content: center;
+        }
+
+        body.dark-mode .parent-portal-btn {
+            background: var(--gradient-parent-dark);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .parent-portal-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+            z-index: -1;
+        }
+
+        .parent-portal-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .parent-portal-btn:hover::before {
+            left: 100%;
+        }
+
+        .parent-portal-btn i {
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .parent-portal-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        .parent-portal-btn span {
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .parent-portal-info {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: white;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 300px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            pointer-events: none;
+        }
+
+        body.dark-mode .parent-portal-info {
+            background: #1e293b;
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .parent-portal-btn-container:hover .parent-portal-info {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(5px);
+            pointer-events: auto;
+        }
+
+        .parent-portal-info::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-left: 1px solid rgba(16, 185, 129, 0.2);
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        body.dark-mode .parent-portal-info::before {
+            background: #1e293b;
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .parent-portal-info h4 {
+            color: var(--parent-green);
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        body.dark-mode .parent-portal-info h4 {
+            color: #34d399;
+        }
+
+        .parent-portal-info p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        body.dark-mode .parent-portal-info p {
+            color: #94a3b8;
+        }
+
+        .parent-portal-features {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        body.dark-mode .feature-item {
+            color: #cbd5e1;
+        }
+
+        .feature-item i {
+            color: var(--parent-green);
+            font-size: 10px;
+        }
+
+        body.dark-mode .feature-item i {
+            color: #34d399;
+        }
+
         .student-nav {
             display: flex;
             gap: 15px;
@@ -406,6 +606,8 @@
             display: flex;
             gap: 15px;
             margin-top: 30px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .hero-get-started {
@@ -428,6 +630,61 @@
         .hero-get-started:hover {
             transform: translateY(-3px) scale(1.05);
             box-shadow: 0 10px 25px rgba(30, 64, 175, 0.4);
+        }
+
+        /* PARENT PORTAL BUTTON IN HERO SECTION */
+        .hero-parent-portal {
+            padding: 14px 28px;
+            background: var(--gradient-parent);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .hero-parent-portal {
+            background: var(--gradient-parent-dark);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .hero-parent-portal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .hero-parent-portal:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .hero-parent-portal:hover::before {
+            left: 100%;
+        }
+
+        .hero-parent-portal i {
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .hero-parent-portal:hover i {
+            transform: translateX(3px) rotate(360deg);
         }
 
         /* Modern Stats with Progress Rings */
@@ -1479,9 +1736,26 @@
                 align-items: center;
             }
             
-            .hero-get-started, .hero-login-btn {
+            .hero-get-started, .hero-parent-portal, .hero-login-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            /* Parent Portal Button Responsive */
+            .parent-portal-btn-container {
+                flex-direction: column;
+                padding: 10px;
+                text-align: center;
+            }
+            
+            .parent-portal-info {
+                width: 280px;
+                left: 50%;
+                transform: translateX(-50%) translateY(10px);
+            }
+            
+            .parent-portal-info::before {
+                left: 50%;
             }
         }
 
@@ -1511,6 +1785,17 @@
             .stat-number {
                 font-size: 20px;
             }
+            
+            .parent-portal-btn {
+                min-width: 150px;
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .parent-portal-info {
+                width: 260px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -1535,6 +1820,32 @@
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Search assignments, notes..." id="searchInput">
+                </div>
+                
+                <!-- PARENT PORTAL BUTTON IN HEADER -->
+                <div class="parent-portal-btn-container">
+                    <div class="parent-portal-info">
+                        <h4><i class="fas fa-users"></i> Parent Portal Access</h4>
+                        <p>Monitor your child's academic progress, attendance, and school updates in real-time.</p>
+                        <div class="parent-portal-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>View grades & report cards</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Track attendance records</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Receive school announcements</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Contact teachers directly</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <button class="theme-toggle" id="themeToggle">
@@ -1699,11 +2010,15 @@
                 
                 <p>Access your classes, assignments, grades, and learning resources all in one place.</p>
                 
-                <!-- Get Started & Login Buttons in Hero -->
+                <!-- Get Started & Login & Parent Portal Buttons in Hero -->
                 <div class="hero-actions">
                     <button class="hero-get-started" id="heroGetStartedBtn">
                         <i class="fas fa-rocket"></i> Get Started Free
                     </button>
+                    
+                    <a href="{% url 'parents:login' %}" class="hero-parent-portal" id="heroParentPortalBtn">
+                        <i class="fas fa-users"></i> Parent Portal
+                    </a>
                     
                     <button class="login-btn" id="heroLoginBtn" style="font-size: 16px; padding: 14px 32px;">
                         <i class="fas fa-sign-in-alt"></i> Login
@@ -1767,7 +2082,7 @@
                             <div class="card-avatar">MJ</div>
                             <div class="card-title">
                                 <h4>Michael kumburu</h4>
-                                <span>Grade 11 | Arts</span>
+                                <span>Web Designer</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -1781,7 +2096,7 @@
                             <div class="card-avatar">SR</div>
                             <div class="card-title">
                                 <h4>Sarah Roberts</h4>
-                                <span>Grade 10 | Science</span>
+                                <span>Entrepreneurship</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -1950,7 +2265,7 @@
                         <div class="author-avatar">DK</div>
                         <div class="author-info">
                             <h4>David Kim</h4>
-                            <span>Grade 12, Head Prefect</span>
+                            <span>Graphic Designer</span>
                         </div>
                     </div>
                 </div>
@@ -1999,7 +2314,7 @@
                 <div class="footer-col">
                     <h4>Contact</h4>
                     <ul>
-                        <li><i class="fas fa-envelope"></i> info@charlesacademy.com</li>
+                        <li><i class="fas fa-envelope"></i> info@charlesacademy.co.tz</li>
                         <li><i class="fas fa-phone"></i> +255 789 012 345</li>
                         <li><i class="fas fa-clock"></i> 8AM - 4PM</li>
                     </ul>
@@ -2173,6 +2488,7 @@
         const headerGetStartedBtn = document.getElementById('headerGetStartedBtn');
         const heroLoginBtn = document.getElementById('heroLoginBtn');
         const heroGetStartedBtn = document.getElementById('heroGetStartedBtn');
+        const heroParentPortalBtn = document.getElementById('heroParentPortalBtn');
         const closeLoginModal = document.getElementById('closeLoginModal');
         const closeGetStartedModal = document.getElementById('closeGetStartedModal');
         const signupLink = document.getElementById('signupLink');
@@ -2180,6 +2496,7 @@
         const teacherOption = document.getElementById('teacherOption');
         const parentOption = document.getElementById('parentOption');
         const getStartedLoginBtn = document.getElementById('getStartedLoginBtn');
+        const parentPortalBtn = document.getElementById('parentPortalBtn');
 
         // Open Login Modal
         function openLoginModal() {
@@ -2220,6 +2537,27 @@
             e.preventDefault();
             openGetStartedModal();
         });
+
+        // Parent Portal Button Hover Effects
+        if (parentPortalBtn) {
+            parentPortalBtn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px) scale(1.05)';
+            });
+            
+            parentPortalBtn.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
+        }
+
+        if (heroParentPortalBtn) {
+            heroParentPortalBtn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.05)';
+            });
+            
+            heroParentPortalBtn.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
+        }
 
         closeLoginModal.addEventListener('click', closeModals);
         closeGetStartedModal.addEventListener('click', closeModals);

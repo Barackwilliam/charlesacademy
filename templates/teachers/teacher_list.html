@@ -1,48 +1,411 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h4>Teachers</h4>
-
-<!-- Top action buttons -->
-<div class="mb-3">
-    <a href="{% url 'add_teacher' %}" class="btn btn-primary">Add Teacher</a>
-    <a href="{% url 'attendance:mark_teacher_attendance' %}" class="btn btn-success">Mark Attendance</a>
-    <a href="{% url 'attendance:teacher_attendance_list' %}" class="btn btn-info">Attendance List</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Teachers</h4>
+    <!-- Search and filter on larger screens -->
+    <div class="d-none d-md-block">
+        <input type="text" class="form-control form-control-sm" placeholder="Search teachers..." id="teacherSearch">
+    </div>
 </div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for t in teachers %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ t.first_name }} {{ t.last_name }}</td>
-            <td>{{ t.email }}</td>
-            <td>
-                {% if t.is_available %}
-                    <span class="badge bg-success">Available</span>
-                {% else %}
-                    <span class="badge bg-danger">Unavailable</span>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'edit_teacher' t.id %}" class="btn btn-sm btn-warning">Edit</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-center">No teachers found</td>
-        </tr>
+<!-- Mobile search -->
+<div class="d-block d-md-none mb-3">
+    <input type="text" class="form-control" placeholder="Search teachers..." id="teacherSearchMobile">
+</div>
+
+<!-- Responsive action buttons -->
+<div class="mb-4">
+    <div class="row g-2">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <a href="{% url 'add_teacher' %}" class="btn btn-primary w-100">
+                <i class="fas fa-plus me-1 d-none d-sm-inline"></i>
+                <span>Add Teacher</span>
+            </a>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <a href="{% url 'attendance:mark_teacher_attendance' %}" class="btn btn-success w-100">
+                <i class="fas fa-calendar-check me-1 d-none d-sm-inline"></i>
+                <span>Mark Attendance</span>
+            </a>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <a href="{% url 'attendance:teacher_attendance_list' %}" class="btn btn-info w-100">
+                <i class="fas fa-list me-1 d-none d-sm-inline"></i>
+                <span>Attendance List</span>
+            </a>
+        </div>
+        <!-- Filter button for mobile -->
+        <div class="col-12 d-block d-md-none">
+            <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="fas fa-filter me-1"></i> Filters
+            </button>
+            <div class="collapse mt-2" id="filterCollapse">
+                <div class="card card-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filterAvailable" checked>
+                        <label class="form-check-label" for="filterAvailable">
+                            Available
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filterUnavailable" checked>
+                        <label class="form-check-label" for="filterUnavailable">
+                            Unavailable
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Desktop filters -->
+<div class="d-none d-md-block mb-3">
+    <div class="row g-2">
+        <div class="col-auto">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                <select class="form-select form-select-sm" id="statusFilter">
+                    <option value="all">All Status</option>
+                    <option value="available">Available Only</option>
+                    <option value="unavailable">Unavailable Only</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-sort"></i></span>
+                <select class="form-select form-select-sm" id="sortFilter">
+                    <option value="name_asc">Name A-Z</option>
+                    <option value="name_desc">Name Z-A</option>
+                    <option value="status">Status</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Responsive table -->
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" class="d-none d-md-table-cell">#</th>
+                <th scope="col">Name</th>
+                <th scope="col" class="d-none d-sm-table-cell">Email</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-end">Action</th>
+            </tr>
+        </thead>
+        <tbody id="teacherTableBody">
+            {% for t in teachers %}
+            <tr class="teacher-row" data-status="{% if t.is_available %}available{% else %}unavailable{% endif %}">
+                <td class="d-none d-md-table-cell">{{ forloop.counter }}</td>
+                <td>
+                    <div class="d-flex flex-column">
+                        <span class="fw-medium">{{ t.first_name }} {{ t.last_name }}</span>
+                        <small class="text-muted d-block d-sm-none">{{ t.email }}</small>
+                    </div>
+                </td>
+                <td class="d-none d-sm-table-cell">{{ t.email }}</td>
+                <td>
+                    {% if t.is_available %}
+                        <span class="badge bg-success rounded-pill">
+                            <i class="fas fa-check-circle me-1"></i> Available
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger rounded-pill">
+                            <i class="fas fa-times-circle me-1"></i> Unavailable
+                        </span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'edit_teacher' t.id %}" class="btn btn-sm btn-warning" title="Edit">
+                            <i class="fas fa-edit"></i>
+                            <span class="d-none d-sm-inline ms-1">Edit</span>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-primary d-none d-md-inline-flex" 
+                                data-teacher-id="{{ t.id }}" 
+                                data-teacher-name="{{ t.first_name }} {{ t.last_name }}"
+                                title="Quick Actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <p class="mb-0">No teachers found</p>
+                        <small class="d-block mt-1">
+                            <a href="{% url 'add_teacher' %}">Add your first teacher</a>
+                        </small>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Mobile card view -->
+<div class="d-block d-md-none" id="mobileTeacherView">
+    {% for t in teachers %}
+    <div class="card mb-3 teacher-card" data-status="{% if t.is_available %}available{% else %}unavailable{% endif %}">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <h6 class="card-title mb-1">{{ t.first_name }} {{ t.last_name }}</h6>
+                    <p class="card-text text-muted small mb-2">
+                        <i class="fas fa-envelope me-1"></i> {{ t.email }}
+                    </p>
+                    <div class="mb-3">
+                        {% if t.is_available %}
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-check-circle me-1"></i> Available
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger rounded-pill">
+                                <i class="fas fa-times-circle me-1"></i> Unavailable
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'edit_teacher' t.id %}">
+                                <i class="fas fa-edit me-2"></i> Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-eye me-2"></i> View Details
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#">
+                                <i class="fas fa-trash me-2"></i> Delete
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="d-grid">
+                <a href="{% url 'edit_teacher' t.id %}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit me-1"></i> Edit Teacher
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-5">
+        <div class="text-muted">
+            <i class="fas fa-users fa-3x mb-3"></i>
+            <p class="mb-0">No teachers found</p>
+            <small class="d-block mt-2">
+                <a href="{% url 'add_teacher' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> Add Teacher
+                </a>
+            </small>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if teachers.has_other_pages %}
+<nav aria-label="Teacher pagination">
+    <ul class="pagination justify-content-center">
+        {% if teachers.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ teachers.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in teachers.paginator.page_range %}
+            {% if teachers.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > teachers.number|add:'-3' and num < teachers.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
         {% endfor %}
-    </tbody>
-</table>
+        
+        {% if teachers.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ teachers.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    /* Custom responsive styles */
+    .teacher-row:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        cursor: pointer;
+    }
+    
+    .teacher-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+    
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Badge animations */
+    .badge {
+        transition: all 0.3s ease;
+    }
+    
+    /* Responsive typography */
+    @media (max-width: 768px) {
+        h4 {
+            font-size: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('teacherSearch') || document.getElementById('teacherSearchMobile');
+        const teacherRows = document.querySelectorAll('.teacher-row');
+        const teacherCards = document.querySelectorAll('.teacher-card');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                teacherRows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+                
+                teacherCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+        
+        // Filter functionality
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function(e) {
+                const status = e.target.value;
+                
+                teacherRows.forEach(row => {
+                    const rowStatus = row.dataset.status;
+                    if (status === 'all' || rowStatus === status) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                teacherCards.forEach(card => {
+                    const cardStatus = card.dataset.status;
+                    if (status === 'all' || cardStatus === status) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Mobile filter checkboxes
+        const filterAvailable = document.getElementById('filterAvailable');
+        const filterUnavailable = document.getElementById('filterUnavailable');
+        
+        if (filterAvailable && filterUnavailable) {
+            function updateMobileFilter() {
+                teacherCards.forEach(card => {
+                    const cardStatus = card.dataset.status;
+                    const showAvailable = filterAvailable.checked && cardStatus === 'available';
+                    const showUnavailable = filterUnavailable.checked && cardStatus === 'unavailable';
+                    
+                    card.style.display = (showAvailable || showUnavailable) ? '' : 'none';
+                });
+                
+                teacherRows.forEach(row => {
+                    const rowStatus = row.dataset.status;
+                    const showAvailable = filterAvailable.checked && rowStatus === 'available';
+                    const showUnavailable = filterUnavailable.checked && rowStatus === 'unavailable';
+                    
+                    row.style.display = (showAvailable || showUnavailable) ? '' : 'none';
+                });
+            }
+            
+            filterAvailable.addEventListener('change', updateMobileFilter);
+            filterUnavailable.addEventListener('change', updateMobileFilter);
+        }
+        
+        // Row click for desktop
+        teacherRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Don't trigger if clicking on buttons or links
+                if (!e.target.closest('a') && !e.target.closest('button')) {
+                    const teacherId = this.dataset.teacherId;
+                    if (teacherId) {
+                        window.location.href = `/teachers/${teacherId}/`;
+                    }
+                }
+            });
+        });
+        
+        // Sort functionality
+        const sortFilter = document.getElementById('sortFilter');
+        if (sortFilter) {
+            sortFilter.addEventListener('change', function(e) {
+                const sortValue = e.target.value;
+                // Implement your sorting logic here
+                console.log('Sort by:', sortValue);
+            });
+        }
+        
+        // Toggle between table and card view based on screen size
+        function toggleView() {
+            const table = document.querySelector('.table-responsive');
+            const mobileView = document.getElementById('mobileTeacherView');
+            
+            if (window.innerWidth < 768) {
+                if (table) table.style.display = 'none';
+                if (mobileView) mobileView.style.display = 'block';
+            } else {
+                if (table) table.style.display = 'block';
+                if (mobileView) mobileView.style.display = 'none';
+            }
+        }
+        
+        // Initial toggle and on resize
+        toggleView();
+        window.addEventListener('resize', toggleView);
+    });
+</script>
 
 {% endblock %}

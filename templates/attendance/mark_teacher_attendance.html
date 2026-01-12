@@ -1,80 +1,80 @@
 {% extends 'base.html' %}
 {% block page_title %}Mark Teacher Attendance{% endblock %}
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-0">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="fw-bold mb-2">Mark Teacher Attendance</h1>
-            <p class="text-muted mb-0">Record attendance for teaching staff on {{ today }}</p>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2 px-2 px-sm-3">
+        <div class="flex-grow-1">
+            <h1 class="fw-bold mb-1 fs-5">Mark Teacher Attendance</h1>
+            <p class="text-muted mb-0 fs-6">Record for {{ today }}</p>
         </div>
-        <div>
-            <a href="{% url 'attendance:teacher_attendance_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> View Records
+        <div class="w-100 w-sm-auto">
+            <a href="{% url 'attendance:teacher_attendance_list' %}" class="btn btn-outline-secondary btn-sm d-block d-sm-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> <span>View Records</span>
             </a>
         </div>
     </div>
 
     <!-- Attendance Overview -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+    <div class="row row-cols-2 row-cols-sm-4 g-2 g-sm-3 mb-3 px-2 px-sm-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Teachers</h6>
-                            <h3 class="fw-bold mb-0">{{ teachers|length }}</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Total</h6>
+                            <h3 class="fw-bold mb-0 fs-5">{{ teachers|length }}</h3>
                         </div>
-                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-person-badge text-primary fs-4"></i>
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-person-badge text-primary fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Present</h6>
-                            <h3 class="fw-bold mb-0" id="presentCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Present</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="presentCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-check-circle text-success fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Absent</h6>
-                            <h3 class="fw-bold mb-0" id="absentCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Absent</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="absentCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-x-circle text-danger fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Late</h6>
-                            <h3 class="fw-bold mb-0" id="lateCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Late</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="lateCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-clock text-warning fs-4"></i>
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-clock text-warning fs-6"></i>
                         </div>
                     </div>
                 </div>
@@ -83,22 +83,22 @@
     </div>
 
     <!-- Attendance Form -->
-    <div class="card border-0 shadow-lg">
-        <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-calendar-check text-primary me-2"></i>
-                        Staff Attendance - {{ today|date:"F d, Y" }}
+    <div class="card border-0 shadow-sm rounded-0">
+        <div class="card-header bg-white border-0 py-2">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                <div class="flex-grow-1">
+                    <h5 class="mb-0 fw-bold fs-6">
+                        <i class="bi bi-calendar-check text-primary me-1"></i>
+                        Staff Attendance
                     </h5>
-                    <small class="text-muted">Select attendance status for each teacher</small>
+                    <small class="text-muted fs-7">{{ today|date:"M d, Y" }}</small>
                 </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="markAllPresent">
-                        <i class="bi bi-check-all me-1"></i> Mark All Present
+                <div class="d-flex gap-1 w-100 w-sm-auto">
+                    <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 flex-sm-grow-0" id="markAllPresent">
+                        <i class="bi bi-check-all me-1"></i> <span class="d-none d-sm-inline">All Present</span>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="resetAll">
-                        <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 flex-sm-grow-0" id="resetAll">
+                        <i class="bi bi-arrow-clockwise me-1"></i> <span class="d-none d-sm-inline">Reset</span>
                     </button>
                 </div>
             </div>
@@ -110,36 +110,36 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                        <thead class="table-light d-none d-sm-table-header-group">
                             <tr>
-                                <th class="ps-4" style="width: 50px;">#</th>
+                                <th class="ps-3" style="width: 40px;">#</th>
                                 <th>Teacher</th>
-                                <th>Subjects</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Quick Actions</th>
+                                <th class="d-none d-md-table-cell">Subjects</th>
+                                <th style="min-width: 100px;">Status</th>
+                                <th class="text-end pe-3" style="min-width: 110px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for teacher in teachers %}
                             <tr class="attendance-row" data-teacher-id="{{ teacher.id }}">
-                                <td class="ps-4">{{ forloop.counter }}</td>
-                                <td>
+                                <td class="ps-3 d-none d-sm-table-cell">{{ forloop.counter }}</td>
+                                <td data-label="Teacher">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                             style="width: 40px; height: 40px;">
+                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" 
+                                             style="width: 36px; height: 36px;">
                                             {{ teacher.user.first_name|slice:":1"|upper }}{{ teacher.user.last_name|slice:":1"|upper }}
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold">{{ teacher.user.get_full_name }}</h6>
-                                            <small class="text-muted">{{ teacher.teacher_id|default:"Staff" }}</small>
+                                        <div class="min-w-0">
+                                            <h6 class="mb-0 fw-bold fs-6 text-truncate">{{ teacher.user.get_full_name }}</h6>
+                                            <small class="text-muted fs-7 d-block text-truncate">{{ teacher.teacher_id|default:"Staff" }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell" data-label="Subjects">
                                     {% if teacher.subjects_taught.all %}
-                                        <div class="subject-tags">
+                                        <div class="subject-tags d-flex flex-wrap gap-1">
                                             {% for subject in teacher.subjects_taught.all|slice:":2" %}
-                                                <span class="badge bg-info me-1 mb-1">{{ subject.name|slice:":10" }}</span>
+                                                <span class="badge bg-info">{{ subject.name|slice:":8" }}</span>
                                             {% endfor %}
                                             {% if teacher.subjects_taught.all|length > 2 %}
                                                 <span class="badge bg-secondary">+{{ teacher.subjects_taught.all|length|add:"-2" }}</span>
@@ -149,41 +149,44 @@
                                         <span class="text-muted small">Not assigned</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     <div class="status-selector">
                                         <select name="teacher_{{ teacher.id }}" 
-                                                class="form-select status-select" 
-                                                style="min-width: 120px;">
+                                                class="form-select status-select py-1" 
+                                                style="min-width: 100px; font-size: 0.875rem;">
                                             <option value="PRESENT" selected>Present</option>
                                             <option value="ABSENT">Absent</option>
                                             <option value="LATE">Late</option>
                                         </select>
                                     </div>
                                 </td>
-                                <td class="text-end pe-4">
+                                <td class="text-end pe-3" data-label="Actions">
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-outline-success set-present" 
+                                        <button type="button" class="btn btn-outline-success set-present px-1 px-sm-2" 
                                                 data-id="{{ teacher.id }}">
-                                            <i class="bi bi-check"></i> Present
+                                            <i class="bi bi-check d-sm-none"></i>
+                                            <span class="d-none d-sm-inline">Present</span>
                                         </button>
-                                        <button type="button" class="btn btn-outline-danger set-absent" 
+                                        <button type="button" class="btn btn-outline-danger set-absent px-1 px-sm-2" 
                                                 data-id="{{ teacher.id }}">
-                                            <i class="bi bi-x"></i> Absent
+                                            <i class="bi bi-x d-sm-none"></i>
+                                            <span class="d-none d-sm-inline">Absent</span>
                                         </button>
-                                        <button type="button" class="btn btn-outline-warning set-late" 
+                                        <button type="button" class="btn btn-outline-warning set-late px-1 px-sm-2" 
                                                 data-id="{{ teacher.id }}">
-                                            <i class="bi bi-clock"></i> Late
+                                            <i class="bi bi-clock d-sm-none"></i>
+                                            <span class="d-none d-sm-inline">Late</span>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="py-4">
-                                        <i class="bi bi-person-badge display-1 text-muted"></i>
-                                        <h5 class="mt-3">No Teachers Found</h5>
-                                        <p class="text-muted">There are no teachers to mark attendance for.</p>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="py-2">
+                                        <i class="bi bi-person-badge display-6 text-muted"></i>
+                                        <h5 class="mt-2 fs-5">No Teachers Found</h5>
+                                        <p class="text-muted fs-6 mb-0">No teachers available</p>
                                     </div>
                                 </td>
                             </tr>
@@ -194,21 +197,20 @@
             </div>
             
             <!-- Form Footer -->
-            <div class="card-footer bg-white border-0 py-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
+            <div class="card-footer bg-white border-0 py-2">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                    <div class="order-2 order-sm-1">
+                        <span class="text-muted fs-7">
                             <span id="statsText">0 Present, 0 Absent, 0 Late</span>
                         </span>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="order-1 order-sm-2 d-flex gap-1 w-100 w-sm-auto">
                         <a href="{% url 'attendance:teacher_attendance_list' %}" 
-                           class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle me-1"></i> Cancel
+                           class="btn btn-outline-secondary btn-sm flex-grow-1 flex-sm-grow-0">
+                            Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="bi bi-save me-1"></i> Save Attendance
+                        <button type="submit" class="btn btn-primary btn-sm px-3 flex-grow-1 flex-sm-grow-0">
+                            <i class="bi bi-save me-1"></i> Save
                         </button>
                     </div>
                 </div>
@@ -218,221 +220,155 @@
 </div>
 
 <style>
-    .avatar {
-        font-weight: 600;
-        transition: transform 0.2s ease;
-    }
+    .min-w-0 { min-width: 0; }
+    .avatar { font-weight: 600; }
+    .subject-tags .badge { font-size: 0.75rem; padding: 0.2rem 0.4rem; }
     
-    .attendance-row:hover .avatar {
-        transform: scale(1.1);
-    }
-    
-    .table-hover tbody tr:hover {
-        background-color: rgba(67, 97, 238, 0.05);
-    }
-    
-    .status-select {
-        cursor: pointer;
-        padding: 0.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .status-select:focus {
-        border-color: #4361ee;
-        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-        transform: translateY(-1px);
-    }
-    
-    .btn-group .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-group .btn:hover {
-        transform: translateY(-1px);
-    }
-    
-    .subject-tags .badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
-    
-    .icon-wrapper {
-        transition: transform 0.3s ease;
-    }
-    
-    .card:hover .icon-wrapper {
-        transform: rotate(15deg);
-    }
-    
-    .attendance-row.table-success {
-        background-color: rgba(25, 135, 84, 0.05);
-    }
-    
-    .attendance-row.table-danger {
-        background-color: rgba(220, 53, 69, 0.05);
-    }
-    
-    .attendance-row.table-warning {
-        background-color: rgba(255, 193, 7, 0.05);
+    @media (max-width: 576px) {
+        .table-responsive { border: 0; }
+        .table thead { display: none; }
+        .table tbody tr { 
+            display: block; 
+            margin-bottom: 0.75rem; 
+            border: 1px solid #dee2e6; 
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+        }
+        .table tbody td { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0.5rem 0.25rem;
+            border: none;
+        }
+        .table tbody td:before { 
+            content: attr(data-label); 
+            font-weight: 600; 
+            margin-right: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .table tbody td[data-label]:before { content: attr(data-label); }
+        .table tbody td .status-select { width: 100%; max-width: 150px; }
+        .table tbody td .btn-group { width: 100%; justify-content: flex-end; }
+        .attendance-row td:nth-child(2):before { content: "Teacher"; }
+        .attendance-row td:nth-child(4):before { content: "Status"; }
+        .attendance-row td:nth-child(5):before { content: "Actions"; }
+        .btn-group .btn { padding: 0.2rem 0.4rem; font-size: 0.75rem; }
     }
     
     @media (max-width: 768px) {
-        .btn-group {
-            flex-direction: column;
-        }
-        
-        .btn-group .btn {
-            margin-bottom: 2px;
-            width: 100%;
-        }
-        
-        .table-responsive {
-            font-size: 0.875rem;
-        }
-        
-        .subject-tags .badge {
-            display: block;
-            margin-bottom: 2px;
-        }
+        .d-none.d-md-table-cell { display: none !important; }
+        .fs-6 { font-size: 0.875rem !important; }
+        .fs-7 { font-size: 0.75rem !important; }
+        .card-body { padding: 0.25rem !important; }
+        .btn { padding: 0.375rem 0.5rem; }
+    }
+    
+    @media (min-width: 577px) and (max-width: 767px) {
+        .btn-group .btn span { display: none; }
+        .btn-group .btn i { margin: 0; }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+        .d-none.d-md-table-cell { display: table-cell !important; }
+        .subject-tags .badge { margin-bottom: 0.1rem; }
     }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeAttendanceForm();
-    });
-
-    function initializeAttendanceForm() {
-        const statusSelects = document.querySelectorAll('.status-select');
-        const markAllBtn = document.getElementById('markAllPresent');
-        const resetBtn = document.getElementById('resetAll');
-        
-        // Update stats on load
-        updateStats();
-        
-        // Add change event to all select elements
-        statusSelects.forEach(select => {
-            select.addEventListener('change', function() {
-                updateStats();
-                const row = this.closest('.attendance-row');
-                updateRowHighlight(row, this.value);
-            });
-            
-            // Initialize row highlight
-            const row = select.closest('.attendance-row');
-            updateRowHighlight(row, select.value);
-        });
-        
-        // Mark all present button
-        if (markAllBtn) {
-            markAllBtn.addEventListener('click', function() {
-                statusSelects.forEach(select => {
-                    select.value = 'PRESENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'PRESENT');
-                });
-                updateStats();
-                showToast('All teachers marked as present', 'success');
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile table transformation
+    function setupMobileTable() {
+        if (window.innerWidth < 576) {
+            document.querySelectorAll('.attendance-row td').forEach((td, index) => {
+                const labels = ['#', 'Teacher', 'Subjects', 'Status', 'Actions'];
+                if (index >= 1 && index <= 4) {
+                    td.setAttribute('data-label', labels[index]);
+                }
             });
         }
-        
-        // Reset all button
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                statusSelects.forEach(select => {
-                    select.value = 'PRESENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'PRESENT');
-                });
-                updateStats();
-                showToast('Attendance reset to default', 'info');
-            });
-        }
-        
-        // Quick action buttons
-        document.querySelectorAll('.set-present').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const teacherId = this.getAttribute('data-id');
-                const select = document.querySelector(`[name="teacher_${teacherId}"]`);
-                if (select) {
-                    select.value = 'PRESENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'PRESENT');
-                    updateStats();
-                }
-            });
-        });
-        
-        document.querySelectorAll('.set-absent').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const teacherId = this.getAttribute('data-id');
-                const select = document.querySelector(`[name="teacher_${teacherId}"]`);
-                if (select) {
-                    select.value = 'ABSENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'ABSENT');
-                    updateStats();
-                }
-            });
-        });
-        
-        document.querySelectorAll('.set-late').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const teacherId = this.getAttribute('data-id');
-                const select = document.querySelector(`[name="teacher_${teacherId}"]`);
-                if (select) {
-                    select.value = 'LATE';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'LATE');
-                    updateStats();
-                }
-            });
-        });
-        
-        // Form submission
-        const form = document.getElementById('attendanceForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                
-                // Show loading state
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
-                submitBtn.disabled = true;
-                
-                // Simulate save delay
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }, 2000);
-            });
-        }
-        
-        // Double-click to toggle status
-        document.querySelectorAll('.attendance-row').forEach(row => {
-            row.addEventListener('dblclick', function() {
-                const select = this.querySelector('.status-select');
-                if (select) {
-                    if (select.value === 'PRESENT') {
-                        select.value = 'ABSENT';
-                    } else if (select.value === 'ABSENT') {
-                        select.value = 'LATE';
-                    } else {
-                        select.value = 'PRESENT';
-                    }
-                    select.dispatchEvent(new Event('change'));
-                }
-            });
-        });
     }
-
+    
+    setupMobileTable();
+    window.addEventListener('resize', setupMobileTable);
+    
+    // Initialize counters
+    updateStats();
+    
+    // Status change handlers
+    document.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            updateRowHighlight(this);
+            updateStats();
+        });
+        updateRowHighlight(select);
+    });
+    
+    // Quick actions
+    document.querySelectorAll('.set-present').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const select = document.querySelector(`[name="teacher_${id}"]`);
+            if (select) {
+                select.value = 'PRESENT';
+                updateRowHighlight(select);
+                updateStats();
+            }
+        });
+    });
+    
+    document.querySelectorAll('.set-absent').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const select = document.querySelector(`[name="teacher_${id}"]`);
+            if (select) {
+                select.value = 'ABSENT';
+                updateRowHighlight(select);
+                updateStats();
+            }
+        });
+    });
+    
+    document.querySelectorAll('.set-late').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const select = document.querySelector(`[name="teacher_${id}"]`);
+            if (select) {
+                select.value = 'LATE';
+                updateRowHighlight(select);
+                updateStats();
+            }
+        });
+    });
+    
+    // Bulk actions
+    document.getElementById('markAllPresent')?.addEventListener('click', function() {
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.value = 'PRESENT';
+            updateRowHighlight(select);
+        });
+        updateStats();
+    });
+    
+    document.getElementById('resetAll')?.addEventListener('click', function() {
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.value = 'PRESENT';
+            updateRowHighlight(select);
+        });
+        updateStats();
+    });
+    
+    // Form submission
+    document.getElementById('attendanceForm')?.addEventListener('submit', function(e) {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving';
+        btn.disabled = true;
+    });
+    
     function updateStats() {
-        const statusSelects = document.querySelectorAll('.status-select');
         let present = 0, absent = 0, late = 0;
         
-        statusSelects.forEach(select => {
+        document.querySelectorAll('.status-select').forEach(select => {
             switch(select.value) {
                 case 'PRESENT': present++; break;
                 case 'ABSENT': absent++; break;
@@ -440,64 +376,34 @@
             }
         });
         
-        // Update count elements
         document.getElementById('presentCount').textContent = present;
         document.getElementById('absentCount').textContent = absent;
         document.getElementById('lateCount').textContent = late;
         
-        // Update stats text
         const statsText = document.getElementById('statsText');
         if (statsText) {
             const total = present + absent + late;
-            const presentPercentage = total > 0 ? Math.round((present / total) * 100) : 0;
-            statsText.textContent = `${present} Present (${presentPercentage}%), ${absent} Absent, ${late} Late`;
+            const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+            if (window.innerWidth < 576) {
+                statsText.textContent = `${present}P, ${absent}A, ${late}L`;
+            } else {
+                statsText.textContent = `${present} Present (${percentage}%), ${absent} Absent, ${late} Late`;
+            }
         }
     }
-
-    function updateRowHighlight(row, status) {
+    
+    function updateRowHighlight(select) {
+        const row = select.closest('.attendance-row');
         if (!row) return;
         
-        // Remove existing classes
         row.classList.remove('table-success', 'table-danger', 'table-warning');
         
-        // Add appropriate class
-        switch(status) {
-            case 'PRESENT':
-                row.classList.add('table-success');
-                break;
-            case 'ABSENT':
-                row.classList.add('table-danger');
-                break;
-            case 'LATE':
-                row.classList.add('table-warning');
-                break;
+        switch(select.value) {
+            case 'PRESENT': row.classList.add('table-success'); break;
+            case 'ABSENT': row.classList.add('table-danger'); break;
+            case 'LATE': row.classList.add('table-warning'); break;
         }
     }
-
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed`;
-        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
-        toast.setAttribute('role', 'alert');
-        
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-info-circle'} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', function() {
-            document.body.removeChild(toast);
-        });
-    }
+});
 </script>
 {% endblock %}

@@ -1,80 +1,80 @@
 {% extends 'base.html' %}
 {% block page_title %}Mark Student Attendance{% endblock %}
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-0 px-sm-2">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="fw-bold mb-2">Mark Student Attendance</h1>
-            <p class="text-muted mb-0">Record attendance for {{ today }}</p>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 gap-2">
+        <div class="flex-grow-1">
+            <h1 class="fw-bold mb-1 fs-4 fs-md-3">Mark Student Attendance</h1>
+            <p class="text-muted mb-0 fs-6">{{ today }}</p>
         </div>
-        <div>
-            <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> View Records
+        <div class="w-100 w-sm-auto">
+            <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary d-block d-sm-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> <span>View Records</span>
             </a>
         </div>
     </div>
 
     <!-- Stats Overview -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+    <div class="row row-cols-2 row-cols-sm-4 g-2 g-sm-3 mb-3 mb-sm-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2 p-sm-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Students</h6>
-                            <h3 class="fw-bold mb-0">{{ students|length }}</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Total</h6>
+                            <h3 class="fw-bold mb-0 fs-5">{{ students|length }}</h3>
                         </div>
-                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-people-fill text-primary fs-4"></i>
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-1 p-sm-2">
+                            <i class="bi bi-people-fill text-primary fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2 p-sm-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Present</h6>
-                            <h3 class="fw-bold mb-0" id="presentCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Present</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="presentCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-1 p-sm-2">
+                            <i class="bi bi-check-circle text-success fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2 p-sm-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Absent</h6>
-                            <h3 class="fw-bold mb-0" id="absentCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Absent</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="absentCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-1 p-sm-2">
+                            <i class="bi bi-x-circle text-danger fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2 p-sm-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Late</h6>
-                            <h3 class="fw-bold mb-0" id="lateCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Late</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="lateCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-clock text-warning fs-4"></i>
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-1 p-sm-2">
+                            <i class="bi bi-clock text-warning fs-6"></i>
                         </div>
                     </div>
                 </div>
@@ -83,22 +83,22 @@
     </div>
 
     <!-- Attendance Form -->
-    <div class="card border-0 shadow-lg">
-        <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-calendar-check text-primary me-2"></i>
-                        Attendance for {{ today|date:"F d, Y" }}
+    <div class="card border-0 shadow-lg overflow-hidden">
+        <div class="card-header bg-white border-0 py-2 py-sm-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                <div class="flex-grow-1">
+                    <h5 class="mb-0 fw-bold fs-5">
+                        <i class="bi bi-calendar-check text-primary me-1 me-sm-2"></i>
+                        <span>Attendance for {{ today|date:"F d, Y" }}</span>
                     </h5>
-                    <small class="text-muted">Select attendance status for each student</small>
+                    <small class="text-muted fs-7">Select attendance status for each student</small>
                 </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="markAllPresent">
-                        <i class="bi bi-check-all me-1"></i> Mark All Present
+                <div class="d-flex flex-wrap gap-1 w-100 w-sm-auto mt-1 mt-sm-0">
+                    <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 flex-sm-grow-0" id="markAllPresent">
+                        <i class="bi bi-check-all me-1"></i> <span class="d-none d-sm-inline">Mark All</span>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="resetAll">
-                        <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 flex-sm-grow-0" id="resetAll">
+                        <i class="bi bi-arrow-clockwise me-1"></i> <span class="d-none d-sm-inline">Reset</span>
                     </button>
                 </div>
             </div>
@@ -112,67 +112,70 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-4" style="width: 50px;">#</th>
+                                <th class="ps-2 ps-sm-3" style="width: 40px;">#</th>
                                 <th>Student</th>
-                                <th>Class</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Quick Actions</th>
+                                <th class="d-none d-md-table-cell">Class</th>
+                                <th style="min-width: 100px;">Status</th>
+                                <th class="text-end pe-2 pe-sm-3" style="min-width: 120px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for student in students %}
                             <tr class="attendance-row" data-student-id="{{ student.id }}">
-                                <td class="ps-4">{{ forloop.counter }}</td>
+                                <td class="ps-2 ps-sm-3">{{ forloop.counter }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                             style="width: 40px; height: 40px;">
+                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2 me-sm-3 flex-shrink-0" 
+                                             style="width: 36px; height: 36px;">
                                             {{ student.full_name|slice:":1"|upper }}
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold">{{ student.full_name }}</h6>
-                                            <small class="text-muted">{{ student.registration_number }}</small>
+                                        <div class="min-w-0">
+                                            <h6 class="mb-0 fw-bold fs-6 text-truncate">{{ student.full_name }}</h6>
+                                            <small class="text-muted fs-7 d-block text-truncate">{{ student.registration_number }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell">
                                     <span class="badge bg-secondary">{{ student.classroom.name|default:"N/A" }}</span>
                                 </td>
                                 <td>
                                     <div class="status-selector">
                                         <select name="student_{{ student.id }}" 
-                                                class="form-select status-select" 
-                                                style="min-width: 120px;">
+                                                class="form-select status-select py-1 py-sm-2" 
+                                                style="min-width: 100px; font-size: 0.875rem;">
                                             <option value="PRESENT" selected>Present</option>
                                             <option value="ABSENT">Absent</option>
                                             <option value="LATE">Late</option>
                                         </select>
                                     </div>
                                 </td>
-                                <td class="text-end pe-4">
+                                <td class="text-end pe-2 pe-sm-3">
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-outline-success set-present" 
-                                                data-id="{{ student.id }}">
-                                            <i class="bi bi-check"></i> Present
+                                        <button type="button" class="btn btn-outline-success set-present px-1 px-sm-2" 
+                                                data-id="{{ student.id }}" title="Mark Present">
+                                            <i class="bi bi-check d-sm-none"></i>
+                                            <span class="d-none d-sm-inline">Present</span>
                                         </button>
-                                        <button type="button" class="btn btn-outline-danger set-absent" 
-                                                data-id="{{ student.id }}">
-                                            <i class="bi bi-x"></i> Absent
+                                        <button type="button" class="btn btn-outline-danger set-absent px-1 px-sm-2" 
+                                                data-id="{{ student.id }}" title="Mark Absent">
+                                            <i class="bi bi-x d-sm-none"></i>
+                                            <span class="d-none d-sm-inline">Absent</span>
                                         </button>
-                                        <button type="button" class="btn btn-outline-warning set-late" 
-                                                data-id="{{ student.id }}">
-                                            <i class="bi bi-clock"></i> Late
+                                        <button type="button" class="btn btn-outline-warning set-late px-1 px-sm-2" 
+                                                data-id="{{ student.id }}" title="Mark Late">
+                                            <i class="bi bi-clock d-sm-none"></i>
+                                            <span class="d-none d-sm-inline">Late</span>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="py-4">
-                                        <i class="bi bi-people display-1 text-muted"></i>
-                                        <h5 class="mt-3">No Students Found</h5>
-                                        <p class="text-muted">There are no students to mark attendance for.</p>
+                                <td colspan="5" class="text-center py-4 py-sm-5">
+                                    <div class="py-2 py-sm-4">
+                                        <i class="bi bi-people display-6 text-muted"></i>
+                                        <h5 class="mt-2 mt-sm-3 fs-5">No Students Found</h5>
+                                        <p class="text-muted fs-6 mb-0">There are no students to mark attendance for.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -183,18 +186,20 @@
             </div>
             
             <!-- Form Footer -->
-            <div class="card-footer bg-white border-0 py-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted">
+            <div class="card-footer bg-white border-0 py-2 py-sm-3">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                    <div class="order-2 order-sm-1 mt-1 mt-sm-0">
+                        <span class="text-muted fs-7">
                             <span id="statsText">0 Present, 0 Absent, 0 Late</span>
                         </span>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="order-1 order-sm-2 d-flex flex-wrap gap-1 w-100 w-sm-auto">
                         <a href="{% url 'attendance:student_attendance_list' %}" 
-                           class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="bi bi-save me-1"></i> Save Attendance
+                           class="btn btn-outline-secondary flex-grow-1 flex-sm-grow-0">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-3 px-sm-4 flex-grow-1 flex-sm-grow-0">
+                            <i class="bi bi-save me-1"></i> Save
                         </button>
                     </div>
                 </div>
@@ -204,182 +209,142 @@
 </div>
 
 <style>
-    .avatar {
-        font-weight: 600;
-        transition: transform 0.2s ease;
-    }
+    .min-w-0 { min-width: 0; }
+    .avatar { font-weight: 600; }
+    .table-hover tbody tr:hover { background-color: rgba(13, 110, 253, 0.05); }
+    .status-select { cursor: pointer; transition: all 0.2s; }
+    .btn-group .btn { border-radius: 0.25rem !important; }
     
-    .attendance-row:hover .avatar {
-        transform: scale(1.1);
-    }
+    .status-select option[value="PRESENT"] { color: #198754; }
+    .status-select option[value="ABSENT"] { color: #dc3545; }
+    .status-select option[value="LATE"] { color: #fd7e14; }
     
-    .table-hover tbody tr:hover {
-        background-color: rgba(67, 97, 238, 0.05);
-    }
-    
-    .status-select {
-        cursor: pointer;
-        padding: 0.5rem;
-    }
-    
-    .btn-group .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .status-select option[value="PRESENT"] {
-        color: #198754;
-    }
-    
-    .status-select option[value="ABSENT"] {
-        color: #dc3545;
-    }
-    
-    .status-select option[value="LATE"] {
-        color: #fd7e14;
-    }
-    
-    .status-select:focus {
-        border-color: #4361ee;
-        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-    }
-    
-    .icon-wrapper {
-        transition: transform 0.3s ease;
-    }
-    
-    .card:hover .icon-wrapper {
-        transform: rotate(15deg);
+    @media (max-width: 576px) {
+        .btn-group { flex-wrap: nowrap; }
+        .btn-group .btn { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+        .table-responsive { border: 0; }
+        .table thead { display: none; }
+        .table tbody tr { display: block; margin-bottom: 1rem; border: 1px solid #dee2e6; border-radius: 0.375rem; }
+        .table tbody td { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: none; }
+        .table tbody td:before { content: attr(data-label); font-weight: 600; margin-right: 1rem; }
+        .table tbody td[data-label]:before { content: attr(data-label); }
+        .table tbody td:first-child { border-top-left-radius: 0.375rem; border-top-right-radius: 0.375rem; }
+        .table tbody td:last-child { border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; }
+        .attendance-row td:nth-child(1):before { content: "#"; }
+        .attendance-row td:nth-child(2):before { content: "Student"; }
+        .attendance-row td:nth-child(3):before { content: "Class"; }
+        .attendance-row td:nth-child(4):before { content: "Status"; }
+        .attendance-row td:nth-child(5):before { content: "Actions"; }
+        .table tbody td .status-select { width: 100%; max-width: 150px; }
+        .table tbody td .btn-group { width: 100%; justify-content: flex-end; }
     }
     
     @media (max-width: 768px) {
-        .btn-group {
-            flex-direction: column;
-        }
-        
-        .btn-group .btn {
-            margin-bottom: 2px;
-        }
-        
-        .table-responsive {
-            font-size: 0.875rem;
-        }
+        .card-body { padding: 0.5rem !important; }
+        .btn { padding: 0.375rem 0.75rem; font-size: 0.875rem; }
+        .fs-6 { font-size: 0.875rem !important; }
+        .fs-7 { font-size: 0.75rem !important; }
+    }
+    
+    @media (max-width: 992px) {
+        .d-md-table-cell { display: table-cell !important; }
     }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeAttendanceForm();
-    });
-
-    function initializeAttendanceForm() {
-        const statusSelects = document.querySelectorAll('.status-select');
-        const markAllBtn = document.getElementById('markAllPresent');
-        const resetBtn = document.getElementById('resetAll');
-        
-        // Update stats on load
-        updateStats();
-        
-        // Add change event to all select elements
-        statusSelects.forEach(select => {
-            select.addEventListener('change', updateStats);
-            
-            // Highlight row based on selection
-            select.addEventListener('change', function() {
-                const row = this.closest('.attendance-row');
-                updateRowHighlight(row, this.value);
-            });
-            
-            // Initialize row highlight
-            const row = select.closest('.attendance-row');
-            updateRowHighlight(row, select.value);
-        });
-        
-        // Mark all present button
-        if (markAllBtn) {
-            markAllBtn.addEventListener('click', function() {
-                statusSelects.forEach(select => {
-                    select.value = 'PRESENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'PRESENT');
-                });
-                updateStats();
-            });
-        }
-        
-        // Reset all button
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                statusSelects.forEach(select => {
-                    select.value = 'PRESENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'PRESENT');
-                });
-                updateStats();
-            });
-        }
-        
-        // Quick action buttons
-        document.querySelectorAll('.set-present').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const studentId = this.getAttribute('data-id');
-                const select = document.querySelector(`[name="student_${studentId}"]`);
-                if (select) {
-                    select.value = 'PRESENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'PRESENT');
-                    updateStats();
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile table row transformation
+    function transformTableForMobile() {
+        if (window.innerWidth < 576) {
+            document.querySelectorAll('.attendance-row td').forEach((td, index) => {
+                const labels = ['#', 'Student', 'Class', 'Status', 'Actions'];
+                if (labels[index]) {
+                    td.setAttribute('data-label', labels[index]);
                 }
-            });
-        });
-        
-        document.querySelectorAll('.set-absent').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const studentId = this.getAttribute('data-id');
-                const select = document.querySelector(`[name="student_${studentId}"]`);
-                if (select) {
-                    select.value = 'ABSENT';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'ABSENT');
-                    updateStats();
-                }
-            });
-        });
-        
-        document.querySelectorAll('.set-late').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const studentId = this.getAttribute('data-id');
-                const select = document.querySelector(`[name="student_${studentId}"]`);
-                if (select) {
-                    select.value = 'LATE';
-                    const row = select.closest('.attendance-row');
-                    updateRowHighlight(row, 'LATE');
-                    updateStats();
-                }
-            });
-        });
-        
-        // Form submission
-        const form = document.getElementById('attendanceForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                
-                // Show loading state
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
-                submitBtn.disabled = true;
-                
-                // Allow form submission to proceed
             });
         }
     }
 
+    transformTableForMobile();
+    window.addEventListener('resize', transformTableForMobile);
+
+    // Initialize counters
+    updateStats();
+    
+    // Event listeners for status changes
+    document.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            updateRowHighlight(this);
+            updateStats();
+        });
+        updateRowHighlight(select);
+    });
+
+    // Quick action buttons
+    document.querySelectorAll('.set-present').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const select = document.querySelector(`[name="student_${id}"]`);
+            if (select) {
+                select.value = 'PRESENT';
+                updateRowHighlight(select);
+                updateStats();
+            }
+        });
+    });
+
+    document.querySelectorAll('.set-absent').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const select = document.querySelector(`[name="student_${id}"]`);
+            if (select) {
+                select.value = 'ABSENT';
+                updateRowHighlight(select);
+                updateStats();
+            }
+        });
+    });
+
+    document.querySelectorAll('.set-late').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const select = document.querySelector(`[name="student_${id}"]`);
+            if (select) {
+                select.value = 'LATE';
+                updateRowHighlight(select);
+                updateStats();
+            }
+        });
+    });
+
+    // Bulk actions
+    document.getElementById('markAllPresent')?.addEventListener('click', function() {
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.value = 'PRESENT';
+            updateRowHighlight(select);
+        });
+        updateStats();
+    });
+
+    document.getElementById('resetAll')?.addEventListener('click', function() {
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.value = 'PRESENT';
+            updateRowHighlight(select);
+        });
+        updateStats();
+    });
+
+    // Form submission
+    document.getElementById('attendanceForm')?.addEventListener('submit', function(e) {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving';
+        btn.disabled = true;
+    });
+
     function updateStats() {
-        const statusSelects = document.querySelectorAll('.status-select');
         let present = 0, absent = 0, late = 0;
         
-        statusSelects.forEach(select => {
+        document.querySelectorAll('.status-select').forEach(select => {
             switch(select.value) {
                 case 'PRESENT': present++; break;
                 case 'ABSENT': absent++; break;
@@ -387,66 +352,28 @@
             }
         });
         
-        // Update count elements
         document.getElementById('presentCount').textContent = present;
         document.getElementById('absentCount').textContent = absent;
         document.getElementById('lateCount').textContent = late;
         
-        // Update stats text
         const statsText = document.getElementById('statsText');
         if (statsText) {
             statsText.textContent = `${present} Present, ${absent} Absent, ${late} Late`;
         }
     }
 
-    function updateRowHighlight(row, status) {
+    function updateRowHighlight(select) {
+        const row = select.closest('.attendance-row');
         if (!row) return;
         
-        // Remove existing classes
         row.classList.remove('table-success', 'table-danger', 'table-warning');
         
-        // Add appropriate class
-        switch(status) {
-            case 'PRESENT':
-                row.classList.add('table-success');
-                break;
-            case 'ABSENT':
-                row.classList.add('table-danger');
-                break;
-            case 'LATE':
-                row.classList.add('table-warning');
-                break;
+        switch(select.value) {
+            case 'PRESENT': row.classList.add('table-success'); break;
+            case 'ABSENT': row.classList.add('table-danger'); break;
+            case 'LATE': row.classList.add('table-warning'); break;
         }
     }
-
-    // Auto-save functionality (optional)
-    let autoSaveTimeout;
-    const form = document.getElementById('attendanceForm');
-    
-    if (form) {
-        form.addEventListener('change', function() {
-            clearTimeout(autoSaveTimeout);
-            
-            // Show saving indicator
-            const indicator = document.createElement('div');
-            indicator.className = 'position-fixed bottom-0 end-0 m-3';
-            indicator.innerHTML = `
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <span>Changes saved locally</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            
-            document.body.appendChild(indicator);
-            
-            // Auto-dismiss after 3 seconds
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.remove();
-                }
-            }, 3000);
-        });
-    }
+});
 </script>
 {% endblock %}

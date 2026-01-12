@@ -5,129 +5,287 @@
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+<div class="container-fluid px-0 px-md-2">
+    <div class="row">
+        <div class="col-12">
+            <!-- Mobile Header -->
+            <div class="d-md-none mb-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{{ page_title }}</h5>
-                    <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-light">
-                        <i class="bi bi-arrow-left me-1"></i> Back
+                    <div>
+                        <h1 class="h4 fw-bold mb-1">{{ page_title }}</h1>
+                        <nav aria-label="breadcrumb" class="d-none">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'announcement_list' %}">Announcements</a></li>
+                                <li class="breadcrumb-item active">{{ page_title }}</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i>
+                        <span class="d-none d-sm-inline">Back</span>
                     </a>
                 </div>
             </div>
-            <div class="card-body">
-                <form method="post" novalidate id="announcementForm">
-                    {% csrf_token %}
-                    
-                    <!-- Title Field -->
-                    <div class="mb-4">
-                        <label for="id_title" class="form-label fw-bold">
-                            Title <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" 
-                               name="title" 
-                               id="id_title" 
-                               class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}"
-                               value="{{ form.title.value|default:'' }}"
-                               placeholder="Enter announcement title"
-                               required
-                               maxlength="200">
-                        {% if form.title.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.title.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Maximum 200 characters. Current: <span id="titleCharCount">0</span>/200
-                        </div>
+
+            <!-- Main Form Card -->
+            <div class="card shadow border-0">
+                <!-- Desktop Header -->
+                <div class="card-header bg-primary text-white d-none d-md-block">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ page_title }}</h5>
+                        <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-light">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
                     </div>
-                    
-                    <!-- Message Field -->
-                    <div class="mb-4">
-                        <label for="id_message" class="form-label fw-bold">
-                            Message <span class="text-danger">*</span>
-                        </label>
-                        <textarea name="message" 
-                                  id="id_message" 
-                                  class="form-control {% if form.message.errors %}is-invalid{% endif %}"
-                                  rows="8"
-                                  placeholder="Enter announcement message"
-                                  required>{{ form.message.value|default:'' }}</textarea>
-                        {% if form.message.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.message.errors %}
-                            {{ error }}
-                            {% endfor %}
+                </div>
+                
+                <!-- Mobile Header inside card -->
+                <div class="card-header bg-primary text-white d-md-none py-3">
+                    <h5 class="mb-0 text-center">{{ page_title }}</h5>
+                </div>
+                
+                <div class="card-body p-3 p-md-4">
+                    <form method="post" novalidate id="announcementForm">
+                        {% csrf_token %}
+                        
+                        <!-- Title Field -->
+                        <div class="mb-4">
+                            <label for="id_title" class="form-label fw-bold">
+                                Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="title" 
+                                   id="id_title" 
+                                   class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+                                   value="{{ form.title.value|default:'' }}"
+                                   placeholder="Enter announcement title"
+                                   required
+                                   maxlength="200"
+                                   autocomplete="off">
+                            {% if form.title.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.title.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text mt-1">
+                                <span class="d-inline-block me-3">Maximum 200 characters</span>
+                                <span class="d-inline-block">
+                                    Current: <span id="titleCharCount" class="fw-bold">0</span>/200
+                                </span>
+                            </div>
                         </div>
-                        {% endif %}
-                        <div class="form-text">
-                            You can use basic formatting. Maximum 5000 characters. Current: <span id="messageCharCount">0</span>/5000
+                        
+                        <!-- Message Field -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="id_message" class="form-label fw-bold mb-0">
+                                    Message <span class="text-danger">*</span>
+                                </label>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                            onclick="formatText('bold')" title="Bold">
+                                        <i class="bi bi-type-bold"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                            onclick="formatText('italic')" title="Italic">
+                                        <i class="bi bi-type-italic"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea name="message" 
+                                      id="id_message" 
+                                      class="form-control {% if form.message.errors %}is-invalid{% endif %}"
+                                      rows="6"
+                                      placeholder="Enter announcement message..."
+                                      required
+                                      style="min-height: 200px;">{{ form.message.value|default:'' }}</textarea>
+                            {% if form.message.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.message.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text mt-1">
+                                <span class="d-inline-block me-3">Maximum 5000 characters</span>
+                                <span class="d-inline-block">
+                                    Current: <span id="messageCharCount" class="fw-bold">0</span>/5000
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Preview Section -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">Live Preview</h6>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshPreview()">
-                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                        
+                        <!-- Target Audience (Optional) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Target Audience (Optional)</label>
+                            <div class="row row-cols-2 row-cols-md-4 g-2">
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="targetAll">
+                                        <label class="form-check-label" for="targetAll">
+                                            All Users
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="targetStudents">
+                                        <label class="form-check-label" for="targetStudents">
+                                            Students
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="targetTeachers">
+                                        <label class="form-check-label" for="targetTeachers">
+                                            Teachers
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="targetParents">
+                                        <label class="form-check-label" for="targetParents">
+                                            Parents
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Toggle -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" 
+                                    onclick="togglePreview()" id="previewToggle">
+                                <i class="bi bi-eye me-1"></i> Show Preview
                             </button>
                         </div>
-                        <div class="announcement-preview p-3 border rounded bg-light">
-                            <h4 id="previewTitle" class="text-primary">Announcement Title</h4>
-                            <hr>
-                            <p id="previewMessage" class="mb-2">Announcement message will appear here...</p>
-                            <div class="text-end">
-                                <small class="text-muted">
+                        
+                        <!-- Preview Section (Collapsible) -->
+                        <div class="mb-4 d-none" id="previewSection">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="bi bi-card-text text-primary me-2"></i>
+                                    Live Preview
+                                </h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                            onclick="refreshPreview()" title="Refresh Preview">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                        <span class="d-none d-md-inline"> Refresh</span>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            onclick="togglePreview()" title="Close Preview">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="announcement-preview p-3 border rounded bg-white shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h4 id="previewTitle" class="text-primary mb-0 fs-5 fs-md-4">Announcement Title</h4>
+                                    <span class="badge bg-primary">New</span>
+                                </div>
+                                <small class="text-muted d-block mb-3">
+                                    <i class="bi bi-calendar me-1"></i>
                                     Posted on <span id="previewDate">{% now "F d, Y" %}</span>
                                 </small>
+                                <hr class="my-2">
+                                <div id="previewMessage" class="mb-3 announcement-content">
+                                    <p class="mb-2">Announcement message will appear here...</p>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">
+                                        <i class="bi bi-person-circle me-1"></i>
+                                        Posted by: <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4 pt-3 border-top">
+                            <div class="order-2 order-md-1 d-grid d-md-block">
+                                <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-x-circle me-2"></i> Cancel
+                                </a>
+                            </div>
+                            <div class="order-1 order-md-2 d-grid gap-2 d-md-flex">
+                                <button type="button" class="btn btn-outline-warning" onclick="clearForm()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i> Clear
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    {% if announcement %}
+                                    <i class="bi bi-check-circle me-2"></i> Update Announcement
+                                    {% else %}
+                                    <i class="bi bi-plus-circle me-2"></i> Create Announcement
+                                    {% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Tips Card -->
+            <div class="card shadow border-0 mt-3">
+                <div class="card-header bg-light border-0 py-3">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightbulb text-warning me-2"></i>
+                        Tips for Effective Announcements
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-2">
+                        <div class="col">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-check-circle text-success mt-1 me-2 fs-5"></i>
+                                <div>
+                                    <small class="fw-bold d-block">Clear Titles</small>
+                                    <small class="text-muted">Keep titles concise</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-check-circle text-success mt-1 me-2 fs-5"></i>
+                                <div>
+                                    <small class="fw-bold d-block">Use Bullets</small>
+                                    <small class="text-muted">For multiple items</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-check-circle text-success mt-1 me-2 fs-5"></i>
+                                <div>
+                                    <small class="fw-bold d-block">Include Dates</small>
+                                    <small class="text-muted">Important deadlines</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-check-circle text-success mt-1 me-2 fs-5"></i>
+                                <div>
+                                    <small class="fw-bold d-block">Professional Tone</small>
+                                    <small class="text-muted">Friendly but formal</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-check-circle text-success mt-1 me-2 fs-5"></i>
+                                <div>
+                                    <small class="fw-bold d-block">Proofread</small>
+                                    <small class="text-muted">Check before sending</small>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Form Actions -->
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                        <div>
-                            <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle me-2"></i> Cancel
-                            </a>
-                        </div>
-                        <div>
-                            <button type="button" class="btn btn-outline-warning me-2" onclick="clearForm()">
-                                <i class="bi bi-arrow-clockwise me-2"></i> Clear
-                            </button>
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                {% if announcement %}
-                                <i class="bi bi-check-circle me-2"></i> Update Announcement
-                                {% else %}
-                                <i class="bi bi-plus-circle me-2"></i> Create Announcement
-                                {% endif %}
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Tips Card -->
-        <div class="card shadow mt-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-lightbulb text-warning me-2"></i>
-                    Tips for Effective Announcements
-                </h6>
-            </div>
-            <div class="card-body">
-                <ul class="mb-0">
-                    <li>Keep titles clear and concise</li>
-                    <li>Use bullet points for multiple items</li>
-                    <li>Include important dates and deadlines</li>
-                    <li>Use a friendly but professional tone</li>
-                    <li>Proofread before publishing</li>
-                </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -145,72 +303,130 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewMessage = document.getElementById('previewMessage');
     const form = document.getElementById('announcementForm');
     const submitBtn = document.getElementById('submitBtn');
+    const previewToggle = document.getElementById('previewToggle');
     
     // Initialize character counts
-    if (titleInput && titleCharCount) {
-        titleCharCount.textContent = titleInput.value.length;
-    }
-    if (messageInput && messageCharCount) {
-        messageCharCount.textContent = messageInput.value.length;
-    }
-    
-    // Update character counts and preview in real-time
-    function updateCountsAndPreview() {
-        // Update character counts
+    function initCharCounts() {
         if (titleInput && titleCharCount) {
             titleCharCount.textContent = titleInput.value.length;
-            if (titleInput.value.length >= 190) {
-                titleCharCount.classList.add('text-warning');
-                if (titleInput.value.length >= 200) {
-                    titleCharCount.classList.remove('text-warning');
-                    titleCharCount.classList.add('text-danger');
-                }
-            } else {
-                titleCharCount.classList.remove('text-warning', 'text-danger');
-            }
+            updateCharCountStyle(titleInput, titleCharCount, 200);
         }
-        
         if (messageInput && messageCharCount) {
             messageCharCount.textContent = messageInput.value.length;
-            if (messageInput.value.length >= 4500) {
-                messageCharCount.classList.add('text-warning');
-                if (messageInput.value.length >= 5000) {
-                    messageCharCount.classList.remove('text-warning');
-                    messageCharCount.classList.add('text-danger');
-                }
-            } else {
-                messageCharCount.classList.remove('text-warning', 'text-danger');
-            }
+            updateCharCountStyle(messageInput, messageCharCount, 5000);
+        }
+    }
+    
+    // Update character count style
+    function updateCharCountStyle(inputElement, countElement, maxLength) {
+        const length = inputElement.value.length;
+        const percentage = (length / maxLength) * 100;
+        
+        countElement.textContent = length;
+        countElement.className = 'fw-bold';
+        
+        if (percentage >= 90) {
+            countElement.classList.add('text-danger');
+        } else if (percentage >= 75) {
+            countElement.classList.add('text-warning');
+        } else {
+            countElement.classList.remove('text-warning', 'text-danger');
+        }
+    }
+    
+    // Update preview
+    function updatePreview() {
+        if (previewTitle) {
+            const title = titleInput.value.trim() || 'Announcement Title';
+            previewTitle.textContent = title;
+            previewTitle.title = title;
         }
         
-        // Update preview
-        if (previewTitle) {
-            previewTitle.textContent = titleInput.value || 'Announcement Title';
-        }
         if (previewMessage) {
-            previewMessage.textContent = messageInput.value || 'Announcement message will appear here...';
+            let message = messageInput.value.trim() || 'Announcement message will appear here...';
+            
+            // Basic formatting
+            message = message
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
+                .replace(/\n/g, '<br>') // Line breaks
+                .replace(/^- (.*?)(?=\n|$)/gm, '<li>$1</li>'); // Basic bullets
+            
+            // Wrap list items
+            if (message.includes('<li>')) {
+                message = '<ul class="mb-2">' + message.replace(/<\/li><li>/g, '</li><li>') + '</ul>';
+            }
+            
+            previewMessage.innerHTML = message;
+        }
+    }
+    
+    // Handle input events
+    function handleInput() {
+        if (titleInput === this || messageInput === this) {
+            const maxLength = this === titleInput ? 200 : 5000;
+            const countElement = this === titleInput ? titleCharCount : messageCharCount;
+            
+            updateCharCountStyle(this, countElement, maxLength);
+            updatePreview();
         }
     }
     
     // Attach event listeners
     if (titleInput) {
-        titleInput.addEventListener('input', updateCountsAndPreview);
-    }
-    if (messageInput) {
-        messageInput.addEventListener('input', updateCountsAndPreview);
+        titleInput.addEventListener('input', handleInput);
+        titleInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                messageInput.focus();
+            }
+        });
     }
     
-    // Initial update
-    updateCountsAndPreview();
+    if (messageInput) {
+        messageInput.addEventListener('input', handleInput);
+        
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 400) + 'px';
+        });
+        
+        // Initialize height
+        setTimeout(() => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 400) + 'px';
+        }, 100);
+    }
     
     // Form submission handling
     if (form) {
         form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             // Validate form
-            if (!titleInput.value.trim() || !messageInput.value.trim()) {
-                e.preventDefault();
-                alert('Please fill in all required fields.');
-                return;
+            if (!titleInput.value.trim()) {
+                showToast('Please enter a title', 'error');
+                titleInput.focus();
+                return false;
+            }
+            
+            if (!messageInput.value.trim()) {
+                showToast('Please enter a message', 'error');
+                messageInput.focus();
+                return false;
+            }
+            
+            if (titleInput.value.length > 200) {
+                showToast('Title must be 200 characters or less', 'error');
+                titleInput.focus();
+                return false;
+            }
+            
+            if (messageInput.value.length > 5000) {
+                showToast('Message must be 5000 characters or less', 'error');
+                messageInput.focus();
+                return false;
             }
             
             // Disable submit button to prevent double submission
@@ -218,101 +434,342 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
             }
+            
+            // Submit form
+            this.submit();
         });
     }
+    
+    // Initialize
+    initCharCounts();
+    updatePreview();
+    
+    // Auto-save to localStorage
+    let saveTimeout;
+    function autoSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            const data = {
+                title: titleInput.value,
+                message: messageInput.value,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('announcement_draft', JSON.stringify(data));
+            console.log('Draft saved');
+        }, 1000);
+    }
+    
+    // Attach auto-save
+    titleInput.addEventListener('input', autoSave);
+    messageInput.addEventListener('input', autoSave);
+    
+    // Load draft on page load
+    loadDraft();
 });
+
+// Toggle preview visibility
+function togglePreview() {
+    const previewSection = document.getElementById('previewSection');
+    const previewToggle = document.getElementById('previewToggle');
+    
+    if (previewSection.classList.contains('d-none')) {
+        previewSection.classList.remove('d-none');
+        previewToggle.innerHTML = '<i class="bi bi-eye-slash me-1"></i> Hide Preview';
+        previewToggle.classList.add('active');
+        updatePreview();
+        
+        // Scroll to preview if on mobile
+        if (window.innerWidth < 768) {
+            previewSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    } else {
+        previewSection.classList.add('d-none');
+        previewToggle.innerHTML = '<i class="bi bi-eye me-1"></i> Show Preview';
+        previewToggle.classList.remove('active');
+    }
+}
 
 // Clear form function
 function clearForm() {
-    if (confirm('Clear all form fields?')) {
+    if (confirm('Are you sure you want to clear all form fields?')) {
         document.getElementById('id_title').value = '';
         document.getElementById('id_message').value = '';
         
-        // Trigger input events to update preview
+        // Reset textarea height
+        const messageInput = document.getElementById('id_message');
+        messageInput.style.height = 'auto';
+        
+        // Trigger input events to update preview and counts
         document.getElementById('id_title').dispatchEvent(new Event('input'));
         document.getElementById('id_message').dispatchEvent(new Event('input'));
+        
+        // Clear localStorage draft
+        localStorage.removeItem('announcement_draft');
+        
+        showToast('Form cleared successfully', 'success');
     }
 }
 
 // Refresh preview function
 function refreshPreview() {
-    const titleInput = document.getElementById('id_title');
-    const messageInput = document.getElementById('id_message');
+    updatePreview();
+    showToast('Preview refreshed', 'info');
+}
+
+// Format text in textarea
+function formatText(format) {
+    const textarea = document.getElementById('id_message');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
     
-    if (titleInput && messageInput) {
-        titleInput.dispatchEvent(new Event('input'));
-        messageInput.dispatchEvent(new Event('input'));
+    let formattedText = '';
+    switch(format) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        default:
+            return;
+    }
+    
+    // Replace selected text
+    textarea.value = textarea.value.substring(0, start) + 
+                     formattedText + 
+                     textarea.value.substring(end);
+    
+    // Restore cursor position
+    const newCursorPos = start + formattedText.length;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    textarea.focus();
+    
+    // Trigger input event
+    textarea.dispatchEvent(new Event('input'));
+}
+
+// Load draft from localStorage
+function loadDraft() {
+    if (window.location.href.includes('edit')) return;
+    
+    const draft = localStorage.getItem('announcement_draft');
+    if (draft) {
+        try {
+            const data = JSON.parse(draft);
+            const titleInput = document.getElementById('id_title');
+            const messageInput = document.getElementById('id_message');
+            
+            // Only load if fields are empty
+            if (titleInput && !titleInput.value.trim()) {
+                titleInput.value = data.title || '';
+            }
+            if (messageInput && !messageInput.value.trim()) {
+                messageInput.value = data.message || '';
+            }
+            
+            // Trigger updates
+            if (titleInput) titleInput.dispatchEvent(new Event('input'));
+            if (messageInput) messageInput.dispatchEvent(new Event('input'));
+            
+            console.log('Draft loaded from localStorage');
+        } catch (e) {
+            console.error('Error loading draft:', e);
+            localStorage.removeItem('announcement_draft');
+        }
     }
 }
 
-// Auto-save draft (optional feature)
-let autoSaveTimeout;
-function autoSaveDraft() {
-    clearTimeout(autoSaveTimeout);
-    autoSaveTimeout = setTimeout(() => {
-        const title = document.getElementById('id_title').value;
-        const message = document.getElementById('id_message').value;
-        
-        if (title || message) {
-            // Save to localStorage
-            localStorage.setItem('announcement_draft', JSON.stringify({
-                title: title,
-                message: message,
-                timestamp: new Date().toISOString()
-            }));
-            
-            console.log('Draft auto-saved');
-        }
-    }, 2000);
+// Toast notification
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle'} me-2"></i>
+            ${message}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
-// Load draft if exists
-window.addEventListener('load', function() {
-    const draft = localStorage.getItem('announcement_draft');
-    if (draft && !window.location.href.includes('edit')) {
-        const draftData = JSON.parse(draft);
-        const titleInput = document.getElementById('id_title');
-        const messageInput = document.getElementById('id_message');
-        
-        if (titleInput && !titleInput.value) {
-            titleInput.value = draftData.title;
+// Handle back button
+window.addEventListener('beforeunload', function(e) {
+    const titleInput = document.getElementById('id_title');
+    const messageInput = document.getElementById('id_message');
+    
+    if ((titleInput && titleInput.value.trim()) || (messageInput && messageInput.value.trim())) {
+        // Check if form is being submitted
+        if (!document.querySelector('#submitBtn[disabled]')) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            return e.returnValue;
         }
-        if (messageInput && !messageInput.value) {
-            messageInput.value = draftData.message;
-        }
-        
-        // Update preview
-        if (titleInput && messageInput) {
-            titleInput.dispatchEvent(new Event('input'));
-            messageInput.dispatchEvent(new Event('input'));
-        }
-        
-        // Clear draft after loading
-        localStorage.removeItem('announcement_draft');
     }
 });
 </script>
 
 <style>
-.announcement-preview {
+/* Responsive styles */
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
     min-height: 200px;
-    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+}
+
+.announcement-preview {
     border-left: 4px solid var(--primary-color) !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-#previewTitle {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-#previewMessage {
-    white-space: pre-wrap;
+.announcement-content {
     line-height: 1.6;
 }
 
-.form-control-lg {
-    font-size: 1.1rem;
-    padding: 0.75rem 1rem;
+.announcement-content ul {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.announcement-content li {
+    margin-bottom: 0.5rem;
+}
+
+/* Toast notifications */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1050;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 90vw;
+    width: 350px;
+}
+
+.toast-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    border-left: 4px solid #28a745;
+}
+
+.toast-error {
+    border-left: 4px solid #dc3545;
+}
+
+.toast-info {
+    border-left: 4px solid #17a2b8;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* Touch-friendly elements */
+.btn, .form-check-input, .form-control {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 575.98px) {
+    .card-body {
+        padding: 1.25rem !important;
+    }
+    
+    .form-control {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+    
+    .announcement-preview {
+        padding: 1rem !important;
+    }
+    
+    .toast-notification {
+        bottom: 70px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .container-fluid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6;
+    }
+}
+
+@media (min-width: 768px) {
+    .form-control-lg {
+        font-size: 1.1rem;
+        padding: 0.875rem 1.125rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .announcement-preview {
+        background-color: #1a1a1a !important;
+        color: #f8f9fa !important;
+        border-color: #495057 !important;
+    }
+    
+    .text-muted {
+        color: #adb5bd !important;
+    }
 }
 </style>
 {% endblock %}

@@ -5,157 +5,257 @@
 {% block page_title %}{{ announcement.title|truncatechars:30 }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <!-- Announcement Card -->
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Announcement Details</h5>
-                    <div class="btn-group">
-                        <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-light">
-                            <i class="bi bi-arrow-left me-1"></i> Back
-                        </a>
-                        {% if request.user.role == 'ADMIN' %}
-                        <a href="{% url 'announcement_edit' announcement.pk %}" class="btn btn-sm btn-light ms-2">
-                            <i class="bi bi-pencil me-1"></i> Edit
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Announcement Meta Info -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <span class="badge bg-primary">
-                            <i class="bi bi-calendar-event me-1"></i>
-                            {{ announcement.created_at|date:"F d, Y" }}
-                        </span>
-                        <span class="badge bg-secondary ms-2">
-                            <i class="bi bi-clock me-1"></i>
-                            {{ announcement.created_at|date:"h:i A" }}
-                        </span>
-                    </div>
-                    <div>
-                        <small class="text-muted">
-                            ID: #{{ announcement.pk|stringformat:"04d" }}
-                        </small>
-                    </div>
-                </div>
-                
-                <!-- Announcement Title -->
-                <h2 class="mb-4 text-primary">{{ announcement.title }}</h2>
-                
-                <!-- Announcement Message -->
-                <div class="announcement-content mb-4">
-                    <div class="message-body p-4 border rounded bg-light">
-                        {{ announcement.message|linebreaks }}
-                    </div>
-                </div>
-                
-                <!-- Announcement Stats -->
-                <div class="row text-center mb-4">
-                    <div class="col-md-4">
-                        <div class="border rounded p-3">
-                            <h4 class="text-primary mb-0">{{ announcement.created_at|date:"d" }}</h4>
-                            <small class="text-muted">Day Posted</small>
+<div class="container-fluid px-0 px-md-3">
+    <!-- Header with Back Button -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'announcement_list' %}" class="btn btn-outline-primary btn-sm me-3 d-none d-md-inline-flex">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a href="{% url 'announcement_list' %}" class="btn btn-outline-primary btn-sm me-3 d-inline-flex d-md-none">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div class="flex-grow-1">
+            <h5 class="mb-0 d-none d-md-block">Announcement Details</h5>
+            <h6 class="mb-0 d-block d-md-none">Announcement</h6>
+        </div>
+        {% if request.user.role == 'ADMIN' %}
+        <div class="dropdown">
+            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" 
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear me-1 d-none d-md-inline"></i>
+                <span class="d-none d-md-inline">Actions</span>
+                <i class="bi bi-three-dots d-inline d-md-none"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{% url 'announcement_edit' announcement.pk %}">
+                        <i class="bi bi-pencil me-2"></i>Edit Announcement
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" onclick="printAnnouncement()">
+                        <i class="bi bi-printer me-2"></i>Print Announcement
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-danger" href="{% url 'announcement_delete' announcement.pk %}">
+                        <i class="bi bi-trash me-2"></i>Delete Announcement
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <!-- Main Announcement Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <!-- Card Header -->
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="mb-2 mb-md-0">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-megaphone-fill me-2 d-none d-sm-inline" style="font-size: 1.2rem;"></i>
+                                <h5 class="mb-0">{{ announcement.title|truncatechars:50 }}</h5>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded p-3">
-                            <h4 class="text-success mb-0">{{ announcement.created_at|date:"m" }}</h4>
-                            <small class="text-muted">Month Posted</small>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded p-3">
-                            <h4 class="text-warning mb-0">{{ announcement.created_at|date:"Y" }}</h4>
-                            <small class="text-muted">Year Posted</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Age Information -->
-                <div class="alert alert-info">
-                    <div class="d-flex">
-                        <i class="bi bi-info-circle me-3" style="font-size: 1.5rem;"></i>
                         <div>
-                            <strong>Information:</strong> This announcement was posted 
-                            <span class="fw-bold">{{ announcement.created_at|timesince }}</span> ago.
-                            {% if announcement.updated_at != announcement.created_at %}
-                            <br>
-                            <small>Last updated: {{ announcement.updated_at|date:"F d, Y H:i" }}</small>
-                            {% endif %}
+                            <small class="d-block d-md-inline">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                {{ announcement.created_at|date:"M d, Y" }}
+                            </small>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small class="text-muted">
-                            <i class="bi bi-person-circle me-1"></i>
-                            Posted by: System Admin
-                        </small>
+
+                <!-- Card Body -->
+                <div class="card-body p-3 p-md-4">
+                    <!-- Meta Information -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-primary d-flex align-items-center">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                <span class="d-none d-sm-inline">{{ announcement.created_at|date:"F d, Y" }}</span>
+                                <span class="d-inline d-sm-none">{{ announcement.created_at|date:"M d" }}</span>
+                            </span>
+                            <span class="badge bg-secondary d-flex align-items-center">
+                                <i class="bi bi-clock me-1"></i>
+                                {{ announcement.created_at|date:"h:i A" }}
+                            </span>
+                            <span class="badge bg-info d-flex align-items-center">
+                                <i class="bi bi-hash me-1"></i>
+                                #{{ announcement.pk|stringformat:"03d" }}
+                            </span>
+                        </div>
+                        <div>
+                            <small class="text-muted">
+                                <i class="bi bi-clock-history me-1"></i>
+                                {{ announcement.created_at|timesince }} ago
+                            </small>
+                        </div>
                     </div>
-                    <div>
-                        {% if request.user.role == 'ADMIN' %}
-                        <div class="btn-group">
-                            <a href="{% url 'announcement_edit' announcement.pk %}" 
-                               class="btn btn-sm btn-outline-warning">
-                                <i class="bi bi-pencil me-1"></i> Edit
-                            </a>
-                            <a href="{% url 'announcement_delete' announcement.pk %}" 
-                               class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash me-1"></i> Delete
-                            </a>
-                            <button class="btn btn-sm btn-outline-primary" onclick="shareAnnouncement()">
-                                <i class="bi bi-share me-1"></i> Share
+
+                    <!-- Announcement Content -->
+                    <div class="announcement-content mb-4">
+                        <div class="message-body p-3 p-md-4 border rounded bg-light bg-opacity-10">
+                            {{ announcement.message|linebreaks }}
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="row g-2 mb-4">
+                        <div class="col-4 col-md-4">
+                            <div class="border rounded p-2 text-center">
+                                <h4 class="text-primary mb-0">{{ announcement.created_at|date:"d" }}</h4>
+                                <small class="text-muted">Day</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-4">
+                            <div class="border rounded p-2 text-center">
+                                <h4 class="text-success mb-0">{{ announcement.created_at|date:"m" }}</h4>
+                                <small class="text-muted">Month</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-4">
+                            <div class="border rounded p-2 text-center">
+                                <h4 class="text-warning mb-0">{{ announcement.created_at|date:"Y" }}</h4>
+                                <small class="text-muted">Year</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Update Information -->
+                    {% if announcement.updated_at != announcement.created_at %}
+                    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-circle me-3 flex-shrink-0"></i>
+                            <div class="flex-grow-1">
+                                <small class="d-block">
+                                    <strong>Updated:</strong> {{ announcement.updated_at|date:"F d, Y h:i A" }}
+                                </small>
+                                <small class="text-muted">
+                                    ({{ announcement.updated_at|timesince }} ago)
+                                </small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer bg-transparent border-top py-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                        <div class="text-center text-md-start">
+                            <small class="text-muted">
+                                <i class="bi bi-person-circle me-1"></i>
+                                Posted by: <strong>System Admin</strong>
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end">
+                            <!-- Share Button -->
+                            <button class="btn btn-outline-primary btn-sm d-flex align-items-center" 
+                                    onclick="shareAnnouncement()">
+                                <i class="bi bi-share me-1"></i>
+                                <span class="d-none d-sm-inline">Share</span>
+                            </button>
+                            
+                            <!-- Print Button -->
+                            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center" 
+                                    onclick="printAnnouncement()">
+                                <i class="bi bi-printer me-1"></i>
+                                <span class="d-none d-sm-inline">Print</span>
+                            </button>
+                            
+                            <!-- Copy Link Button -->
+                            <button class="btn btn-outline-info btn-sm d-flex align-items-center" 
+                                    onclick="copyAnnouncementLink()">
+                                <i class="bi bi-link-45deg me-1"></i>
+                                <span class="d-none d-sm-inline">Copy Link</span>
                             </button>
                         </div>
-                        {% else %}
-                        <button class="btn btn-sm btn-outline-primary" onclick="shareAnnouncement()">
-                            <i class="bi bi-share me-1"></i> Share
-                        </button>
-                        {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Navigation Cards -->
-        <div class="row mt-4">
-            <div class="col-md-6">
+
+            <!-- Navigation Cards -->
+            <div class="row g-3">
                 {% if previous_announcement %}
-                <div class="card shadow-sm border-primary">
-                    <div class="card-body">
-                        <small class="text-muted">Previous Announcement</small>
-                        <h6 class="mb-2">{{ previous_announcement.title|truncatechars:40 }}</h6>
-                        <p class="text-muted mb-2 small">{{ previous_announcement.created_at|date:"M d, Y" }}</p>
-                        <a href="{% url 'announcement_detail' previous_announcement.pk %}" 
-                           class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-chevron-left me-1"></i> View
-                        </a>
+                <div class="col-12 col-md-6">
+                    <div class="card shadow-sm border-start border-primary border-4 h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-2">
+                                <i class="bi bi-chevron-left text-primary me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block">Previous Announcement</small>
+                                    <h6 class="mb-2 mt-1">{{ previous_announcement.title|truncatechars:40 }}</h6>
+                                    <p class="text-muted mb-3 small">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        {{ previous_announcement.created_at|date:"M d, Y" }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <a href="{% url 'announcement_detail' previous_announcement.pk %}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-chevron-left me-1"></i> View Previous
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
-            </div>
-            <div class="col-md-6">
+                
                 {% if next_announcement %}
-                <div class="card shadow-sm border-primary">
-                    <div class="card-body text-end">
-                        <small class="text-muted">Next Announcement</small>
-                        <h6 class="mb-2">{{ next_announcement.title|truncatechars:40 }}</h6>
-                        <p class="text-muted mb-2 small">{{ next_announcement.created_at|date:"M d, Y" }}</p>
-                        <a href="{% url 'announcement_detail' next_announcement.pk %}" 
-                           class="btn btn-sm btn-outline-primary">
-                            View <i class="bi bi-chevron-right ms-1"></i>
-                        </a>
+                <div class="col-12 col-md-6">
+                    <div class="card shadow-sm border-end border-primary border-4 h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-2">
+                                <div class="flex-grow-1 text-end">
+                                    <small class="text-muted d-block">Next Announcement</small>
+                                    <h6 class="mb-2 mt-1">{{ next_announcement.title|truncatechars:40 }}</h6>
+                                    <p class="text-muted mb-3 small">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        {{ next_announcement.created_at|date:"M d, Y" }}
+                                    </p>
+                                </div>
+                                <i class="bi bi-chevron-right text-primary ms-2 mt-1"></i>
+                            </div>
+                            <div class="d-grid">
+                                <a href="{% url 'announcement_detail' next_announcement.pk %}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    View Next <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
             </div>
+
+            <!-- Quick Actions Floating Button (Mobile Only) -->
+            {% if request.user.role == 'ADMIN' %}
+            <div class="d-block d-lg-none fixed-bottom p-3">
+                <div class="d-flex justify-content-center">
+                    <div class="btn-group shadow" role="group">
+                        <a href="{% url 'announcement_edit' announcement.pk %}" 
+                           class="btn btn-warning btn-sm px-3">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button class="btn btn-primary btn-sm px-3" onclick="shareAnnouncement()">
+                            <i class="bi bi-share"></i>
+                        </button>
+                        <a href="{% url 'announcement_delete' announcement.pk %}" 
+                           class="btn btn-danger btn-sm px-3">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -163,112 +263,496 @@
 
 {% block extra_js %}
 <script>
+// Share functionality
 function shareAnnouncement() {
-    const announcementTitle = "{{ announcement.title }}";
+    const announcementTitle = "{{ announcement.title|escapejs }}";
     const announcementUrl = window.location.href;
     const shareText = `Check out this announcement: ${announcementTitle}`;
     
+    // Check if Web Share API is supported
     if (navigator.share) {
-        // Use Web Share API if available
         navigator.share({
             title: announcementTitle,
             text: shareText,
             url: announcementUrl
         })
-        .then(() => console.log('Announcement shared successfully'))
-        .catch(error => console.log('Error sharing:', error));
+        .then(() => {
+            showToast('Announcement shared successfully!', 'success');
+        })
+        .catch(error => {
+            if (error.name !== 'AbortError') {
+                fallbackShare(shareText, announcementUrl);
+            }
+        });
     } else {
-        // Fallback to clipboard
-        const shareData = `${shareText}\n\n${announcementUrl}`;
-        navigator.clipboard.writeText(shareData)
-            .then(() => {
-                alert('Announcement link copied to clipboard!');
-            })
-            .catch(err => {
-                console.error('Failed to copy: ', err);
-                // Fallback to prompt
-                prompt('Copy this link to share:', announcementUrl);
-            });
+        fallbackShare(shareText, announcementUrl);
     }
 }
 
-// Print announcement
+function fallbackShare(shareText, url) {
+    const shareData = `${shareText}\n\n${url}`;
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(shareData)
+            .then(() => {
+                showToast('Link copied to clipboard!', 'success');
+            })
+            .catch(err => {
+                promptShare(url);
+            });
+    } else {
+        promptShare(url);
+    }
+}
+
+function promptShare(url) {
+    const tempInput = document.createElement('input');
+    tempInput.value = url;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    tempInput.setSelectionRange(0, 99999);
+    
+    try {
+        const successful = document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        if (successful) {
+            showToast('Link copied to clipboard!', 'success');
+        } else {
+            window.prompt('Copy this link to share:', url);
+        }
+    } catch (err) {
+        document.body.removeChild(tempInput);
+        window.prompt('Copy this link to share:', url);
+    }
+}
+
+// Copy link functionality
+function copyAnnouncementLink() {
+    const url = window.location.href;
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                showToast('Link copied to clipboard!', 'success');
+            })
+            .catch(err => {
+                fallbackCopy(url);
+            });
+    } else {
+        fallbackCopy(url);
+    }
+}
+
+function fallbackCopy(text) {
+    const tempInput = document.createElement('input');
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    tempInput.setSelectionRange(0, 99999);
+    
+    try {
+        const successful = document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        if (successful) {
+            showToast('Link copied to clipboard!', 'success');
+        }
+    } catch (err) {
+        document.body.removeChild(tempInput);
+        showToast('Failed to copy link', 'error');
+    }
+}
+
+// Print functionality
 function printAnnouncement() {
     const printContent = `
         <html>
         <head>
-            <title>{{ announcement.title }}</title>
+            <title>{{ announcement.title|escapejs }}</title>
             <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
-                h1 { color: #333; border-bottom: 2px solid #4361ee; padding-bottom: 10px; }
-                .meta { color: #666; margin-bottom: 20px; }
-                .content { margin: 20px 0; }
-                .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; color: #666; }
+                @media print {
+                    @page {
+                        margin: 20mm;
+                        size: A4;
+                    }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        margin: 0;
+                        color: #333;
+                    }
+                    .print-header {
+                        border-bottom: 3px solid #4361ee;
+                        padding-bottom: 15px;
+                        margin-bottom: 20px;
+                    }
+                    h1 {
+                        color: #333;
+                        font-size: 24px;
+                        margin-bottom: 10px;
+                    }
+                    .meta-info {
+                        color: #666;
+                        font-size: 14px;
+                        margin-bottom: 20px;
+                        padding: 10px;
+                        background: #f8f9fa;
+                        border-radius: 5px;
+                    }
+                    .content {
+                        margin: 25px 0;
+                        font-size: 16px;
+                    }
+                    .content p {
+                        margin-bottom: 15px;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        padding-top: 15px;
+                        border-top: 1px solid #ddd;
+                        color: #666;
+                        font-size: 12px;
+                    }
+                    .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo h2 {
+                        color: #4361ee;
+                        margin: 0;
+                    }
+                    .print-only {
+                        display: block;
+                    }
+                }
+                @media screen {
+                    body {
+                        padding: 20px;
+                    }
+                }
+                .no-print {
+                    display: none;
+                }
             </style>
         </head>
         <body>
-            <h1>{{ announcement.title }}</h1>
-            <div class="meta">
-                <strong>Date:</strong> {{ announcement.created_at|date:"F d, Y" }}<br>
-                <strong>Time:</strong> {{ announcement.created_at|date:"h:i A" }}
+            <div class="logo">
+                <h2>Charles Academy</h2>
             </div>
+            
+            <div class="print-header">
+                <h1>{{ announcement.title|escapejs }}</h1>
+                <div class="meta-info">
+                    <strong>Date:</strong> {{ announcement.created_at|date:"F d, Y" }}<br>
+                    <strong>Time:</strong> {{ announcement.created_at|date:"h:i A" }}<br>
+                    <strong>Announcement ID:</strong> #{{ announcement.pk|stringformat:"04d" }}
+                </div>
+            </div>
+            
             <div class="content">
                 {{ announcement.message|linebreaks }}
             </div>
+            
             <div class="footer">
-                Charles Academy<br>
-                Printed on: {% now "F d, Y h:i A" %}
+                <p>
+                    <strong>Charles Academy School Management System</strong><br>
+                    Printed on: {% now "F d, Y \\a\\t h:i A" %}
+                </p>
+                <p class="print-only">
+                    This document is system generated. For official verification, please contact the school administration.
+                </p>
             </div>
         </body>
         </html>
     `;
     
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+        showToast('Please allow popups to print', 'warning');
+        return;
+    }
+    
     printWindow.document.write(printContent);
     printWindow.document.close();
+    
+    // Focus and print with delay for content to load
     printWindow.focus();
     setTimeout(() => {
         printWindow.print();
-        printWindow.close();
-    }, 250);
+        // Don't close automatically - let user decide
+    }, 500);
 }
 
-// Add print button functionality
+// Toast notification system
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    const toastId = 'toast-' + Date.now();
+    
+    const bgColor = type === 'success' ? 'bg-success' : 
+                    type === 'error' ? 'bg-danger' : 
+                    type === 'warning' ? 'bg-warning' : 'bg-info';
+    
+    const toastHTML = `
+        <div id="${toastId}" class="toast align-items-center border-0 ${bgColor} text-white" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                        data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, {
+        delay: 3000,
+        animation: true
+    });
+    
+    toast.show();
+    
+    // Remove after hide
+    toastElement.addEventListener('hidden.bs.toast', function () {
+        this.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    container.style.zIndex = '1060';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Mobile touch enhancements
 document.addEventListener('DOMContentLoaded', function() {
-    const footer = document.querySelector('.card-footer .btn-group');
-    if (footer) {
-        const printButton = document.createElement('button');
-        printButton.className = 'btn btn-sm btn-outline-secondary';
-        printButton.innerHTML = '<i class="bi bi-printer me-1"></i> Print';
-        printButton.onclick = printAnnouncement;
-        footer.insertBefore(printButton, footer.firstChild);
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Touch-friendly adjustments
+    if ('ontouchstart' in window) {
+        // Increase touch targets
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => {
+            btn.style.minHeight = '44px';
+            btn.style.padding = '10px 16px';
+        });
+        
+        // Better dropdown handling for mobile
+        const dropdowns = document.querySelectorAll('.dropdown-toggle');
+        dropdowns.forEach(dropdown => {
+            dropdown.addEventListener('touchstart', function(e) {
+                if (window.innerWidth < 768) {
+                    e.preventDefault();
+                    const dropdownMenu = this.nextElementSibling;
+                    dropdownMenu.classList.toggle('show');
+                }
+            });
+        });
+        
+        // Close dropdowns when tapping outside
+        document.addEventListener('touchstart', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
+                openDropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            }
+        });
     }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Escape key closes dropdowns
+        if (e.key === 'Escape') {
+            const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
+            openDropdowns.forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+        
+        // Left/Right arrow keys for navigation
+        if (e.key === 'ArrowLeft' && document.querySelector('a[href*="previous"]')) {
+            window.location.href = document.querySelector('a[href*="previous"]').href;
+        }
+        if (e.key === 'ArrowRight' && document.querySelector('a[href*="next"]')) {
+            window.location.href = document.querySelector('a[href*="next"]').href;
+        }
+    });
 });
 </script>
 
 <style>
+/* Mobile-first responsive styles */
+@media (max-width: 768px) {
+    .card-header {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .message-body {
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+        padding: 1rem !important;
+    }
+    
+    .badge {
+        font-size: 0.75rem !important;
+        padding: 0.35em 0.65em !important;
+    }
+    
+    .fixed-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0) !important;
+    }
+    
+    /* Improved scrolling on mobile */
+    .announcement-content {
+        max-height: 60vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Touch-friendly button groups */
+    .btn-group {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .btn-group .btn {
+        flex: 1;
+        padding: 12px;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 992px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .message-body {
+        padding: 1.5rem !important;
+    }
+}
+
+/* Message body styling */
 .message-body {
-    background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-    border-left: 4px solid var(--primary-color) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-left: 4px solid #4361ee !important;
+    font-size: 1.05rem;
+    line-height: 1.7;
 }
 
-.announcement-content {
-    font-size: 1.1rem;
-    line-height: 1.8;
+.message-body p {
+    margin-bottom: 1.2rem;
 }
 
-.announcement-content p {
-    margin-bottom: 1rem;
+.message-body ul, 
+.message-body ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.2rem;
 }
 
-.announcement-content ul, 
-.announcement-content ol {
-    margin-left: 2rem;
-    margin-bottom: 1rem;
-}
-
-.announcement-content li {
+.message-body li {
     margin-bottom: 0.5rem;
+}
+
+/* Card hover effects for desktop */
+@media (min-width: 992px) {
+    .card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: transform 0.2s ease;
+    }
+}
+
+/* Navigation card styling */
+.border-start.border-primary {
+    border-left-width: 4px !important;
+}
+
+.border-end.border-primary {
+    border-right-width: 4px !important;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .card, .btn {
+        transition: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .text-primary {
+        color: #0000ff !important;
+    }
+    
+    .btn-primary {
+        background-color: #0000ff !important;
+        border-color: #0000ff !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .message-body {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        color: #e2e8f0;
+        border-color: #63b3ed !important;
+    }
+    
+    .card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .text-muted {
+        color: #a0aec0 !important;
+    }
+    
+    .bg-light {
+        background-color: #4a5568 !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print,
+    .fixed-bottom,
+    .dropdown,
+    .btn-group {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .card-header {
+        background: none !important;
+        color: #000 !important;
+    }
 }
 </style>
 {% endblock %}

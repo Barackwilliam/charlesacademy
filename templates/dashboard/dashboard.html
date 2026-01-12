@@ -5,239 +5,892 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="row">
-    <!-- Quick Stats -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Students
+<div class="container-fluid px-0 px-md-3">
+    <!-- Welcome Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h5 class="mb-1">Welcome back, {{ request.user.first_name|default:"User" }}!</h5>
+            <p class="text-muted mb-0">
+                <i class="bi bi-calendar3 me-1"></i>
+                {{ current_date|date:"l, F d, Y" }}
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'announcement_create' %}" class="btn btn-primary btn-sm d-flex align-items-center">
+                <i class="bi bi-plus-circle me-1"></i>
+                <span class="d-none d-sm-inline">New Announcement</span>
+                <span class="d-inline d-sm-none">New</span>
+            </a>
+            <button class="btn btn-outline-primary btn-sm d-flex align-items-center" onclick="refreshDashboard()">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span class="d-none d-sm-inline ms-1">Refresh</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="row g-3 mb-4">
+        <!-- Total Students -->
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card shadow-sm border-start border-primary border-4 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted small mb-1">Total Students</h6>
+                            <h3 class="mb-0 text-primary">1,250</h3>
+                            <small class="text-success">
+                                <i class="bi bi-arrow-up me-1"></i>
+                                5.2% from last month
+                            </small>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">1,250</div>
+                        <div class="ms-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-people-fill text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-people-fill fa-2x text-primary"></i>
+                    <div class="mt-3">
+                        <a href="#" class="text-decoration-none small">
+                            View details <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Teachers -->
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card shadow-sm border-start border-success border-4 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted small mb-1">Total Teachers</h6>
+                            <h3 class="mb-0 text-success">45</h3>
+                            <small class="text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                All active
+                            </small>
+                        </div>
+                        <div class="ms-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-person-badge-fill text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#" class="text-decoration-none small">
+                            View details <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Announcements -->
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card shadow-sm border-start border-warning border-4 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted small mb-1">Announcements</h6>
+                            <h3 class="mb-0 text-warning">{{ announcements_count }}</h3>
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                {% if latest_announcement_date %}
+                                Last: {{ latest_announcement_date|date:"M d" }}
+                                {% else %}
+                                No announcements
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="ms-3">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-megaphone text-warning" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'announcement_list' %}" class="text-decoration-none small">
+                            View all <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance -->
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card shadow-sm border-start border-info border-4 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted small mb-1">Today's Attendance</h6>
+                            <h3 class="mb-0 text-info">94%</h3>
+                            <small class="text-info">
+                                <i class="bi bi-check2-circle me-1"></i>
+                                1,175 present
+                            </small>
+                        </div>
+                        <div class="ms-3">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-calendar-check text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#" class="text-decoration-none small">
+                            Mark attendance <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total Teachers
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">45</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-person-badge-fill fa-2x text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Total Announcements
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ announcements_count }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-megaphone fa-2x text-warning"></i>
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-12 col-lg-8">
+            <!-- Announcements Card -->
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 d-flex align-items-center">
+                            <i class="bi bi-megaphone text-primary me-2"></i>
+                            Recent Announcements
+                        </h6>
+                        <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-primary">
+                            <span class="d-none d-md-inline">View All</span>
+                            <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Today's Attendance
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">94%</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-calendar-check fa-2x text-info"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Announcements Section -->
-<div class="row">
-    <div class="col-lg-8">
-        <!-- Recent Announcements -->
-        <div class="card shadow mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-megaphone me-2"></i>
-                    Recent Announcements
-                </h6>
-                <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-primary">
-                    View All <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-            <div class="card-body">
-                {% if latest_announcements %}
-                <div class="list-group list-group-flush">
-                    {% for announcement in latest_announcements %}
-                    <div class="list-group-item border-0 px-0 py-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="mb-0 text-primary">{{ announcement.title }}</h6>
-                            <small class="text-muted">{{ announcement.created_at|date:"M d, Y" }}</small>
-                        </div>
-                        <p class="mb-2">{{ announcement.message|truncatewords:30 }}</p>
+                <div class="card-body p-0">
+                    {% if latest_announcements %}
+                    <div class="list-group list-group-flush">
+                        {% for announcement in latest_announcements %}
                         <a href="{% url 'announcement_detail' announcement.pk %}" 
-                           class="btn btn-sm btn-outline-primary">
-                            Read More <i class="bi bi-arrow-right ms-1"></i>
+                           class="list-group-item list-group-item-action border-0 p-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                        <i class="bi bi-megaphone text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h6 class="mb-0 text-primary">{{ announcement.title|truncatechars:40 }}</h6>
+                                        <small class="text-muted">
+                                            {{ announcement.created_at|timesince }} ago
+                                        </small>
+                                    </div>
+                                    <p class="mb-2 text-muted small">
+                                        {{ announcement.message|truncatewords:20 }}
+                                    </p>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            {{ announcement.created_at|date:"M d, Y" }}
+                                        </small>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary ms-2">
+                                            <i class="bi bi-eye me-1"></i> View
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </a>
+                        {% endfor %}
                     </div>
-                    {% if not forloop.last %}
-                    <hr class="my-2">
+                    {% else %}
+                    <div class="text-center py-5 px-3">
+                        <div class="mb-3">
+                            <i class="bi bi-megaphone text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-muted mb-2">No announcements yet</h5>
+                        <p class="text-muted mb-4">When announcements are created, they'll appear here.</p>
+                        {% if request.user.role == 'ADMIN' %}
+                        <a href="{% url 'announcement_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i> Create First Announcement
+                        </a>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-megaphone text-muted" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3 text-muted">No announcements yet</h5>
-                    <p class="text-muted mb-0">When announcements are created, they'll appear here.</p>
-                    {% if request.user.role == 'ADMIN' %}
-                    <a href="{% url 'announcement_create' %}" class="btn btn-primary mt-3">
-                        <i class="bi bi-plus-circle me-2"></i> Create First Announcement
-                    </a>
-                    {% endif %}
-                </div>
-                {% endif %}
             </div>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-lightning-fill me-2"></i>
-                    Quick Actions
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'announcement_create' %}" class="btn btn-primary w-100">
-                            <i class="bi bi-megaphone me-2"></i>
-                            New Announcement
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'announcement_list' %}" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-list-ul me-2"></i>
-                            View All
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'settings' %}" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-gear me-2"></i>
-                            Settings
-                        </a>
-                    </div>
+            <!-- Quick Actions -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom py-3">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="bi bi-lightning-fill text-primary me-2"></i>
+                        Quick Actions
+                    </h6>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Calendar & Updates -->
-    <div class="col-lg-4">
-        <!-- School Calendar -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-calendar-week me-2"></i>
-                    School Calendar
-                </h6>
-            </div>
-            <div class="card-body">
-                <div id="mini-calendar" class="text-center">
-                    <h5 class="mb-3">{{ current_date|date:"F Y" }}</h5>
-                    <div class="calendar-dates">
-                        <!-- Simple calendar display -->
-                        {% now "d" as current_day %}
-                        <div class="calendar-grid mb-3">
-                            <!-- Calendar days would go here -->
-                            <p class="text-muted">Calendar integration coming soon...</p>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-4">
+                            <a href="{% url 'announcement_create' %}" 
+                               class="btn btn-outline-primary d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-megaphone mb-2" style="font-size: 1.5rem;"></i>
+                                <span>New Announcement</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="{% url 'announcement_list' %}" 
+                               class="btn btn-outline-primary d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-list-ul mb-2" style="font-size: 1.5rem;"></i>
+                                <span>View All</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="{% url 'settings' %}" 
+                               class="btn btn-outline-primary d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-gear mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Settings</span>
+                            </a>
+                        </div>
+                        <!-- Additional Actions for Mobile -->
+                        <div class="col-6 col-md-4 d-block d-md-none">
+                            <a href="#" class="btn btn-outline-success d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-calendar-check mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Attendance</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 d-block d-md-none">
+                            <a href="#" class="btn btn-outline-warning d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-person-plus mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Add User</span>
+                            </a>
                         </div>
                     </div>
                 </div>
-                <div class="mt-3">
-                    <small class="text-muted">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Academic Year: {{ school_settings.academic_year|default:"2025" }}
-                    </small>
-                </div>
             </div>
         </div>
 
-        <!-- System Status -->
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-server me-2"></i>
-                    System Status
-                </h6>
+        <!-- Right Column -->
+        <div class="col-12 col-lg-4">
+            <!-- Calendar -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-bottom py-3">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="bi bi-calendar-week text-primary me-2"></i>
+                        School Calendar
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Mini Calendar -->
+                    <div class="text-center mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="prevMonth()">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <h5 class="mb-0" id="currentMonth">
+                                {{ current_date|date:"F Y" }}
+                            </h5>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="nextMonth()">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="calendar-grid mb-3">
+                            <div class="row g-0 text-center small mb-2">
+                                {% for day in "SMTWTFS" %}
+                                <div class="col text-muted">{{ day }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="row g-0" id="calendarDays">
+                                <!-- Calendar days will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Events -->
+                    <div class="border-top pt-3">
+                        <h6 class="small text-muted mb-3">Upcoming Events</h6>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item border-0 px-0 py-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-primary text-white rounded p-2 text-center" style="width: 45px;">
+                                            <small class="d-block">Dec</small>
+                                            <strong>25</strong>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <small class="text-muted d-block">Christmas Day</small>
+                                        <small>School Holiday</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item border-0 px-0 py-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success text-white rounded p-2 text-center" style="width: 45px;">
+                                            <small class="d-block">Jan</small>
+                                            <strong>01</strong>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <small class="text-muted d-block">New Year</small>
+                                        <small>School Holiday</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Academic Year: {{ school_settings.academic_year|default:"2025" }}
+                        </small>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Storage Usage</span>
-                        <span>65%</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
+
+            <!-- System Status -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-bottom py-3">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="bi bi-server text-primary me-2"></i>
+                        System Status
+                    </h6>
                 </div>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Database Health</span>
-                        <span class="text-success">Healthy</span>
+                <div class="card-body">
+                    <!-- Storage -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">Storage Usage</span>
+                            <span class="small">65%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 65%"></div>
+                        </div>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    
+                    <!-- Database -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">Database Health</span>
+                            <span class="small text-success">Healthy</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>System Uptime</span>
-                        <span>99.8%</span>
+                    
+                    <!-- Uptime -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">System Uptime</span>
+                            <span class="small">99.8%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 99.8%"></div>
+                        </div>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: 99.8%" aria-valuenow="99.8" aria-valuemin="0" aria-valuemax="100"></div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row g-2 text-center">
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <div class="text-primary fw-bold">24</div>
+                                <small class="text-muted">Users Online</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <div class="text-success fw-bold">0</div>
+                                <small class="text-muted">Active Alerts</small>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <hr>
-                <div class="text-center">
-                    <small class="text-muted">
-                        <i class="bi bi-clock-history me-1"></i>
-                        Last updated: {% now "H:i" %}
-                    </small>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="bi bi-clock-history me-1"></i>
+                            Last updated: <span id="currentTime">{% now "H:i" %}</span>
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="d-block d-lg-none fixed-bottom p-3 bg-white border-top shadow-lg">
+        <div class="d-flex justify-content-around">
+            <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-primary d-flex flex-column align-items-center px-3">
+                <i class="bi bi-megaphone mb-1"></i>
+                <small>Announcements</small>
+            </a>
+            <a href="#" class="btn btn-sm btn-outline-success d-flex flex-column align-items-center px-3">
+                <i class="bi bi-calendar-check mb-1"></i>
+                <small>Attendance</small>
+            </a>
+            <a href="#" class="btn btn-sm btn-outline-warning d-flex flex-column align-items-center px-3">
+                <i class="bi bi-graph-up mb-1"></i>
+                <small>Reports</small>
+            </a>
+            <a href="{% url 'settings' %}" class="btn btn-sm btn-outline-secondary d-flex flex-column align-items-center px-3">
+                <i class="bi bi-gear mb-1"></i>
+                <small>More</small>
+            </a>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Dashboard refresh function
+function refreshDashboard() {
+    const refreshBtn = document.querySelector('[onclick="refreshDashboard()"]');
+    const originalContent = refreshBtn.innerHTML;
+    
+    // Show loading state
+    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Refreshing...';
+    refreshBtn.disabled = true;
+    
+    // Simulate refresh delay
+    setTimeout(() => {
+        refreshBtn.innerHTML = originalContent;
+        refreshBtn.disabled = false;
+        
+        // Update time
+        const now = new Date();
+        document.getElementById('currentTime').textContent = 
+            now.getHours().toString().padStart(2, '0') + ':' + 
+            now.getMinutes().toString().padStart(2, '0');
+        
+        // Show success message
+        showToast('Dashboard refreshed successfully!', 'success');
+    }, 1000);
+}
+
+// Calendar functionality
+let currentDate = new Date();
+
+function renderCalendar() {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    
+    // Update month title
+    document.getElementById('currentMonth').textContent = 
+        `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    
+    // Get first day of month and total days
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const totalDays = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    
+    // Clear previous calendar
+    const calendarDays = document.getElementById('calendarDays');
+    calendarDays.innerHTML = '';
+    
+    // Add empty cells for days before first day
+    let html = '<div class="row g-0">';
+    for (let i = 0; i < startingDay; i++) {
+        html += '<div class="col p-2"></div>';
+    }
+    
+    // Add day cells
+    const today = new Date();
+    for (let day = 1; day <= totalDays; day++) {
+        const isToday = currentDate.getMonth() === today.getMonth() && 
+                       currentDate.getFullYear() === today.getFullYear() && 
+                       day === today.getDate();
+        
+        html += `
+            <div class="col p-2">
+                <div class="calendar-day ${isToday ? 'bg-primary text-white' : 'border'} 
+                     rounded text-center p-1 ${isToday ? '' : 'text-muted'}"
+                     style="cursor: pointer;">
+                    ${day}
+                </div>
+            </div>
+        `;
+        
+        // Start new row after Saturday
+        if ((day + startingDay) % 7 === 0 && day !== totalDays) {
+            html += '</div><div class="row g-0">';
+        }
+    }
+    
+    // Close the last row
+    html += '</div>';
+    calendarDays.innerHTML = html;
+    
+    // Add click handlers to days
+    document.querySelectorAll('.calendar-day').forEach(day => {
+        day.addEventListener('click', function() {
+            const dayNum = this.textContent;
+            if (dayNum) {
+                showToast(`Selected: ${monthNames[currentDate.getMonth()]} ${dayNum}`, 'info');
+            }
+        });
+    });
+}
+
+function prevMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+// Toast notification system
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    const toastId = 'toast-' + Date.now();
+    
+    const bgColor = type === 'success' ? 'bg-success' : 
+                    type === 'error' ? 'bg-danger' : 
+                    type === 'warning' ? 'bg-warning' : 'bg-info';
+    
+    const toastHTML = `
+        <div id="${toastId}" class="toast align-items-center border-0 ${bgColor} text-white" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                        data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, {
+        delay: 3000,
+        animation: true
+    });
+    
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function () {
+        this.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    container.style.zIndex = '1060';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    // Render calendar
+    renderCalendar();
+    
+    // Update time every minute
+    setInterval(() => {
+        const now = new Date();
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.textContent = 
+                now.getHours().toString().padStart(2, '0') + ':' + 
+                now.getMinutes().toString().padStart(2, '0');
+        }
+    }, 60000);
+    
+    // Add touch/swipe support for mobile
+    if ('ontouchstart' in window) {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next month
+                    nextMonth();
+                } else {
+                    // Swipe right - previous month
+                    prevMonth();
+                }
+            }
+        }
+    }
+    
+    // Pull to refresh for mobile
+    let touchStartY = 0;
+    let isRefreshing = false;
+    
+    document.addEventListener('touchstart', e => {
+        if (window.scrollY === 0) {
+            touchStartY = e.touches[0].clientY;
+        }
+    });
+    
+    document.addEventListener('touchmove', e => {
+        if (touchStartY && !isRefreshing) {
+            const touchY = e.touches[0].clientY;
+            const pullDistance = touchY - touchStartY;
+            
+            if (pullDistance > 50 && window.scrollY === 0) {
+                isRefreshing = true;
+                refreshDashboard();
+                setTimeout(() => {
+                    isRefreshing = false;
+                    touchStartY = 0;
+                }, 1000);
+            }
+        }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // R key refreshes dashboard
+        if (e.key === 'r' || e.key === 'R') {
+            if (!e.ctrlKey) {
+                e.preventDefault();
+                refreshDashboard();
+            }
+        }
+        
+        // Left/Right arrow keys navigate calendar
+        if (e.key === 'ArrowLeft' && !e.ctrlKey) {
+            prevMonth();
+        }
+        if (e.key === 'ArrowRight' && !e.ctrlKey) {
+            nextMonth();
+        }
+    });
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
+<style>
+/* Mobile-first responsive styles */
+@media (max-width: 768px) {
+    .card {
+        border-radius: 12px !important;
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    h3 {
+        font-size: 1.5rem !important;
+    }
+    
+    .fixed-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0) !important;
+        z-index: 1030;
+    }
+    
+    .calendar-grid .col {
+        font-size: 0.75rem;
+    }
+    
+    .calendar-day {
+        font-size: 0.875rem;
+        padding: 0.25rem !important;
+    }
+    
+    /* Touch-friendly buttons */
+    .btn {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+    }
+    
+    .btn-sm {
+        min-height: 36px;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    /* Improved scrolling */
+    .list-group {
+        max-height: 50vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 992px) {
+    .card-body {
+        padding: 1.25rem !important;
+    }
+    
+    h3 {
+        font-size: 1.75rem !important;
+    }
+}
+
+/* Animation for refresh spinner */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.bi-arrow-clockwise.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Calendar day hover effects */
+@media (hover: hover) {
+    .calendar-day:hover:not(.bg-primary) {
+        background-color: #f8f9fa;
+        transform: scale(1.05);
+        transition: all 0.2s ease;
+    }
+}
+
+/* Progress bar improvements */
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+/* Stats card hover effects */
+@media (min-width: 992px) {
+    .stats-card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+}
+
+/* Quick actions button styling */
+.btn-outline-primary.d-flex {
+    border-radius: 10px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+}
+
+.btn-outline-primary.d-flex i {
+    font-size: 1.25rem;
+}
+
+/* Mobile bottom navigation active state */
+.fixed-bottom .btn.active {
+    background-color: #4361ee;
+    color: white;
+    border-color: #4361ee;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .calendar-day,
+    .stats-card,
+    .btn {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000 !important;
+    }
+    
+    .text-primary {
+        color: #0000ff !important;
+    }
+    
+    .border-primary {
+        border-color: #0000ff !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .text-muted {
+        color: #a0aec0 !important;
+    }
+    
+    .border {
+        border-color: #4a5568 !important;
+    }
+    
+    .bg-light {
+        background-color: #4a5568 !important;
+    }
+    
+    .fixed-bottom {
+        background-color: #2d3748 !important;
+        border-color: #4a5568 !important;
+    }
+    
+    .btn-outline-primary {
+        border-color: #63b3ed;
+        color: #63b3ed;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #63b3ed;
+        color: #1a202c;
+    }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+    .stats-card .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .list-group-item {
+        padding: 0.5rem !important;
+    }
+    
+    .fixed-bottom {
+        display: none !important;
+    }
+}
+
+/* Safe area for iPhone X and above */
+@supports (padding: max(0px)) {
+    .fixed-bottom {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+}
+</style>
 {% endblock %}

@@ -1,152 +1,741 @@
 {% extends 'base.html' %}
 {% load exam_filters %}
 
-{% block content %}
-<h3>Results for {{ exam.name }} ({{ exam.get_exam_type_display }})</h3>
-
-<!-- Print and Download Controls -->
-<div class="mb-3 d-print-none">
-    <!-- <button class="btn btn-primary" onclick="window.print()">
-        <i class="fas fa-print"></i> Print Results
-    </button> -->
-    <button class="btn btn-success" onclick="downloadAsPDF()">
-        <i class="fas fa-download"></i> Download as PDF
-    </button>
-    <button class="btn btn-info" onclick="exportToExcel()">
-        <i class="fas fa-file-excel"></i> Export to Excel
-    </button>
-    <button class="btn btn-secondary" onclick="togglePrintView()">
-        <i class="fas fa-eye"></i> Toggle Print View
-    </button>
-</div>
-
-<!-- Print Header (only shows when printing) -->
-<div class="print-header d-none d-print-block">
-    <h2 class="text-center">{{ exam.name }} Results</h2>
-    <p class="text-center"><strong>Exam Type:</strong> {{ exam.get_exam_type_display }}</p>
-    <p class="text-center"><strong>Date:</strong> <span id="print-date"></span></p>
-    <hr>
-</div>
-
-<table class="table table-bordered" id="results-table">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Student Name</th>
-            {% for subject in subjects %}
-                <th>{{ subject.name }}</th>
-            {% endfor %}
-            <th>Total</th>
-            <th>Average</th>
-            <th>Grade</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for student in students %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ student.full_name }}</td>
-            {% for subject in subjects %}
-                <td>{{ results_dict|get_item:student.id|get_item:subject.name }}</td>
-            {% endfor %}
-            <td>{{ results_dict|get_item:student.id|get_item:"total" }}</td>
-            <td>{{ results_dict|get_item:student.id|get_item:"average" }}</td>
-            <td>{{ results_dict|get_item:student.id|get_item:"grade" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="{{ subjects|length|add:'4' }}">No students found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Summary Statistics -->
-<div class="card mt-4 d-print-none">
-    <div class="card-header">
-        <h5>Summary Statistics</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <p><strong>Total Students:</strong> <span id="total-students">{{ students|length }}</span></p>
-            </div>
-            <div class="col-md-3">
-                <p><strong>Total Subjects:</strong> <span id="total-subjects">{{ subjects|length }}</span></p>
-            </div>
-            <div class="col-md-3">
-                <p><strong>Top Score:</strong> <span id="top-score">Calculating...</span></p>
-            </div>
-            <div class="col-md-3">
-                <p><strong>Class Average:</strong> <span id="class-average">Calculating...</span></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
 {% block extra_css %}
 <style>
-    /* Print-specific styles */
-    @media print {
-        body * {
-            visibility: hidden;
+    /* Mobile-First Results Page */
+    .results-container {
+        padding: 1rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #3498db;
+        position: relative;
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 60px;
+        height: 2px;
+        background: #e74c3c;
+    }
+    
+    /* Action Buttons - Mobile Optimized */
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .action-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 12px 8px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .btn-print {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+    
+    .btn-pdf {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+    }
+    
+    .btn-excel {
+        background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+        color: white;
+    }
+    
+    .btn-view {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .action-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Results Table - Mobile Optimized */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        background: white;
+        position: relative;
+    }
+    
+    .results-table {
+        width: 100%;
+        min-width: 700px;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .results-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .results-table th {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        font-weight: 600;
+        padding: 12px 8px;
+        text-align: center;
+        border-bottom: 2px solid #1a252f;
+        position: relative;
+        white-space: nowrap;
+    }
+    
+    .results-table th:first-child,
+    .results-table td:first-child {
+        position: sticky;
+        left: 0;
+        background: #f8f9fa;
+        z-index: 5;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        min-width: 40px;
+    }
+    
+    .results-table th:nth-child(2),
+    .results-table td:nth-child(2) {
+        position: sticky;
+        left: 40px;
+        background: #f8f9fa;
+        z-index: 5;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        min-width: 150px;
+        max-width: 150px;
+    }
+    
+    .results-table td {
+        padding: 10px 8px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+        vertical-align: middle;
+        font-size: 14px;
+    }
+    
+    .student-name {
+        font-weight: 500;
+        color: #2c3e50;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .total-cell {
+        font-weight: bold;
+        background-color: #e8f4fc !important;
+    }
+    
+    .average-cell {
+        font-weight: bold;
+        background-color: #e8f6f3 !important;
+    }
+    
+    .grade-cell {
+        font-weight: bold;
+        font-size: 15px;
+        padding: 8px;
+        border-radius: 4px;
+        display: inline-block;
+        min-width: 50px;
+    }
+    
+    /* Grade colors */
+    .grade-A { background-color: #2ecc71; color: white; }
+    .grade-B { background-color: #3498db; color: white; }
+    .grade-C { background-color: #f1c40f; color: #2c3e50; }
+    .grade-D { background-color: #e67e22; color: white; }
+    .grade-E { background-color: #e74c3c; color: white; }
+    .grade-F { background-color: #c0392b; color: white; }
+    
+    /* Summary Card - Mobile Optimized */
+    .summary-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .summary-card h5 {
+        color: white;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .stat-item {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.3s;
+    }
+    
+    .stat-item:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .results-container {
+            padding: 0.75rem;
         }
         
-        .print-header, .print-header *,
-        #results-table, #results-table * {
-            visibility: visible;
+        .page-title {
+            font-size: 1.3rem;
+            text-align: center;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 1rem;
         }
         
-        .print-header {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .page-title::after {
+            display: none;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 10px;
+            padding: 1rem;
+        }
+        
+        .action-btn {
             width: 100%;
-            background: white;
-            padding: 10px;
+            padding: 14px;
+            font-size: 15px;
         }
         
-        #results-table {
-            position: absolute;
-            top: 150px;
-            left: 0;
-            width: 100%;
-            border-collapse: collapse;
+        .results-table {
+            min-width: 800px;
         }
         
-        #results-table th {
-            background-color: #f8f9fa !important;
-            border: 1px solid #dee2e6;
-            padding: 8px;
-            font-weight: bold;
+        .results-table th {
+            padding: 10px 6px;
+            font-size: 12px;
         }
         
-        #results-table td {
-            border: 1px solid #dee2e6;
+        .results-table td {
+            padding: 8px 6px;
+            font-size: 13px;
+        }
+        
+        .results-table th:nth-child(2),
+        .results-table td:nth-child(2) {
+            left: 35px;
+            min-width: 120px;
+            max-width: 120px;
+        }
+        
+        .student-name {
+            font-size: 13px;
+        }
+        
+        .grade-cell {
+            font-size: 14px;
+            min-width: 45px;
             padding: 6px;
         }
         
-        .btn, .card, .d-print-none {
+        .summary-stats {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        /* Scroll hint for mobile */
+        .scroll-hint {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            background: #f1f8ff;
+            color: #3498db;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .scroll-hint i {
+            animation: bounce 1s infinite;
+            margin: 0 5px;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        
+        /* Mobile floating actions */
+        .mobile-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1000;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .mobile-fab-menu {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            z-index: 999;
+        }
+        
+        .mobile-fab-menu.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .results-container {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+        
+        .action-buttons {
+            padding: 0.75rem;
+        }
+        
+        .action-btn {
+            padding: 12px;
+            font-size: 14px;
+        }
+        
+        .results-table th {
+            padding: 8px 4px;
+            font-size: 11px;
+        }
+        
+        .results-table td {
+            padding: 6px 4px;
+            font-size: 12px;
+        }
+        
+        .results-table th:nth-child(2),
+        .results-table td:nth-child(2) {
+            left: 30px;
+            min-width: 100px;
+            max-width: 100px;
+        }
+        
+        .student-name {
+            font-size: 12px;
+        }
+        
+        .grade-cell {
+            font-size: 12px;
+            min-width: 40px;
+            padding: 4px;
+        }
+        
+        .summary-card {
+            padding: 1rem;
+        }
+        
+        .stat-item {
+            padding: 10px;
+        }
+        
+        .stat-value {
+            font-size: 1.3rem;
+        }
+        
+        .mobile-fab {
+            width: 55px;
+            height: 55px;
+            bottom: 15px;
+            right: 15px;
+        }
+    }
+    
+    @media (max-width: 400px) {
+        .results-table th:nth-child(2),
+        .results-table td:nth-child(2) {
+            min-width: 90px;
+            max-width: 90px;
+        }
+        
+        .mobile-fab {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+    }
+    
+    /* Orientation-specific styles */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .results-container {
+            padding: 0.5rem;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 4px 6px;
+        }
+        
+        .action-buttons {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    }
+    
+    /* Print styles */
+    @media print {
+        .results-container {
+            padding: 0;
+        }
+        
+        .page-title,
+        .action-buttons,
+        .scroll-hint,
+        .mobile-fab,
+        .summary-card {
             display: none !important;
+        }
+        
+        .table-container {
+            border: none;
+            overflow: visible;
+        }
+        
+        .results-table {
+            min-width: auto;
+            width: 100%;
+        }
+        
+        .results-table th,
+        .results-table td {
+            border: 1px solid #000 !important;
+            background: white !important;
+            color: black !important;
         }
         
         @page {
             size: landscape;
             margin: 0.5cm;
         }
+        
+        .print-only {
+            display: block !important;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
     }
     
-    /* Screen styles */
-    .print-view table {
+    /* Loading state */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        flex-direction: column;
+    }
+    
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Subject column headers with tooltip */
+    .subject-header {
+        position: relative;
+        cursor: help;
+    }
+    
+    .subject-tooltip {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2c3e50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
         font-size: 12px;
+        white-space: nowrap;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
     
-    .print-view th, .print-view td {
-        padding: 4px 8px;
+    .subject-header:hover .subject-tooltip {
+        display: block;
+    }
+    
+    /* Performance optimizations */
+    .results-table {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+    
+    /* Accessibility */
+    .action-btn:focus-visible,
+    .results-table :focus-visible {
+        outline: 2px solid #3498db;
+        outline-offset: 2px;
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <!-- Print Header (only shows when printing) -->
+    <div class="print-header d-none d-print-block print-only">
+        <h2 class="text-center">{{ exam.name }} Results</h2>
+        <p class="text-center"><strong>Exam Type:</strong> {{ exam.get_exam_type_display }}</p>
+        <p class="text-center"><strong>Date:</strong> <span id="print-date"></span></p>
+        <hr>
+    </div>
+    
+    <h3 class="page-title">
+        <i class="fas fa-chart-line me-2"></i>
+        Results for {{ exam.name }} ({{ exam.get_exam_type_display }})
+    </h3>
+    
+    <!-- Mobile scroll hint -->
+    <div class="scroll-hint d-block d-md-none">
+        <i class="bi bi-arrow-left-right"></i> Scroll horizontally to view all columns
+        <i class="bi bi-arrow-left-right"></i>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons d-print-none">
+        <!-- <button class="action-btn btn-print" onclick="enhancedPrint()">
+            <i class="fas fa-print"></i>
+            <span class="btn-text">Print</span>
+        </button> -->
+        <button class="action-btn btn-pdf" onclick="downloadAsPDF()">
+            <i class="fas fa-download"></i>
+            <span class="btn-text">PDF</span>
+        </button>
+        <button class="action-btn btn-excel" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i>
+            <span class="btn-text">Excel</span>
+        </button>
+        <button class="action-btn btn-view" onclick="togglePrintView()">
+            <i class="fas fa-eye"></i>
+            <span class="btn-text">Print View</span>
+        </button>
+    </div>
+    
+    <!-- Results Table -->
+    <div class="table-container">
+        <table class="table results-table" id="results-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student Name</th>
+                    {% for subject in subjects %}
+                        <th class="subject-header">
+                            {{ subject.name|truncatechars:12 }}
+                            {% if subject.name|length > 12 %}
+                            <span class="subject-tooltip">{{ subject.name }}</span>
+                            {% endif %}
+                        </th>
+                    {% endfor %}
+                    <th>Total</th>
+                    <th>Avg</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <div class="student-name" title="{{ student.full_name }}">
+                            {{ student.full_name|truncatechars:20 }}
+                        </div>
+                    </td>
+                    {% for subject in subjects %}
+                        <td>{{ results_dict|get_item:student.id|get_item:subject.name }}</td>
+                    {% endfor %}
+                    <td class="total-cell">{{ results_dict|get_item:student.id|get_item:"total" }}</td>
+                    <td class="average-cell">{{ results_dict|get_item:student.id|get_item:"average" }}</td>
+                    <td>
+                        <span class="grade-cell grade-{{ results_dict|get_item:student.id|get_item:"grade"|first }}">
+                            {{ results_dict|get_item:student.id|get_item:"grade" }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{{ subjects|length|add:'4' }}">
+                        <div class="empty-state text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5>No Results Found</h5>
+                            <p class="text-muted">No students have been added to this exam yet.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="summary-card d-print-none">
+        <h5>
+            <i class="fas fa-chart-bar"></i>
+            Summary Statistics
+        </h5>
+        <div class="summary-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-students">{{ students|length }}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-subjects">{{ subjects|length }}</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="top-score">0</div>
+                <div class="stat-label">Top Score</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="class-average">0.00</div>
+                <div class="stat-label">Class Average</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Floating Action Button -->
+    <div class="mobile-fab d-md-none" id="mobileFab" aria-label="Quick actions">
+        <i class="fas fa-bolt"></i>
+    </div>
+    
+    <!-- Mobile Fab Menu -->
+    <div class="mobile-fab-menu" id="mobileFabMenu">
+        <!-- <button class="action-btn btn-print btn-sm" onclick="enhancedPrint()">
+            <i class="fas fa-print"></i> Print
+        </button> -->
+        <button class="action-btn btn-pdf btn-sm" onclick="downloadAsPDF()">
+            <i class="fas fa-download"></i> PDF
+        </button>
+        <button class="action-btn btn-excel btn-sm" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+        </button>
+        <button class="action-btn btn-view btn-sm" onclick="togglePrintView()">
+            <i class="fas fa-eye"></i> View
+        </button>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -155,28 +744,147 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
-// Set current date for print
 document.addEventListener('DOMContentLoaded', function() {
+    // Set current date for print
     const now = new Date();
     const printDate = document.getElementById('print-date');
     if (printDate) {
-        printDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        printDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }
     
-    // Calculate statistics
+    // Calculate and display statistics
     calculateStatistics();
+    
+    // Mobile Floating Action Button
+    const mobileFab = document.getElementById('mobileFab');
+    const mobileFabMenu = document.getElementById('mobileFabMenu');
+    
+    if (mobileFab) {
+        mobileFab.addEventListener('click', function() {
+            mobileFabMenu.classList.toggle('show');
+            this.classList.toggle('active');
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mobileFab.contains(e.target) && !mobileFabMenu.contains(e.target)) {
+                mobileFabMenu.classList.remove('show');
+                mobileFab.classList.remove('active');
+            }
+        });
+    }
+    
+    // Add touch gesture support for table scrolling
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer && window.innerWidth <= 768) {
+        let startX, startY, scrollLeft, scrollTop;
+        let isScrolling = false;
+        
+        tableContainer.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].pageX - this.offsetLeft;
+            startY = e.touches[0].pageY - this.offsetTop;
+            scrollLeft = this.scrollLeft;
+            scrollTop = this.scrollTop;
+            isScrolling = true;
+        }, { passive: true });
+        
+        tableContainer.addEventListener('touchmove', function(e) {
+            if (!isScrolling) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - this.offsetLeft;
+            const y = e.touches[0].pageY - this.offsetTop;
+            const walkX = (x - startX) * 2;
+            const walkY = (y - startY) * 2;
+            this.scrollLeft = scrollLeft - walkX;
+            this.scrollTop = scrollTop - walkY;
+        }, { passive: false });
+        
+        tableContainer.addEventListener('touchend', function() {
+            isScrolling = false;
+        }, { passive: true });
+    }
+    
+    // Add search functionality for mobile
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'mb-3 d-md-none';
+    searchContainer.innerHTML = `
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="studentSearch" placeholder="Search students...">
+            <button class="btn btn-outline-secondary" type="button" id="clearSearch">Clear</button>
+        </div>
+    `;
+    
+    if (window.innerWidth <= 768) {
+        document.querySelector('.action-buttons').after(searchContainer);
+        
+        const searchInput = document.getElementById('studentSearch');
+        const clearBtn = document.getElementById('clearSearch');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.results-table tbody tr');
+                
+                rows.forEach(row => {
+                    const studentName = row.querySelector('.student-name').textContent.toLowerCase();
+                    if (studentName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Clear search
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    const rows = document.querySelectorAll('.results-table tbody tr');
+                    rows.forEach(row => row.style.display = '');
+                });
+            }
+        }
+    }
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + P
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            enhancedPrint();
+        }
+        
+        // Ctrl/Cmd + E for Excel
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            exportToExcel();
+        }
+        
+        // Ctrl/Cmd + F for search on mobile
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f' && window.innerWidth <= 768) {
+            e.preventDefault();
+            const searchInput = document.getElementById('studentSearch');
+            if (searchInput) searchInput.focus();
+        }
+        
+        // Escape to close mobile menu
+        if (e.key === 'Escape' && mobileFabMenu.classList.contains('show')) {
+            mobileFabMenu.classList.remove('show');
+            mobileFab.classList.remove('active');
+        }
+    });
 });
 
 // Calculate summary statistics
 function calculateStatistics() {
-    const totalElements = document.querySelectorAll('td:nth-last-child(3)'); // Total column
-    const averageElements = document.querySelectorAll('td:nth-last-child(2)'); // Average column
-    const gradeElements = document.querySelectorAll('td:last-child'); // Grade column
+    const totalElements = document.querySelectorAll('.total-cell');
+    const averageElements = document.querySelectorAll('.average-cell');
     
     if (totalElements.length > 0) {
         let maxTotal = 0;
         let sumAverages = 0;
-        let gradeCounts = {};
+        let gradeDistribution = {};
         
         totalElements.forEach((td, index) => {
             const total = parseFloat(td.textContent) || 0;
@@ -187,9 +895,11 @@ function calculateStatistics() {
                 sumAverages += avg;
             }
             
-            if (gradeElements[index]) {
-                const grade = gradeElements[index].textContent.trim();
-                gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
+            // Grade distribution
+            const gradeCell = td.closest('tr').querySelector('.grade-cell');
+            if (gradeCell) {
+                const grade = gradeCell.textContent.trim();
+                gradeDistribution[grade] = (gradeDistribution[grade] || 0) + 1;
             }
         });
         
@@ -197,46 +907,108 @@ function calculateStatistics() {
         document.getElementById('class-average').textContent = 
             (sumAverages / totalElements.length).toFixed(2);
         
-        // Optional: Display grade distribution
-        console.log('Grade Distribution:', gradeCounts);
+        // Optional: Display grade distribution chart
+        // console.log('Grade Distribution:', gradeDistribution);
     }
 }
 
 // Toggle print-friendly view
 function togglePrintView() {
-    document.body.classList.toggle('print-view');
-    document.getElementById('results-table').classList.toggle('table-sm');
+    const table = document.getElementById('results-table');
+    const container = document.querySelector('.table-container');
+    
+    table.classList.toggle('print-view');
+    container.classList.toggle('print-mode');
     
     const button = event.target.closest('button');
-    if (document.body.classList.contains('print-view')) {
-        button.innerHTML = '<i class="fas fa-desktop"></i> Normal View';
-    } else {
-        button.innerHTML = '<i class="fas fa-eye"></i> Toggle Print View';
+    if (button) {
+        if (table.classList.contains('print-view')) {
+            button.innerHTML = '<i class="fas fa-desktop"></i> Normal View';
+            button.classList.add('active');
+        } else {
+            button.innerHTML = '<i class="fas fa-eye"></i> Print View';
+            button.classList.remove('active');
+        }
     }
+    
+    // Scroll to top when toggling view
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Export to Excel
+// Export to Excel with mobile optimization
 function exportToExcel() {
+    showLoading();
+    
+    // Get the table
     const table = document.getElementById('results-table');
+    
+    // Create a clean clone for export
+    const exportTable = table.cloneNode(true);
+    
+    // Remove sticky positioning classes for clean export
+    exportTable.querySelectorAll('[style*="sticky"]').forEach(el => {
+        el.removeAttribute('style');
+        el.classList.remove('sticky-cell');
+    });
+    
+    // Create workbook
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.table_to_sheet(table);
+    const worksheet = XLSX.utils.table_to_sheet(exportTable);
     
     // Auto-size columns
-    const wscols = [];
     const maxColumns = table.rows[0].cells.length;
+    const colWidths = [];
     for (let i = 0; i < maxColumns; i++) {
-        wscols.push({ wch: 15 });
+        colWidths.push({ wch: i === 1 ? 25 : 12 }); // Wider for student names
     }
-    worksheet['!cols'] = wscols;
+    worksheet['!cols'] = colWidths;
     
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
-    XLSX.writeFile(workbook, `{{ exam.name|slugify }}-results-${new Date().toISOString().slice(0,10)}.xlsx`);
+    // Add some styling
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!worksheet[cellAddress]) continue;
+            
+            // Header row styling
+            if (row === 0) {
+                worksheet[cellAddress].s = {
+                    fill: { fgColor: { rgb: "2C3E50" } },
+                    font: { color: { rgb: "FFFFFF" }, bold: true },
+                    alignment: { horizontal: "center" }
+                };
+            }
+            
+            // Total and Average columns
+            if (col === maxColumns - 3 || col === maxColumns - 2) {
+                worksheet[cellAddress].s = {
+                    font: { bold: true },
+                    fill: { fgColor: { rgb: col === maxColumns - 3 ? "E8F4FC" : "E8F6F3" } }
+                };
+            }
+        }
+    }
+    
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Exam Results');
+    
+    // Generate filename
+    const examName = '{{ exam.name|slugify }}' || 'results';
+    const date = new Date().toISOString().slice(0,10);
+    const filename = `${examName}-results-${date}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(workbook, filename);
+    
+    hideLoading();
 }
 
-// Download as PDF using jsPDF and html2canvas
+// Download as PDF with mobile optimization
 function downloadAsPDF() {
-    const element = document.getElementById('results-table');
-    const printHeader = document.querySelector('.print-header');
+    showLoading('Generating PDF...');
+    
+    // Get elements
+    const table = document.getElementById('results-table');
+    const summaryCard = document.querySelector('.summary-card');
     
     // Create a temporary container for PDF generation
     const tempContainer = document.createElement('div');
@@ -244,76 +1016,245 @@ function downloadAsPDF() {
     tempContainer.style.left = '-9999px';
     tempContainer.style.width = '1000px';
     tempContainer.style.padding = '20px';
+    tempContainer.style.background = 'white';
+    tempContainer.style.fontFamily = 'Arial, sans-serif';
     
-    // Clone the content
-    const headerClone = printHeader.cloneNode(true);
-    const tableClone = element.cloneNode(true);
+    // Create header
+    const header = document.createElement('div');
+    header.innerHTML = `
+        <h2 style="text-align: center; color: #2c3e50; margin-bottom: 10px;">
+            {{ exam.name }} Results
+        </h2>
+        <div style="text-align: center; margin-bottom: 20px; color: #7f8c8d;">
+            <strong>Exam Type:</strong> {{ exam.get_exam_type_display }} | 
+            <strong>Date:</strong> ${new Date().toLocaleDateString()}
+        </div>
+    `;
     
-    tempContainer.appendChild(headerClone);
+    // Clone table
+    const tableClone = table.cloneNode(true);
+    tableClone.style.width = '100%';
+    tableClone.style.borderCollapse = 'collapse';
+    tableClone.style.fontSize = '11px';
+    
+    // Style the cloned table
+    const ths = tableClone.querySelectorAll('th');
+    const tds = tableClone.querySelectorAll('td');
+    
+    ths.forEach(th => {
+        th.style.backgroundColor = '#2c3e50';
+        th.style.color = 'white';
+        th.style.padding = '8px';
+        th.style.border = '1px solid #1a252f';
+        th.style.textAlign = 'center';
+    });
+    
+    tds.forEach(td => {
+        td.style.padding = '6px';
+        td.style.border = '1px solid #ddd';
+        td.style.textAlign = 'center';
+    });
+    
+    // Remove sticky positioning
+    tableClone.querySelectorAll('[style*="sticky"], .sticky-cell').forEach(el => {
+        el.removeAttribute('style');
+        el.classList.remove('sticky-cell');
+    });
+    
+    // Build PDF content
+    tempContainer.appendChild(header);
     tempContainer.appendChild(tableClone);
+    
+    // Add summary if exists
+    if (summaryCard) {
+        const summaryClone = document.createElement('div');
+        summaryClone.style.marginTop = '20px';
+        summaryClone.style.padding = '15px';
+        summaryClone.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        summaryClone.style.color = 'white';
+        summaryClone.style.borderRadius = '8px';
+        
+        const stats = document.querySelectorAll('.stat-item');
+        let statsHTML = '<div style="display: flex; justify-content: space-between; flex-wrap: wrap;">';
+        stats.forEach(stat => {
+            const value = stat.querySelector('.stat-value').textContent;
+            const label = stat.querySelector('.stat-label').textContent;
+            statsHTML += `
+                <div style="text-align: center; margin: 10px; min-width: 120px;">
+                    <div style="font-size: 20px; font-weight: bold;">${value}</div>
+                    <div style="font-size: 12px; opacity: 0.9;">${label}</div>
+                </div>
+            `;
+        });
+        statsHTML += '</div>';
+        
+        summaryClone.innerHTML = `<h4 style="margin-bottom: 15px;">Summary Statistics</h4>${statsHTML}`;
+        tempContainer.appendChild(summaryClone);
+    }
+    
     document.body.appendChild(tempContainer);
     
+    // Generate PDF
     html2canvas(tempContainer, {
         scale: 2,
         useCORS: true,
-        logging: false
+        logging: false,
+        backgroundColor: '#ffffff'
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF('landscape');
-        const imgWidth = 280; // PDF width in mm
+        const pdf = new jspdf.jsPDF('landscape', 'mm', 'a4');
+        
+        const imgWidth = 280;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
         pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-        pdf.save(`{{ exam.name|slugify }}-results-${new Date().toISOString().slice(0,10)}.pdf`);
+        
+        // Add footer
+        const pageCount = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(10);
+            pdf.setTextColor(150);
+            pdf.text(
+                `Page ${i} of ${pageCount} • Generated on ${new Date().toLocaleDateString()}`,
+                pdf.internal.pageSize.width - 20,
+                pdf.internal.pageSize.height - 10,
+                { align: 'right' }
+            );
+        }
+        
+        const examName = '{{ exam.name|slugify }}' || 'results';
+        const date = new Date().toISOString().slice(0,10);
+        pdf.save(`${examName}-results-${date}.pdf`);
         
         // Clean up
         document.body.removeChild(tempContainer);
+        hideLoading();
+    }).catch(error => {
+        console.error('PDF generation error:', error);
+        hideLoading();
+        alert('Error generating PDF. Please try again.');
     });
 }
 
 // Enhanced print function
 function enhancedPrint() {
+    showLoading('Preparing for print...');
+    
     // Add print-specific classes
     document.body.classList.add('printing');
     
-    // Show loading indicator
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = '<div class="text-center p-5"><h3>Preparing for print...</h3></div>';
+    // Store original state
+    const originalTitle = document.title;
+    document.title = '{{ exam.name }} - Results';
     
     // Wait a moment then trigger print
     setTimeout(() => {
         window.print();
         
-        // Restore content
-        document.body.innerHTML = originalContent;
-        document.body.classList.remove('printing');
-        
-        // Re-attach event listeners
-        calculateStatistics();
-    }, 500);
+        // Restore original state
+        setTimeout(() => {
+            document.body.classList.remove('printing');
+            document.title = originalTitle;
+            hideLoading();
+        }, 500);
+    }, 1000);
 }
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + P
-    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault();
-        enhancedPrint();
+// Loading utilities
+function showLoading(message = 'Processing...') {
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.id = 'loadingOverlay';
+    loadingOverlay.innerHTML = `
+        <div class="spinner"></div>
+        <p class="mt-3">${message}</p>
+    `;
+    document.body.appendChild(loadingOverlay);
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.remove();
     }
+}
+
+// Add performance optimizations for mobile
+if (window.innerWidth <= 768) {
+    // Debounce scroll events
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            // Performance optimization
+            const tableContainer = document.querySelector('.table-container');
+            if (tableContainer) {
+                const rect = tableContainer.getBoundingClientRect();
+                if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                    tableContainer.style.willChange = 'auto';
+                } else {
+                    tableContainer.style.willChange = 'scroll-position';
+                }
+            }
+        }, 100);
+    });
     
-    // Ctrl/Cmd + E for Excel
-    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-        e.preventDefault();
-        exportToExcel();
+    // Optimize for slow networks
+    if (navigator.connection && navigator.connection.saveData) {
+        // Reduce animations for data-saving mode
+        document.body.classList.add('save-data');
+    }
+}
+
+// Add offline support detection
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').catch(function(error) {
+            console.log('ServiceWorker registration failed:', error);
+        });
+    });
+}
+
+// Add PWA install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    
+    // Show install button on mobile
+    if (window.innerWidth <= 768) {
+        showInstallPrompt();
     }
 });
 
-// Add event listeners to buttons
-document.addEventListener('DOMContentLoaded', function() {
-    const printBtn = document.querySelector('button[onclick="window.print()"]');
-    if (printBtn) {
-        printBtn.setAttribute('onclick', 'enhancedPrint()');
+function showInstallPrompt() {
+    const installPrompt = document.createElement('div');
+    installPrompt.className = 'install-prompt alert alert-info alert-dismissible fade show';
+    installPrompt.innerHTML = `
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <strong>📱 Install App</strong>
+        <p>Install this app on your home screen for quick access</p>
+        <button class="btn btn-sm btn-primary mt-2" id="installBtn">Install Now</button>
+    `;
+    
+    const container = document.querySelector('.results-container');
+    if (container) {
+        container.prepend(installPrompt);
+        
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installPrompt.remove();
+                }
+                deferredPrompt = null;
+            }
+        });
     }
-});
+}
 </script>
 {% endblock %}

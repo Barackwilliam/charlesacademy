@@ -1,49 +1,49 @@
 {% extends 'base.html' %}
 {% block page_title %}Student Attendance Report{% endblock %}
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-2 px-sm-3">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="fw-bold mb-2">Student Attendance Report</h1>
-            <p class="text-muted mb-0">Monthly attendance overview and analytics</p>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+        <div class="flex-grow-1">
+            <h1 class="fw-bold mb-1 fs-4 fs-md-3">Student Attendance Report</h1>
+            <p class="text-muted mb-0 fs-6">Monthly attendance overview</p>
         </div>
-        <div>
-            <button class="btn btn-outline-primary" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Print Report
+        <div class="w-100 w-sm-auto">
+            <button class="btn btn-outline-primary btn-sm d-block d-sm-inline-block" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> <span>Print</span>
             </button>
         </div>
     </div>
 
     <!-- Filter Card -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body p-4">
-            <form method="GET" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-medium">
-                        <i class="bi bi-calendar-month me-2"></i> Select Month
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-2 p-sm-3">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label class="form-label fw-medium fs-7">
+                        <i class="bi bi-calendar-month me-1"></i> Month
                     </label>
-                    <select name="month" class="form-select">
+                    <select name="month" class="form-select form-select-sm">
                         <option value="">All Months</option>
-                        <option value="1" {% if month == '1' %}selected{% endif %}>January</option>
-                        <option value="2" {% if month == '2' %}selected{% endif %}>February</option>
-                        <option value="3" {% if month == '3' %}selected{% endif %}>March</option>
-                        <option value="4" {% if month == '4' %}selected{% endif %}>April</option>
+                        <option value="1" {% if month == '1' %}selected{% endif %}>Jan</option>
+                        <option value="2" {% if month == '2' %}selected{% endif %}>Feb</option>
+                        <option value="3" {% if month == '3' %}selected{% endif %}>Mar</option>
+                        <option value="4" {% if month == '4' %}selected{% endif %}>Apr</option>
                         <option value="5" {% if month == '5' %}selected{% endif %}>May</option>
-                        <option value="6" {% if month == '6' %}selected{% endif %}>June</option>
-                        <option value="7" {% if month == '7' %}selected{% endif %}>July</option>
-                        <option value="8" {% if month == '8' %}selected{% endif %}>August</option>
-                        <option value="9" {% if month == '9' %}selected{% endif %}>September</option>
-                        <option value="10" {% if month == '10' %}selected{% endif %}>October</option>
-                        <option value="11" {% if month == '11' %}selected{% endif %}>November</option>
-                        <option value="12" {% if month == '12' %}selected{% endif %}>December</option>
+                        <option value="6" {% if month == '6' %}selected{% endif %}>Jun</option>
+                        <option value="7" {% if month == '7' %}selected{% endif %}>Jul</option>
+                        <option value="8" {% if month == '8' %}selected{% endif %}>Aug</option>
+                        <option value="9" {% if month == '9' %}selected{% endif %}>Sep</option>
+                        <option value="10" {% if month == '10' %}selected{% endif %}>Oct</option>
+                        <option value="11" {% if month == '11' %}selected{% endif %}>Nov</option>
+                        <option value="12" {% if month == '12' %}selected{% endif %}>Dec</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-medium">
-                        <i class="bi bi-building me-2"></i> Filter by Class
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label class="form-label fw-medium fs-7">
+                        <i class="bi bi-building me-1"></i> Class
                     </label>
-                    <select class="form-select" id="classFilter">
+                    <select class="form-select form-select-sm" id="classFilter">
                         <option value="">All Classes</option>
                         <option value="Form 1">Form 1</option>
                         <option value="Form 2">Form 2</option>
@@ -51,12 +51,12 @@
                         <option value="Form 4">Form 4</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-funnel me-1"></i> Apply Filters
+                <div class="col-12 col-sm-12 col-md-4">
+                    <div class="d-flex gap-1 flex-wrap">
+                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1 flex-md-grow-0">
+                            <i class="bi bi-funnel me-1"></i> Filter
                         </button>
-                        <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary btn-sm flex-grow-1 flex-md-grow-0">
                             <i class="bi bi-arrow-clockwise me-1"></i> Reset
                         </a>
                     </div>
@@ -66,65 +66,65 @@
     </div>
 
     <!-- Statistics Overview -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+    <div class="row row-cols-2 row-cols-sm-4 g-2 g-sm-3 mb-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Records</h6>
-                            <h3 class="fw-bold mb-0">{{ records|length }}</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Total</h6>
+                            <h3 class="fw-bold mb-0 fs-5">{{ records|length }}</h3>
                         </div>
-                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-clipboard-data text-primary fs-4"></i>
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-clipboard-data text-primary fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Present</h6>
-                            <h3 class="fw-bold mb-0" id="presentCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Present</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="presentCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-check-circle text-success fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Absent</h6>
-                            <h3 class="fw-bold mb-0" id="absentCount">0</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Absent</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="absentCount">0</h3>
                         </div>
-                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-x-circle text-danger fs-6"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-lg-6 mb-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Attendance Rate</h6>
-                            <h3 class="fw-bold mb-0" id="attendanceRate">0%</h3>
+                        <div class="me-2">
+                            <h6 class="text-muted mb-0 fs-7">Rate</h6>
+                            <h3 class="fw-bold mb-0 fs-5" id="attendanceRate">0%</h3>
                         </div>
-                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-2">
-                            <i class="bi bi-percent text-info fs-4"></i>
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-1">
+                            <i class="bi bi-percent text-info fs-6"></i>
                         </div>
                     </div>
                 </div>
@@ -133,19 +133,21 @@
     </div>
 
     <!-- Report Table -->
-    <div class="card border-0 shadow-lg">
-        <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">
-                    <i class="bi bi-table text-primary me-2"></i>
-                    Attendance Records
-                    {% if month %}
-                        <small class="text-muted fs-6">- Month {{ month }}</small>
-                    {% endif %}
-                </h5>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-sm" id="exportBtn">
-                        <i class="bi bi-download me-1"></i> Export
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-white border-0 py-2">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                <div class="flex-grow-1">
+                    <h5 class="mb-0 fw-bold fs-6">
+                        <i class="bi bi-table text-primary me-1"></i>
+                        Attendance Records
+                        {% if month %}
+                            <small class="text-muted fs-7">- Month {{ month }}</small>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="d-flex gap-1 w-100 w-sm-auto">
+                    <button class="btn btn-outline-secondary btn-sm flex-grow-1 flex-sm-grow-0" id="exportBtn">
+                        <i class="bi bi-download me-1"></i> <span class="d-none d-sm-inline">Export</span>
                     </button>
                 </div>
             </div>
@@ -154,79 +156,73 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0" id="attendanceTable">
-                    <thead class="table-light">
+                    <thead class="table-light d-none d-sm-table-header-group">
                         <tr>
-                            <th class="ps-4">Student</th>
-                            <th>Class</th>
+                            <th class="ps-3">Student</th>
+                            <th class="d-none d-md-table-cell">Class</th>
                             <th>Date</th>
-                            <th>Day</th>
                             <th>Status</th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th class="text-end pe-3" style="min-width: 70px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for r in records %}
                         <tr class="attendance-record" data-class="{{ r.student.classroom.name|default:'Unknown' }}">
-                            <td class="ps-4">
+                            <td class="ps-3" data-label="Student">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 36px; height: 36px;">
+                                    <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" 
+                                         style="width: 32px; height: 32px;">
                                         {{ r.student.full_name|slice:":1"|upper }}
                                     </div>
-                                    <div>
-                                        <h6 class="mb-0 fw-bold">{{ r.student.full_name }}</h6>
-                                        <small class="text-muted">{{ r.student.registration_number }}</small>
+                                    <div class="min-w-0">
+                                        <h6 class="mb-0 fw-bold fs-6 text-truncate">{{ r.student.full_name }}</h6>
+                                        <small class="text-muted fs-7 d-block text-truncate">{{ r.student.registration_number }}</small>
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <span class="badge bg-secondary">{{ r.student.classroom.name|default:"Not Assigned" }}</span>
+                            <td class="d-none d-md-table-cell" data-label="Class">
+                                <span class="badge bg-secondary fs-7">{{ r.student.classroom.name|default:"N/A" }}</span>
                             </td>
-                            <td>
-                                <span class="fw-medium">{{ r.date|date:"M d, Y" }}</span>
+                            <td data-label="Date">
+                                <span class="fw-medium fs-7 d-block">{{ r.date|date:"M d" }}</span>
+                                <small class="text-muted fs-7">{{ r.date|date:"D" }}</small>
                             </td>
-                            <td>
-                                <small class="text-muted">{{ r.date|date:"l" }}</small>
-                            </td>
-                            <td>
+                            <td data-label="Status">
                                 {% if r.status == 'PRESENT' or r.status == 'Present' %}
-                                    <span class="badge bg-success rounded-pill px-3 py-2">
-                                        <i class="bi bi-check-circle me-1"></i> Present
+                                    <span class="badge bg-success rounded-pill px-2 py-1 fs-7">
+                                        <i class="bi bi-check-circle me-1"></i> P
                                     </span>
                                 {% elif r.status == 'ABSENT' or r.status == 'Absent' %}
-                                    <span class="badge bg-danger rounded-pill px-3 py-2">
-                                        <i class="bi bi-x-circle me-1"></i> Absent
+                                    <span class="badge bg-danger rounded-pill px-2 py-1 fs-7">
+                                        <i class="bi bi-x-circle me-1"></i> A
                                     </span>
                                 {% elif r.status == 'LATE' or r.status == 'Late' %}
-                                    <span class="badge bg-warning rounded-pill px-3 py-2">
-                                        <i class="bi bi-clock me-1"></i> Late
+                                    <span class="badge bg-warning rounded-pill px-2 py-1 fs-7">
+                                        <i class="bi bi-clock me-1"></i> L
                                     </span>
                                 {% else %}
-                                    <span class="badge bg-secondary rounded-pill px-3 py-2">{{ r.status }}</span>
+                                    <span class="badge bg-secondary rounded-pill px-2 py-1 fs-7">{{ r.status|slice:":1" }}</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end pe-4">
+                            <td class="text-end pe-3" data-label="Actions">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-info view-details" data-id="{{ r.id }}">
-                                        <i class="bi bi-eye"></i>
+                                    <button type="button" class="btn btn-outline-info view-details px-2" data-id="{{ r.id }}">
+                                        <i class="bi bi-eye fs-7"></i>
                                     </button>
-                                    <a href="#" class="btn btn-outline-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
                                 </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="py-5">
-                                    <i class="bi bi-calendar-x display-1 text-muted"></i>
-                                    <h5 class="mt-3">No Attendance Records Found</h5>
-                                    <p class="text-muted">
+                            <td colspan="5" class="text-center py-4">
+                                <div class="py-3">
+                                    <i class="bi bi-calendar-x display-6 text-muted"></i>
+                                    <h5 class="mt-2 fs-5">No Records Found</h5>
+                                    <p class="text-muted fs-6 mb-0">
                                         {% if month %}
-                                            No records for the selected month. Try a different month.
+                                            No records for selected month
                                         {% else %}
-                                            No attendance records available.
+                                            No attendance records
                                         {% endif %}
                                     </p>
                                 </div>
@@ -239,24 +235,28 @@
         </div>
         
         <!-- Table Footer -->
-        <div class="card-footer bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="text-muted">
-                        Showing <span id="visibleCount">{{ records|length }}</span> of {{ records|length }} records
+        <div class="card-footer bg-white border-0 py-2">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                <div class="order-2 order-sm-1">
+                    <span class="text-muted fs-7">
+                        Showing <span id="visibleCount">{{ records|length }}</span> records
                     </span>
                 </div>
-                <div>
+                <div class="order-1 order-sm-2">
                     <nav aria-label="Page navigation">
                         <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Previous</a>
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
                             </li>
                             <li class="page-item active"><a class="page-link" href="#">1</a></li>
                             <li class="page-item"><a class="page-link" href="#">2</a></li>
                             <li class="page-item"><a class="page-link" href="#">3</a></li>
                             <li class="page-item">
-                                <a class="page-link" href="#">Next</a>
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
                             </li>
                         </ul>
                     </nav>
@@ -267,35 +267,33 @@
 
     <!-- Summary Section -->
     {% if records %}
-    <div class="row mt-4">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="bi bi-bar-chart me-2 text-primary"></i>
-                        Monthly Attendance Summary
+    <div class="row mt-3">
+        <div class="col-lg-8 mb-3 mb-lg-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-2">
+                    <h6 class="mb-0 fw-bold fs-6">
+                        <i class="bi bi-bar-chart me-1 text-primary"></i>
+                        Summary
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <canvas id="attendanceChart" height="200"></canvas>
+                    <div class="row align-items-center">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="chart-container" style="height: 180px;">
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="p-4 bg-light rounded">
-                                <h6 class="fw-bold mb-3">Key Insights</h6>
-                                <ul class="list-unstyled mb-0">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="fw-bold mb-2 fs-6">Insights</h6>
+                                <ul class="list-unstyled mb-0 fs-7">
                                     <li class="mb-2">
                                         <i class="bi bi-calendar-check text-success me-2"></i>
-                                        <span>Best attendance day: <strong id="bestDay">Monday</strong></span>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-calendar-x text-danger me-2"></i>
-                                        <span>Most absences: <strong id="worstDay">Friday</strong></span>
+                                        <span>Rate: <strong id="performance">0%</strong></span>
                                     </li>
                                     <li>
-                                        <i class="bi bi-graph-up text-info me-2"></i>
-                                        <span>Overall performance: <strong id="performance">Good</strong></span>
+                                        <i class="bi bi-info-circle text-info me-2"></i>
+                                        <span>Generated: <strong>{{ today|date:"M d, Y" }}</strong></span>
                                     </li>
                                 </ul>
                             </div>
@@ -307,30 +305,26 @@
         
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-0 py-3">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="bi bi-info-circle me-2 text-info"></i>
-                        Report Information
+                <div class="card-header bg-white border-0 py-2">
+                    <h6 class="mb-0 fw-bold fs-6">
+                        <i class="bi bi-info-circle me-1 text-info"></i>
+                        Info
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <small class="text-muted d-block">Generated On</small>
-                        <p class="fw-bold mb-0" id="generatedDate">{{ today|date:"F d, Y" }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Time Period</small>
-                        <p class="fw-bold mb-0">
+                        <small class="text-muted d-block fs-7">Period</small>
+                        <p class="fw-bold mb-0 fs-6">
                             {% if month %}
                                 Month {{ month }} {{ current_year }}
                             {% else %}
-                                All Months {{ current_year }}
+                                All {{ current_year }}
                             {% endif %}
                         </p>
                     </div>
-                    <div>
-                        <small class="text-muted d-block">Data Source</small>
-                        <p class="fw-bold mb-0">Student Attendance System</p>
+                    <div class="mb-3">
+                        <small class="text-muted d-block fs-7">System</small>
+                        <p class="fw-bold mb-0 fs-6">Attendance System</p>
                     </div>
                 </div>
             </div>
@@ -340,300 +334,200 @@
 </div>
 
 <style>
-    .avatar {
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
+    .min-w-0 { min-width: 0; }
+    .avatar { font-weight: 600; font-size: 0.8rem; }
     
-    .table-hover tbody tr:hover {
-        background-color: rgba(0,0,0,0.02);
-    }
-    
-    .badge.rounded-pill {
-        padding: 0.5em 1em;
-    }
-    
-    .icon-wrapper {
-        transition: transform 0.3s ease;
-    }
-    
-    .card:hover .icon-wrapper {
-        transform: rotate(15deg);
-    }
-    
-    .attendance-record {
-        transition: all 0.2s ease;
-    }
-    
-    .attendance-record:hover {
-        transform: translateX(2px);
-    }
-    
-    .pagination .page-link {
-        border: none;
-        color: #4361ee;
-    }
-    
-    .pagination .page-item.active .page-link {
-        background-color: #4361ee;
-        border-color: #4361ee;
-    }
-    
-    @media print {
-        .btn, .form-control, .form-select, .card-header {
-            display: none !important;
+    @media (max-width: 576px) {
+        .table-responsive { border: 0; }
+        .table thead { display: none; }
+        .table tbody tr { 
+            display: block; 
+            margin-bottom: 0.75rem; 
+            border: 1px solid #dee2e6; 
+            border-radius: 0.375rem;
+            padding: 0.5rem;
         }
-        
-        .card {
-            border: none !important;
-            box-shadow: none !important;
+        .table tbody td { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0.375rem 0.25rem;
+            border: none;
         }
-        
-        .table {
-            font-size: 12px;
+        .table tbody td:before { 
+            content: attr(data-label); 
+            font-weight: 600; 
+            margin-right: 0.5rem;
+            font-size: 0.75rem;
+            min-width: 40px;
         }
+        .table tbody td .btn-group { width: 100%; justify-content: flex-end; }
+        .attendance-record td:nth-child(1):before { content: "Student"; }
+        .attendance-record td:nth-child(2):before { content: "Class"; }
+        .attendance-record td:nth-child(3):before { content: "Date"; }
+        .attendance-record td:nth-child(4):before { content: "Status"; }
+        .attendance-record td:nth-child(5):before { content: "Actions"; }
+        .badge { font-size: 0.65rem !important; }
     }
     
     @media (max-width: 768px) {
-        .table-responsive {
-            font-size: 0.875rem;
+        .fs-6 { font-size: 0.875rem !important; }
+        .fs-7 { font-size: 0.75rem !important; }
+        .d-none.d-md-table-cell { display: none !important; }
+        .chart-container { height: 150px !important; }
+        .pagination .page-link { padding: 0.25rem 0.5rem; }
+    }
+    
+    @media print {
+        .btn, .form-control, .form-select, .card-header, .pagination {
+            display: none !important;
         }
-        
-        .btn-group .btn {
-            padding: 0.25rem 0.375rem;
-        }
+        .card { border: none !important; box-shadow: none !important; }
     }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeReport();
-    });
-
-    function initializeReport() {
-        // Calculate statistics
-        calculateStatistics();
-        
-        // Initialize class filter
-        const classFilter = document.getElementById('classFilter');
-        if (classFilter) {
-            classFilter.addEventListener('change', filterTable);
-        }
-        
-        // Initialize export button
-        const exportBtn = document.getElementById('exportBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', exportReport);
-        }
-        
-        // Initialize view details buttons
-        document.querySelectorAll('.view-details').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const recordId = this.getAttribute('data-id');
-                showRecordDetails(recordId);
-            });
-        });
-        
-        // Initialize chart if records exist
-        if (document.getElementById('attendanceChart')) {
-            initializeChart();
-        }
-    }
-
-    function calculateStatistics() {
-        const records = document.querySelectorAll('.attendance-record');
-        let present = 0, absent = 0, late = 0;
-        
-        records.forEach(record => {
-            const badge = record.querySelector('.badge');
-            if (badge) {
-                const text = badge.textContent.trim();
-                if (text.includes('Present')) present++;
-                else if (text.includes('Absent')) absent++;
-                else if (text.includes('Late')) late++;
-            }
-        });
-        
-        const total = present + absent + late;
-        const rate = total > 0 ? Math.round((present / total) * 100) : 0;
-        
-        // Update statistics
-        document.getElementById('presentCount').textContent = present;
-        document.getElementById('absentCount').textContent = absent;
-        document.getElementById('lateCount').textContent = late;
-        document.getElementById('attendanceRate').textContent = `${rate}%`;
-        
-        // Update performance rating
-        const performanceElement = document.getElementById('performance');
-        if (performanceElement) {
-            if (rate >= 90) performanceElement.textContent = 'Excellent';
-            else if (rate >= 80) performanceElement.textContent = 'Good';
-            else if (rate >= 70) performanceElement.textContent = 'Average';
-            else performanceElement.textContent = 'Needs Improvement';
-        }
-    }
-
-    function filterTable() {
-        const classFilter = document.getElementById('classFilter');
-        const selectedClass = classFilter ? classFilter.value : '';
-        const records = document.querySelectorAll('.attendance-record');
-        let visibleCount = 0;
-        
-        records.forEach(record => {
-            const recordClass = record.getAttribute('data-class');
-            const matchesClass = !selectedClass || recordClass === selectedClass;
-            
-            if (matchesClass) {
-                record.style.display = '';
-                visibleCount++;
-            } else {
-                record.style.display = 'none';
-            }
-        });
-        
-        // Update visible count
-        document.getElementById('visibleCount').textContent = visibleCount;
-    }
-
-    function exportReport() {
-        // Create a simple CSV export
-        const rows = [];
-        const headers = ['Student Name', 'Registration Number', 'Class', 'Date', 'Day', 'Status'];
-        rows.push(headers.join(','));
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculate stats on load
+    calculateStats();
+    
+    // Class filter
+    document.getElementById('classFilter')?.addEventListener('change', filterTable);
+    
+    // Export button
+    document.getElementById('exportBtn')?.addEventListener('click', function() {
+        const rows = [['Student', 'Reg Number', 'Class', 'Date', 'Status']];
         
         document.querySelectorAll('.attendance-record').forEach(record => {
-            const studentName = record.querySelector('h6').textContent.trim();
-            const regNumber = record.querySelector('small.text-muted').textContent.trim();
-            const className = record.querySelector('.badge.bg-secondary').textContent.trim();
-            const date = record.querySelector('td:nth-child(3) span').textContent.trim();
-            const day = record.querySelector('td:nth-child(4) small').textContent.trim();
-            const status = record.querySelector('.badge.rounded-pill').textContent.trim();
-            
-            rows.push([studentName, regNumber, className, date, day, status].join(','));
+            if (record.style.display !== 'none') {
+                const student = record.querySelector('h6').textContent.trim();
+                const reg = record.querySelector('small.text-muted').textContent.trim();
+                const cls = record.querySelector('.badge.bg-secondary')?.textContent.trim() || 'N/A';
+                const date = record.querySelector('td:nth-child(3) span').textContent.trim();
+                const status = record.querySelector('.badge.rounded-pill').textContent.trim().charAt(0);
+                
+                rows.push([student, reg, cls, date, status]);
+            }
         });
         
-        const csvContent = rows.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
+        const csv = rows.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `attendance_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `attendance_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
         a.click();
-        
-        // Show success message
-        showToast('Report exported successfully', 'success');
+        document.body.removeChild(a);
+    });
+    
+    // View details
+    document.querySelectorAll('.view-details').forEach(btn => {
+        btn.addEventListener('click', function() {
+            alert('Record ID: ' + this.getAttribute('data-id'));
+        });
+    });
+    
+    // Initialize chart
+    if (document.getElementById('attendanceChart')) {
+        initChart();
     }
+    
+    // Setup mobile table
+    if (window.innerWidth < 576) {
+        document.querySelectorAll('.attendance-record td').forEach((td, idx) => {
+            const labels = ['Student', 'Class', 'Date', 'Status', 'Actions'];
+            if (labels[idx]) {
+                td.setAttribute('data-label', labels[idx]);
+            }
+        });
+    }
+});
 
-    function showRecordDetails(recordId) {
-        // This would typically fetch details from an API
-        // For now, show a modal with sample data
-        const modalContent = `
-            <div class="modal fade" id="recordModal" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Attendance Details</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Record ID</small>
-                                    <p class="fw-bold mb-0">${recordId}</p>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Status</small>
-                                    <span class="badge bg-success">Present</span>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Date</small>
-                                    <p class="fw-bold mb-0">{{ today|date:"M d, Y" }}</p>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Time</small>
-                                    <p class="fw-bold mb-0">08:30 AM</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Remove existing modal if any
-        const existingModal = document.getElementById('recordModal');
-        if (existingModal) {
-            existingModal.remove();
+function calculateStats() {
+    let present = 0, absent = 0, late = 0;
+    
+    document.querySelectorAll('.attendance-record').forEach(record => {
+        const badge = record.querySelector('.badge');
+        if (badge) {
+            const cls = badge.className;
+            if (cls.includes('bg-success')) present++;
+            else if (cls.includes('bg-danger')) absent++;
+            else if (cls.includes('bg-warning')) late++;
         }
-        
-        // Add modal to body
-        document.body.insertAdjacentHTML('beforeend', modalContent);
-        
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('recordModal'));
-        modal.show();
+    });
+    
+    const total = present + absent + late;
+    const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+    
+    document.getElementById('presentCount').textContent = present;
+    document.getElementById('absentCount').textContent = absent;
+    document.getElementById('attendanceRate').textContent = rate + '%';
+    
+    const perf = document.getElementById('performance');
+    if (perf) {
+        perf.textContent = rate + '%';
     }
+}
 
-    function initializeChart() {
-        const ctx = document.getElementById('attendanceChart').getContext('2d');
+function filterTable() {
+    const filter = document.getElementById('classFilter').value;
+    let visible = 0;
+    
+    document.querySelectorAll('.attendance-record').forEach(row => {
+        const cls = row.getAttribute('data-class');
+        const show = !filter || cls === filter;
         
-        // Sample data - in real app, this would come from the server
-        const data = {
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    
+    document.getElementById('visibleCount').textContent = visible;
+}
+
+function initChart() {
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const present = parseInt(document.getElementById('presentCount').textContent) || 0;
+    const absent = parseInt(document.getElementById('absentCount').textContent) || 0;
+    const late = parseInt(document.querySelectorAll('.badge.bg-warning').length) || 0;
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
             labels: ['Present', 'Absent', 'Late'],
             datasets: [{
-                data: [
-                    document.getElementById('presentCount').textContent,
-                    document.getElementById('absentCount').textContent,
-                    document.getElementById('lateCount').textContent
-                ],
-                backgroundColor: [
-                    '#10b981',
-                    '#ef4444',
-                    '#f59e0b'
-                ],
+                data: [present, absent, late],
+                backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
                 borderWidth: 1
             }]
-        };
-        
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: data,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 10,
+                        font: { size: 10 }
                     }
                 }
             }
-        });
-    }
+        }
+    });
+}
 
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed`;
-        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
-        toast.setAttribute('role', 'alert');
-        
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-info-circle'} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', function() {
-            document.body.removeChild(toast);
+// Mobile resize handler
+window.addEventListener('resize', function() {
+    if (window.innerWidth < 576) {
+        document.querySelectorAll('.attendance-record td').forEach((td, idx) => {
+            const labels = ['Student', 'Class', 'Date', 'Status', 'Actions'];
+            if (labels[idx]) {
+                td.setAttribute('data-label', labels[idx]);
+            }
         });
     }
+});
 </script>
 {% endblock %}

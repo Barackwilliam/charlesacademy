@@ -1,51 +1,915 @@
 {% extends 'base.html' %}
 {% block page_title %}Student Management{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* ===== Mobile-First Responsive Design ===== */
+    
+    /* Base Container */
+    .student-management-container {
+        padding: 1rem;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Header Section */
+    .page-header {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+    
+    .student-count-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Filter Card */
+    .filter-card {
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+    }
+    
+    .filter-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        background: #f8f9fa;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .filter-body {
+        padding: 1.25rem;
+    }
+    
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        margin-bottom: 0;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    /* Input Styles */
+    .search-input-group {
+        position: relative;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+    
+    .search-input {
+        padding-left: 40px !important;
+        border-radius: 8px !important;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .select-input {
+        border-radius: 8px !important;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s;
+    }
+    
+    .select-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    /* Action Buttons */
+    .action-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .action-btn {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        color: white;
+    }
+    
+    .btn-info {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+    }
+    
+    .action-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+    
+    .stat-icon-primary {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+    }
+    
+    .stat-icon-success {
+        background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(39, 174, 96, 0.1) 100%);
+        color: #2ecc71;
+    }
+    
+    .stat-icon-info {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+        color: #3498db;
+    }
+    
+    .stat-icon-warning {
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+        color: #f39c12;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        font-weight: 500;
+    }
+    
+    /* Student List Table */
+    .list-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .list-header {
+        padding: 1.25rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .student-table {
+        width: 100%;
+        min-width: 700px;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .student-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .student-table th {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        font-weight: 600;
+        padding: 14px 12px;
+        text-align: left;
+        border-bottom: 2px solid #1a252f;
+        position: relative;
+        white-space: nowrap;
+    }
+    
+    .student-table th:first-child,
+    .student-table td:first-child {
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 5;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        min-width: 50px;
+    }
+    
+    .student-table th:nth-child(2),
+    .student-table td:nth-child(2) {
+        position: sticky;
+        left: 50px;
+        background: white;
+        z-index: 5;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        min-width: 200px;
+        max-width: 200px;
+    }
+    
+    .student-table td {
+        padding: 12px;
+        border-top: 1px solid #e9ecef;
+        vertical-align: middle;
+        font-size: 14px;
+    }
+    
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+    
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid #e9ecef;
+    }
+    
+    .avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    
+    .student-details {
+        min-width: 0;
+        flex: 1;
+    }
+    
+    .student-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .student-meta {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, rgba(46, 204, 113, 0.15) 0%, rgba(39, 174, 96, 0.15) 100%);
+        color: #27ae60;
+        border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+    
+    .status-graduated {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(41, 128, 185, 0.15) 100%);
+        color: #2980b9;
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+    
+    .status-transferred {
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(230, 126, 34, 0.15) 100%);
+        color: #e67e22;
+        border: 1px solid rgba(243, 156, 18, 0.3);
+    }
+    
+    /* Action Dropdown */
+    .action-dropdown {
+        position: relative;
+    }
+    
+    .action-toggle {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .action-toggle:hover {
+        background: #f8f9fa;
+        border-color: #667eea;
+        color: #667eea;
+    }
+    
+    .action-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        min-width: 180px;
+        z-index: 1000;
+        display: none;
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+    }
+    
+    .action-menu.show {
+        display: block;
+        animation: slideDown 0.2s ease;
+    }
+    
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .action-item {
+        display: block;
+        padding: 10px 16px;
+        color: #495057;
+        text-decoration: none;
+        border-bottom: 1px solid #f8f9fa;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .action-item:last-child {
+        border-bottom: none;
+    }
+    
+    .action-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .action-item-danger {
+        color: #e74c3c;
+    }
+    
+    .action-item-danger:hover {
+        background: rgba(231, 76, 60, 0.1);
+        color: #c0392b;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #95a5a6;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    /* Footer */
+    .list-footer {
+        padding: 1rem 1.25rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .student-management-container {
+            padding: 0.75rem;
+        }
+        
+        .page-header {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+        }
+        
+        .page-subtitle {
+            font-size: 0.85rem;
+        }
+        
+        .student-count-badge {
+            margin-top: 0.5rem;
+        }
+        
+        .filter-body {
+            padding: 1rem;
+        }
+        
+        .filter-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .action-buttons-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .action-btn {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .list-header {
+            padding: 1rem;
+        }
+        
+        .student-table {
+            min-width: 800px;
+        }
+        
+        .student-table th {
+            padding: 10px 8px;
+            font-size: 12px;
+        }
+        
+        .student-table td {
+            padding: 10px 8px;
+            font-size: 13px;
+        }
+        
+        .student-table th:nth-child(2),
+        .student-table td:nth-child(2) {
+            left: 40px;
+            min-width: 180px;
+            max-width: 180px;
+        }
+        
+        .student-avatar,
+        .avatar-placeholder {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+        
+        .student-name {
+            font-size: 14px;
+        }
+        
+        .student-meta {
+            font-size: 0.8rem;
+        }
+        
+        /* Mobile scroll hint */
+        .scroll-hint {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            background: #f1f8ff;
+            color: #3498db;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .scroll-hint i {
+            animation: bounce 1s infinite;
+            margin: 0 5px;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        
+        /* Mobile floating actions */
+        .mobile-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1000;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .mobile-fab-menu {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            z-index: 999;
+            min-width: 200px;
+        }
+        
+        .mobile-fab-menu.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .student-management-container {
+            padding: 0.5rem;
+        }
+        
+        .page-header {
+            padding: 0.75rem;
+        }
+        
+        .page-title {
+            font-size: 1.2rem;
+        }
+        
+        .filter-body {
+            padding: 0.75rem;
+        }
+        
+        .action-buttons-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-btn {
+            padding: 12px;
+            font-size: 14px;
+        }
+        
+        .student-table th:nth-child(2),
+        .student-table td:nth-child(2) {
+            left: 35px;
+            min-width: 150px;
+            max-width: 150px;
+        }
+        
+        .student-avatar,
+        .avatar-placeholder {
+            width: 32px;
+            height: 32px;
+            font-size: 13px;
+        }
+        
+        .student-name {
+            font-size: 13px;
+        }
+        
+        .mobile-fab {
+            width: 55px;
+            height: 55px;
+            bottom: 15px;
+            right: 15px;
+        }
+    }
+    
+    @media (max-width: 400px) {
+        .student-table th:nth-child(2),
+        .student-table td:nth-child(2) {
+            min-width: 130px;
+            max-width: 130px;
+        }
+        
+        .mobile-fab {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+    }
+    
+    /* Orientation-specific styles */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .student-management-container {
+            padding: 0.5rem;
+        }
+        
+        .student-table th,
+        .student-table td {
+            padding: 6px 8px;
+        }
+        
+        .action-buttons-grid {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    /* Print styles */
+    @media print {
+        .student-management-container {
+            padding: 0;
+        }
+        
+        .page-header,
+        .filter-card,
+        .action-buttons-grid,
+        .stats-grid,
+        .scroll-hint,
+        .mobile-fab,
+        .list-header,
+        .list-footer,
+        .action-dropdown {
+            display: none !important;
+        }
+        
+        .list-card {
+            border: none;
+            box-shadow: none;
+        }
+        
+        .table-container {
+            overflow: visible;
+        }
+        
+        .student-table {
+            min-width: auto;
+            width: 100%;
+        }
+        
+        .student-table th,
+        .student-table td {
+            border: 1px solid #000 !important;
+            background: white !important;
+            color: black !important;
+        }
+        
+        @page {
+            size: landscape;
+            margin: 0.5cm;
+        }
+    }
+    
+    /* Loading state */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        flex-direction: column;
+    }
+    
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Accessibility */
+    .action-btn:focus-visible,
+    .action-toggle:focus-visible,
+    .search-input:focus-visible,
+    .select-input:focus-visible {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+    
+    /* Performance optimizations */
+    .student-table {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid px-0 px-md-3">
+<div class="student-management-container">
+    <!-- Print Header (only shows when printing) -->
+    <div class="print-header d-none d-print-block">
+        <h2 class="text-center">Student Management Report</h2>
+        <p class="text-center"><strong>Date:</strong> <span id="print-date"></span></p>
+        <hr>
+    </div>
+    
     <!-- Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <div>
-            <h1 class="fw-bold mb-2 h3">Student Management</h1>
-            <p class="text-muted mb-0 small">Manage all student records and activities</p>
-        </div>
-        <div>
-            <span class="badge bg-primary fs-6 px-3 py-2 d-inline-block">
-                <i class="bi bi-people-fill me-1"></i>
-                {{ students|length }} Students
-            </span>
+    <div class="page-header">
+        <h1 class="page-title">👨‍🎓 Student Management</h1>
+        <p class="page-subtitle">Manage all student records and activities efficiently</p>
+        <div class="student-count-badge">
+            <i class="bi bi-people-fill"></i>
+            {{ students|length }} Student{{ students|length|pluralize }}
         </div>
     </div>
-
+    
+    <!-- Mobile scroll hint -->
+    <div class="scroll-hint d-block d-md-none">
+        <i class="bi bi-arrow-left-right"></i> Scroll horizontally to view all columns
+        <i class="bi bi-arrow-left-right"></i>
+    </div>
+    
     <!-- Filter Card -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white border-0 py-3">
-            <h5 class="mb-0 fw-bold h6 d-flex align-items-center">
+    <div class="filter-card">
+        <div class="filter-header">
+            <h5 class="mb-0 d-flex align-items-center">
                 <i class="bi bi-funnel me-2"></i>
                 Filter Students
             </h5>
         </div>
-        <div class="card-body">
-            <form method="GET" action="{% url 'students:student_list' %}" id="filterForm" class="row g-2">
+        <div class="filter-body">
+            <form method="GET" action="{% url 'students:student_list' %}" id="filterForm" class="filter-grid">
                 <!-- Search -->
-                <div class="col-12 col-md-6 col-lg-3">
-                    <label class="form-label small fw-medium">Search</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="bi bi-search"></i>
-                        </span>
+                <div class="filter-group">
+                    <label class="filter-label">Search Students</label>
+                    <div class="search-input-group">
+                        <i class="bi bi-search search-icon"></i>
                         <input type="text" 
                                name="search" 
                                value="{{ search_query }}"
-                               class="form-control border-start-0" 
-                               placeholder="Search...">
+                               class="form-control search-input" 
+                               placeholder="Name, email, or registration..."
+                               aria-label="Search students">
                     </div>
                 </div>
                 
                 <!-- Class Filter -->
-                <div class="col-6 col-md-6 col-lg-2">
-                    <label class="form-label small fw-medium">Class</label>
-                    <select name="class" class="form-select form-select-sm">
+                <div class="filter-group">
+                    <label class="filter-label">Class</label>
+                    <select name="class" class="form-select select-input" aria-label="Filter by class">
                         <option value="">All Classes</option>
                         {% for class in all_classes %}
                             <option value="{{ class.id }}" 
@@ -57,9 +921,9 @@
                 </div>
                 
                 <!-- Status Filter -->
-                <div class="col-6 col-md-6 col-lg-2">
-                    <label class="form-label small fw-medium">Status</label>
-                    <select name="status" class="form-select form-select-sm">
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select name="status" class="form-select select-input" aria-label="Filter by status">
                         <option value="">All Status</option>
                         {% for value, label in status_choices %}
                             <option value="{{ value }}" 
@@ -71,9 +935,9 @@
                 </div>
                 
                 <!-- Year Filter -->
-                <div class="col-6 col-md-6 col-lg-2">
-                    <label class="form-label small fw-medium">Year</label>
-                    <select name="year" class="form-select form-select-sm">
+                <div class="filter-group">
+                    <label class="filter-label">Admission Year</label>
+                    <select name="year" class="form-select select-input" aria-label="Filter by year">
                         <option value="">All Years</option>
                         {% for year in admission_years %}
                             <option value="{{ year }}" 
@@ -84,373 +948,479 @@
                     </select>
                 </div>
                 
-                <!-- Action Buttons -->
-                <div class="col-6 col-md-6 col-lg-3 d-flex flex-column justify-content-end">
-                    <div class="d-flex gap-1">
-                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
-                            <i class="bi bi-funnel me-1"></i> Filter
+                <!-- Filter Actions -->
+                <div class="filter-group d-flex flex-column justify-content-end">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="action-btn btn-primary flex-grow-1">
+                            <i class="bi bi-funnel me-1"></i> Apply Filter
                         </button>
-                        <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <a href="{% url 'students:student_list' %}" class="action-btn btn-secondary" 
+                           title="Clear filters">
                             <i class="bi bi-x-circle"></i>
                         </a>
-                        <button type="button" onclick="downloadPDF()" class="btn btn-success btn-sm">
-                            <i class="bi bi-file-pdf"></i>
-                        </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-
+    
     <!-- Quick Actions -->
-    <div class="row mb-3">
-        <div class="col-6 col-md-3 mb-2">
-            <a href="{% url 'students:add_student' %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-2">
-                <i class="bi bi-person-plus-fill me-2"></i>
-                <span class="d-none d-md-inline">Add Student</span>
-                <span class="d-md-none">Add</span>
-            </a>
-        </div>
-        <div class="col-6 col-md-3 mb-2">
-            <button onclick="downloadPDF()" class="btn btn-success w-100 d-flex align-items-center justify-content-center py-2">
-                <i class="bi bi-file-pdf me-2"></i>
-                <span class="d-none d-md-inline">Download PDF</span>
-                <span class="d-md-none">PDF</span>
-            </button>
-        </div>
-        <div class="col-6 col-md-3 mb-2">
-            <button onclick="printTable()" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center py-2">
-                <i class="bi bi-printer me-2"></i>
-                <span class="d-none d-md-inline">Print</span>
-                <span class="d-md-none">Print</span>
-            </button>
-        </div>
-        <div class="col-6 col-md-3 mb-2">
-            <button onclick="exportExcel()" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center py-2">
-                <i class="bi bi-file-excel me-2"></i>
-                <span class="d-none d-md-inline">Excel</span>
-                <span class="d-md-none">Excel</span>
-            </button>
-        </div>
+    <div class="action-buttons-grid">
+        <a href="{% url 'students:add_student' %}" class="action-btn btn-primary">
+            <i class="bi bi-person-plus-fill me-2"></i>
+            <span class="d-none d-md-inline">Add Student</span>
+            <span class="d-md-none">Add</span>
+        </a>
+        
+        <button type="button" onclick="downloadPDF()" class="action-btn btn-success">
+            <i class="bi bi-file-pdf me-2"></i>
+            <span class="d-none d-md-inline">Download PDF</span>
+            <span class="d-md-none">PDF</span>
+        </button>
+        
+        <button type="button" onclick="printTable()" class="action-btn btn-secondary">
+            <i class="bi bi-printer me-2"></i>
+            <span class="d-none d-md-inline">Print</span>
+            <span class="d-md-none">Print</span>
+        </button>
+        
+        <button type="button" onclick="exportExcel()" class="action-btn btn-info">
+            <i class="bi bi-file-excel me-2"></i>
+            <span class="d-none d-md-inline">Export Excel</span>
+            <span class="d-md-none">Excel</span>
+        </button>
     </div>
-
+    
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                            <i class="bi bi-people text-primary"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Total</h6>
-                            <h4 class="fw-bold mb-0">{{ total_count }}</h4>
-                        </div>
-                    </div>
-                </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-primary">
+                <i class="bi bi-people-fill"></i>
             </div>
+            <div class="stat-value">{{ total_count }}</div>
+            <div class="stat-label">Total Students</div>
         </div>
         
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2 me-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Active</h6>
-                            <h4 class="fw-bold mb-0">{{ active_count }}</h4>
-                        </div>
-                    </div>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-success">
+                <i class="bi bi-check-circle-fill"></i>
             </div>
+            <div class="stat-value">{{ active_count }}</div>
+            <div class="stat-label">Active Students</div>
         </div>
         
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle p-2 me-2">
-                            <i class="bi bi-building text-info"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Classes</h6>
-                            <h4 class="fw-bold mb-0">{{ class_count }}</h4>
-                        </div>
-                    </div>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-info">
+                <i class="bi bi-building-fill"></i>
             </div>
+            <div class="stat-value">{{ class_count }}</div>
+            <div class="stat-label">Classes</div>
         </div>
         
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-2 me-2">
-                            <i class="bi bi-envelope text-warning"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">With Email</h6>
-                            <h4 class="fw-bold mb-0">{{ email_count }}</h4>
-                        </div>
-                    </div>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-warning">
+                <i class="bi bi-envelope-fill"></i>
             </div>
+            <div class="stat-value">{{ email_count }}</div>
+            <div class="stat-label">With Email</div>
         </div>
     </div>
-
+    
     <!-- Student List -->
-    <div class="card border-0 shadow-lg">
-        <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-                <h5 class="mb-0 fw-bold h6">
-                    <i class="bi bi-people-fill text-primary me-2"></i>
-                    Student List
-                    {% if filter_class or filter_status or filter_year or search_query %}
-                        <small class="text-muted ms-2">(Filtered)</small>
-                    {% endif %}
-                </h5>
-                <div class="d-flex gap-2 w-100 w-md-auto">
-                    <div class="input-group input-group-sm flex-grow-1 flex-md-grow-0" style="min-width: 200px;">
-                        <span class="input-group-text bg-white">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control" placeholder="Quick search..." id="quickSearch">
-                    </div>
-                </div>
+    <div class="list-card">
+        <div class="list-header">
+            <h5 class="mb-0 d-flex align-items-center">
+                <i class="bi bi-people-fill text-primary me-2"></i>
+                Student List
+                {% if filter_class or filter_status or filter_year or search_query %}
+                    <small class="text-muted ms-2">(Filtered)</small>
+                {% endif %}
+            </h5>
+            
+            <!-- Quick Search -->
+            <div class="search-input-group" style="max-width: 300px;">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" 
+                       class="form-control search-input" 
+                       placeholder="Quick search..."
+                       id="quickSearch"
+                       aria-label="Quick search students">
             </div>
         </div>
         
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="studentTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3">#</th>
-                            <th>Student</th>
-                            <th class="d-none d-md-table-cell">Registration</th>
-                            <th>Class</th>
-                            <th class="d-none d-lg-table-cell">Year</th>
-                            <th>Status</th>
-                            <th class="text-end pe-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for s in students %}
-                        <tr>
-                            <td class="ps-3">{{ forloop.counter }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    {% if s.photo %}
-                                        <img src="{{ s.photo.url }}" alt="{{ s.full_name }}" 
-                                             class="rounded-circle me-2" style="width: 36px; height: 36px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                             style="width: 36px; height: 36px; font-size: 14px;">
-                                            {{ s.full_name|slice:":1"|upper }}
-                                        </div>
-                                    {% endif %}
-                                    <div>
-                                        <h6 class="mb-0 fw-bold small">{{ s.full_name|truncatechars:20 }}</h6>
-                                        <small class="text-muted d-block d-md-none">
-                                            {{ s.registration_number }}
-                                        </small>
-                                        <small class="text-muted d-none d-md-block">
+        <div class="table-container">
+            <table class="table student-table" id="studentTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Registration</th>
+                        <th>Class</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr class="student-row">
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div class="student-info">
+                                {% if s.photo %}
+                                    <img src="{{ s.photo.url }}" 
+                                         alt="{{ s.full_name }}"
+                                         class="student-avatar"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        {{ s.full_name|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                                <div class="student-details">
+                                    <div class="student-name" title="{{ s.full_name }}">
+                                        {{ s.full_name|truncatechars:25 }}
+                                    </div>
+                                    <div class="student-meta">
+                                        <span title="Email">
                                             <i class="bi bi-envelope me-1"></i>
-                                            {{ s.email|default:"No email"|truncatechars:15 }}
-                                        </small>
+                                            {{ s.email|default:"-"|truncatechars:20 }}
+                                        </span>
                                     </div>
                                 </div>
-                            </td>
-                            <td class="d-none d-md-table-cell">
-                                <span class="badge bg-secondary">{{ s.registration_number }}</span>
-                            </td>
-                            <td>
-                                <span class="fw-medium">{{ s.classroom.name|default:"-"|truncatechars:15 }}</span>
-                            </td>
-                            <td class="d-none d-lg-table-cell">
-                                <span class="badge bg-info">{{ s.admission_year }}</span>
-                            </td>
-                            <td>
-                                {% if s.status == 'ACTIVE' %}
-                                    <span class="badge bg-success rounded-pill py-1 px-2">
-                                        <i class="bi bi-check-circle me-1"></i>
-                                        <span class="d-none d-md-inline">Active</span>
-                                        <span class="d-md-none">A</span>
-                                    </span>
-                                {% elif s.status == 'GRADUATED' %}
-                                    <span class="badge bg-info rounded-pill py-1 px-2">
-                                        <i class="bi bi-mortarboard me-1"></i>
-                                        <span class="d-none d-md-inline">Grad</span>
-                                        <span class="d-md-none">G</span>
-                                    </span>
-                                {% elif s.status == 'TRANSFERRED' %}
-                                    <span class="badge bg-warning rounded-pill py-1 px-2">
-                                        <i class="bi bi-arrow-right-circle me-1"></i>
-                                        <span class="d-none d-md-inline">Trans</span>
-                                        <span class="d-md-none">T</span>
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary rounded-pill py-1 px-2">
-                                        {{ s.status|default:"-"|slice:":1" }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end pe-3">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
-                                            data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="{% url 'students:student_detail' s.id %}">
-                                                <i class="bi bi-eye me-2"></i> View Details
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{% url 'students:edit_student' s.id %}">
-                                                <i class="bi bi-pencil me-2"></i> Edit
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" 
-                                               href="{% url 'students:delete_student' s.id %}"
-                                               onclick="return confirm('Delete {{ s.full_name }}?')">
-                                                <i class="bi bi-trash me-2"></i> Delete
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center py-5">
-                                <div class="py-5">
-                                    <i class="bi bi-people display-1 text-muted"></i>
-                                    <h5 class="mt-3">No Students Found</h5>
-                                    <p class="text-muted mb-4">
-                                        {% if filter_class or filter_status or filter_year or search_query %}
-                                            No students match your filter criteria.
-                                        {% else %}
-                                            Start by adding your first student
-                                        {% endif %}
-                                    </p>
-                                    <a href="{% url 'students:add_student' %}" class="btn btn-primary">
-                                        <i class="bi bi-person-plus me-1"></i> Add Student
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary" title="Registration Number">
+                                {{ s.registration_number|default:"-"|truncatechars:12 }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-medium">{{ s.classroom.name|default:"-"|truncatechars:15 }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ s.admission_year|default:"-" }}</span>
+                        </td>
+                        <td>
+                            {% if s.status == 'ACTIVE' %}
+                                <span class="status-badge status-active">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    <span class="d-none d-md-inline">Active</span>
+                                    <span class="d-md-none">A</span>
+                                </span>
+                            {% elif s.status == 'GRADUATED' %}
+                                <span class="status-badge status-graduated">
+                                    <i class="bi bi-mortarboard me-1"></i>
+                                    <span class="d-none d-md-inline">Graduated</span>
+                                    <span class="d-md-none">G</span>
+                                </span>
+                            {% elif s.status == 'TRANSFERRED' %}
+                                <span class="status-badge status-transferred">
+                                    <i class="bi bi-arrow-right-circle me-1"></i>
+                                    <span class="d-none d-md-inline">Transferred</span>
+                                    <span class="d-md-none">T</span>
+                                </span>
+                            {% else %}
+                                <span class="status-badge">
+                                    {{ s.status|default:"-"|slice:":1" }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-dropdown">
+                                <button class="action-toggle" onclick="toggleActionMenu(this)">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <div class="action-menu">
+                                    <a href="{% url 'students:student_detail' s.id %}" class="action-item">
+                                        <i class="bi bi-eye me-2"></i> View Details
+                                    </a>
+                                    <a href="{% url 'students:edit_student' s.id %}" class="action-item">
+                                        <i class="bi bi-pencil me-2"></i> Edit
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{% url 'students:delete_student' s.id %}" 
+                                       class="action-item action-item-danger"
+                                       onclick="return confirmDelete('{{ s.full_name }}')">
+                                        <i class="bi bi-trash me-2"></i> Delete
                                     </a>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="bi bi-people empty-icon"></i>
+                                <h5>No Students Found</h5>
+                                <p class="text-muted mb-4">
+                                    {% if filter_class or filter_status or filter_year or search_query %}
+                                        No students match your filter criteria.
+                                    {% else %}
+                                        Start by adding your first student
+                                    {% endif %}
+                                </p>
+                                <a href="{% url 'students:add_student' %}" class="action-btn btn-primary">
+                                    <i class="bi bi-person-plus me-1"></i> Add Student
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         
-        <div class="card-footer bg-white border-0 py-3">
+        <div class="list-footer">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
                 <div class="text-center text-md-start">
                     <span class="text-muted small">
-                        Showing {{ students|length }} student(s)
+                        Showing <strong>{{ students|length }}</strong> student{{ students|length|pluralize }}
                     </span>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" onclick="downloadPDF()">
+                    <button class="action-btn btn-primary" onclick="downloadPDF()">
                         <i class="bi bi-download me-1"></i> Download PDF
                     </button>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Mobile Floating Action Button -->
+    <button class="mobile-fab d-md-none" id="mobileFab" aria-label="Quick actions">
+        <i class="bi bi-plus"></i>
+    </button>
+    
+    <!-- Mobile Fab Menu -->
+    <div class="mobile-fab-menu" id="mobileFabMenu">
+        <a href="{% url 'students:add_student' %}" class="action-item">
+            <i class="bi bi-person-plus me-2"></i> Add Student
+        </a>
+        <button type="button" onclick="downloadPDF()" class="action-item">
+            <i class="bi bi-file-pdf me-2"></i> Download PDF
+        </button>
+        <button type="button" onclick="printTable()" class="action-item">
+            <i class="bi bi-printer me-2"></i> Print
+        </button>
+        <button type="button" onclick="exportExcel()" class="action-item">
+            <i class="bi bi-file-excel me-2"></i> Export Excel
+        </button>
+    </div>
 </div>
+{% endblock %}
 
-<style>
-    /* Mobile-first responsive styles */
-    @media (max-width: 768px) {
-        .table th, .table td {
-            padding: 0.5rem;
-            font-size: 0.85rem;
-        }
-        
-        .btn-group-sm > .btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        
-        .card-body {
-            padding: 1rem;
-        }
-        
-        .avatar {
-            min-width: 36px;
-            min-height: 36px;
-        }
-    }
-    
-    .action-card {
-        transition: transform 0.2s ease;
-    }
-    
-    .action-card:hover {
-        transform: translateY(-2px);
-    }
-    
-    .dropdown-menu {
-        font-size: 0.875rem;
-    }
-    
-    .badge {
-        font-weight: 500;
-    }
-    
-    /* Print styles */
-    @media print {
-        .card-header, .card-footer, .btn, .dropdown {
-            display: none !important;
-        }
-        
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-    }
-</style>
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Quick search functionality
+    // Set current date for print
+    const now = new Date();
+    const printDate = document.getElementById('print-date');
+    if (printDate) {
+        printDate.textContent = now.toLocaleDateString() + ' ' + 
+                               now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+    
+    // Initialize quick search
     const quickSearch = document.getElementById('quickSearch');
     if (quickSearch) {
-        quickSearch.addEventListener('keyup', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#studentTable tbody tr');
+        quickSearch.addEventListener('input', debounce(function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.student-row');
+            let visibleCount = 0;
             
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
+                const isVisible = text.includes(searchTerm);
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) visibleCount++;
             });
+            
+            // Update count display
+            updateVisibleCount(visibleCount);
+        }, 300));
+    }
+    
+    // Mobile Floating Action Button
+    const mobileFab = document.getElementById('mobileFab');
+    const mobileFabMenu = document.getElementById('mobileFabMenu');
+    
+    if (mobileFab) {
+        mobileFab.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileFabMenu.classList.toggle('show');
+            this.classList.toggle('active');
+            this.innerHTML = mobileFabMenu.classList.contains('show') ? 
+                '<i class="bi bi-x"></i>' : '<i class="bi bi-plus"></i>';
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mobileFab.contains(e.target) && !mobileFabMenu.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
         });
     }
     
-    // Initialize tooltips
-    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltips.forEach(tooltip => {
-        new bootstrap.Tooltip(tooltip);
+    function closeMobileMenu() {
+        if (mobileFabMenu && mobileFabMenu.classList.contains('show')) {
+            mobileFabMenu.classList.remove('show');
+            mobileFab.classList.remove('active');
+            mobileFab.innerHTML = '<i class="bi bi-plus"></i>';
+        }
+    }
+    
+    // Auto-submit form on filter change for better UX
+    const filterSelects = document.querySelectorAll('#filterForm select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Show loading state
+            showLoading('Applying filters...');
+            
+            // Submit form after short delay
+            setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 500);
+        });
     });
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + N for new student
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = "{% url 'students:add_student' %}";
+        }
+        
+        // Ctrl/Cmd + P for print
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            printTable();
+        }
+        
+        // Ctrl/Cmd + E for Excel
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            exportExcel();
+        }
+        
+        // Ctrl/Cmd + F for search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            if (quickSearch) quickSearch.focus();
+        }
+        
+        // / key for quick search
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            if (quickSearch) quickSearch.focus();
+        }
+    });
+    
+    // Add touch gesture support for table scrolling
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer && window.innerWidth <= 768) {
+        setupTouchScrolling(tableContainer);
+    }
+    
+    // Update visible count function
+    function updateVisibleCount(count) {
+        const countElement = document.querySelector('.list-footer .text-muted');
+        if (countElement) {
+            const total = {{ students|length }};
+            countElement.innerHTML = `Showing <strong>${count}</strong> of <strong>${total}</strong> student${total !== 1 ? 's' : ''}`;
+        }
+    }
 });
 
+// Debounce function for performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func.apply(this, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Toggle action menu
+function toggleActionMenu(button) {
+    const menu = button.nextElementSibling;
+    const isOpen = menu.classList.contains('show');
+    
+    // Close all other menus
+    document.querySelectorAll('.action-menu.show').forEach(m => {
+        if (m !== menu) m.classList.remove('show');
+    });
+    
+    // Toggle current menu
+    menu.classList.toggle('show');
+    
+    // Close menu when clicking outside
+    if (isOpen) {
+        const clickHandler = function(e) {
+            if (!menu.contains(e.target) && !button.contains(e.target)) {
+                menu.classList.remove('show');
+                document.removeEventListener('click', clickHandler);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', clickHandler), 0);
+    }
+}
+
+// Setup touch scrolling for mobile
+function setupTouchScrolling(container) {
+    let startX, startY, scrollLeft, scrollTop;
+    let isScrolling = false;
+    
+    container.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].pageX - this.offsetLeft;
+        startY = e.touches[0].pageY - this.offsetTop;
+        scrollLeft = this.scrollLeft;
+        scrollTop = this.scrollTop;
+        isScrolling = true;
+    }, { passive: true });
+    
+    container.addEventListener('touchmove', function(e) {
+        if (!isScrolling) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - this.offsetLeft;
+        const y = e.touches[0].pageY - this.offsetTop;
+        const walkX = (x - startX) * 2;
+        const walkY = (y - startY) * 2;
+        this.scrollLeft = scrollLeft - walkX;
+        this.scrollTop = scrollTop - walkY;
+    }, { passive: false });
+    
+    container.addEventListener('touchend', function() {
+        isScrolling = false;
+    }, { passive: true });
+}
+
+// Download PDF with advanced features
 function downloadPDF() {
-    // Get current filter values
+    showLoading('Generating PDF report...');
+    
     const form = document.getElementById('filterForm');
     const formData = new FormData(form);
-    
-    // Build query string
     const params = new URLSearchParams();
+    
+    // Add current filter parameters
     for (const [key, value] of formData) {
         if (value) params.append(key, value);
     }
@@ -458,55 +1428,337 @@ function downloadPDF() {
     // Add download parameter
     params.append('download', 'pdf');
     
-    // Open in new tab
-    const url = `{% url 'students:student_list' %}?${params.toString()}`;
-    window.open(url, '_blank');
+    // Create download URL
+    const baseUrl = "{% url 'students:student_list' %}";
+    const downloadUrl = `${baseUrl}?${params.toString()}`;
+    
+    // Open in new tab for download
+    const downloadWindow = window.open(downloadUrl, '_blank');
+    
+    // Check if download started
+    setTimeout(() => {
+        if (downloadWindow && !downloadWindow.closed) {
+            downloadWindow.close();
+        }
+        hideLoading();
+    }, 3000);
 }
 
+// Export to Excel with full functionality
 function exportExcel() {
-    alert('Excel export will be available soon');
-    // You can implement Excel export here
+    showLoading('Preparing Excel export...');
+    
+    try {
+        // Get table data
+        const table = document.getElementById('studentTable');
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.table_to_sheet(table);
+        
+        // Remove action column for export
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (worksheet[cellAddress]?.v === 'Actions') {
+                // Remove action column
+                XLSX.utils.sheet_add_aoa(worksheet, [['']], { origin: cellAddress });
+            }
+        }
+        
+        // Auto-size columns
+        const maxColumns = range.e.c + 1;
+        const colWidths = [];
+        for (let i = 0; i < maxColumns; i++) {
+            colWidths.push({ wch: i === 1 ? 30 : 15 }); // Wider for student names
+        }
+        worksheet['!cols'] = colWidths;
+        
+        // Add some styling
+        for (let row = range.s.r; row <= range.e.r; row++) {
+            for (let col = range.s.c; col <= range.e.c; col++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                if (!worksheet[cellAddress]) continue;
+                
+                // Header row styling
+                if (row === 0) {
+                    worksheet[cellAddress].s = {
+                        fill: { fgColor: { rgb: "2C3E50" } },
+                        font: { color: { rgb: "FFFFFF" }, bold: true },
+                        alignment: { horizontal: "center" }
+                    };
+                }
+            }
+        }
+        
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
+        
+        // Generate filename
+        const examName = 'student-list';
+        const date = new Date().toISOString().slice(0,10);
+        const filename = `${examName}-${date}.xlsx`;
+        
+        // Save file
+        XLSX.writeFile(workbook, filename);
+        
+        hideLoading();
+    } catch (error) {
+        console.error('Excel export error:', error);
+        hideLoading();
+        alert('Error exporting to Excel. Please try again.');
+    }
 }
 
+// Print table with enhanced features
 function printTable() {
-    const printContent = document.getElementById('studentTable').outerHTML;
+    showLoading('Preparing for print...');
+    
+    // Store original content
+    const originalContent = document.body.innerHTML;
+    
+    // Create print content
+    const printContent = document.getElementById('studentTable').cloneNode(true);
+    
+    // Remove action column for print
+    printContent.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
+    
+    // Create print document
     const printWindow = window.open('', '_blank');
+    const now = new Date();
     
     printWindow.document.write(`
+        <!DOCTYPE html>
         <html>
             <head>
-                <title>Student List</title>
+                <title>Student List - {{ request.user.school.name|default:"Charles Academy" }}</title>
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th { background-color: #f8f9fa; text-align: left; }
-                    th, td { border: 1px solid #ddd; padding: 8px; }
-                    .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.85em; }
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+                    
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: 'Inter', sans-serif;
+                        font-size: 12px;
+                        line-height: 1.4;
+                        color: #333;
+                        margin: 20px;
+                    }
+                    
+                    .print-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                        padding-bottom: 15px;
+                        border-bottom: 2px solid #333;
+                    }
+                    
+                    .print-header h1 {
+                        font-size: 24px;
+                        color: #2c3e50;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .print-header p {
+                        color: #666;
+                        font-size: 14px;
+                    }
+                    
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                    }
+                    
+                    th {
+                        background-color: #2c3e50 !important;
+                        color: white !important;
+                        font-weight: 600;
+                        padding: 10px 8px;
+                        text-align: left;
+                        border: 1px solid #1a252f;
+                    }
+                    
+                    td {
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        vertical-align: top;
+                    }
+                    
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    
+                    .student-info {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    
+                    .avatar-placeholder {
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        background: #667eea;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 14px;
+                    }
+                    
+                    .badge {
+                        display: inline-block;
+                        padding: 3px 8px;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 500;
+                    }
+                    
+                    .bg-secondary { background-color: #95a5a6; color: white; }
+                    .bg-info { background-color: #3498db; color: white; }
+                    .bg-success { background-color: #27ae60; color: white; }
+                    
+                    .print-footer {
+                        margin-top: 30px;
+                        padding-top: 15px;
+                        border-top: 1px solid #ddd;
+                        text-align: center;
+                        color: #666;
+                        font-size: 11px;
+                    }
+                    
+                    @page {
+                        size: landscape;
+                        margin: 0.5cm;
+                    }
+                    
+                    @media print {
+                        body {
+                            margin: 0;
+                            padding: 10px;
+                        }
+                        
+                        .no-print {
+                            display: none !important;
+                        }
+                    }
                 </style>
             </head>
             <body>
-                <h2>Student List</h2>
-                <p>Generated: ${new Date().toLocaleDateString()}</p>
-                ${printContent}
+                <div class="print-header">
+                    <h1>Student List</h1>
+                    <p>{{ request.user.school.name|default:"Charles Academy" }}</p>
+                    <p>Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    <p>Total Students: {{ students|length }}</p>
+                </div>
+                
+                ${printContent.outerHTML}
+                
+                <div class="print-footer">
+                    <p>Confidential - For internal use only</p>
+                    <p>Page 1 of 1 • Generated by {{ request.user.get_full_name|default:"System" }}</p>
+                </div>
+                
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function() {
+                            window.close();
+                        }, 500);
+                    };
+                <\/script>
             </body>
         </html>
     `);
     
     printWindow.document.close();
-    printWindow.print();
+    
+    hideLoading();
 }
 
-// PDF Download with filters
-function downloadFilteredPDF() {
-    const form = document.getElementById('filterForm');
-    const data = new FormData(form);
-    const params = new URLSearchParams();
-    
-    for (const [key, value] of data) {
-        if (value) params.append(key, value);
-    }
-    
-    window.location.href = `{% url 'students:student_list' %}?${params.toString()}&download=pdf`;
+// Enhanced delete confirmation
+function confirmDelete(studentName) {
+    return Swal.fire({
+        title: 'Delete Student?',
+        html: `Are you sure you want to delete <strong>${studentName}</strong>?<br><br>
+               <small class="text-danger">This action cannot be undone!</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        backdrop: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+            popup: 'animated bounceIn'
+        }
+    }).then((result) => {
+        return result.isConfirmed;
+    });
 }
+
+// Loading utilities
+function showLoading(message = 'Processing...') {
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.id = 'loadingOverlay';
+    loadingOverlay.innerHTML = `
+        <div class="spinner"></div>
+        <p class="mt-3">${message}</p>
+    `;
+    document.body.appendChild(loadingOverlay);
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.remove();
+    }
+}
+
+// Initialize tooltips
+function initTooltips() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
+// Initialize on page load
+window.addEventListener('load', function() {
+    initTooltips();
+    
+    // Add performance optimizations for mobile
+    if (window.innerWidth <= 768) {
+        // Lazy load images
+        const images = document.querySelectorAll('.student-avatar[data-src]');
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        images.forEach(img => imageObserver.observe(img));
+    }
+});
+
+// Export functions for external use
+window.studentManagement = {
+    downloadPDF,
+    exportExcel,
+    printTable,
+    confirmDelete
+};
 </script>
+
+<!-- SweetAlert2 for better alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}

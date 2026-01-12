@@ -5,197 +5,304 @@
 {% block page_title %}Announcements{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h5 class="mb-0">All Announcements</h5>
-        <p class="text-muted mb-0">Manage and view all school announcements</p>
-    </div>
-    {% if request.user.role == 'ADMIN' %}
-    <a href="{% url 'announcement_create' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-2"></i> Create New
-    </a>
-    {% endif %}
-</div>
-
-<!-- Search and Filter -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search announcements..." id="searchInput">
-            <button class="btn btn-outline-primary" type="button" id="searchButton">
-                <i class="bi bi-search"></i>
-            </button>
+<div class="container-fluid px-0 px-md-2">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h5 class="mb-1 mb-md-0">All Announcements</h5>
+            <p class="text-muted mb-0 d-none d-md-block">Manage and view all school announcements</p>
+            <p class="text-muted mb-0 d-block d-md-none">School announcements</p>
         </div>
+        {% if request.user.role == 'ADMIN' %}
+        <a href="{% url 'announcement_create' %}" class="btn btn-primary w-100 w-md-auto">
+            <i class="bi bi-plus-circle me-2"></i> 
+            <span class="d-none d-sm-inline">Create New</span>
+            <span class="d-inline d-sm-none">New</span>
+        </a>
+        {% endif %}
     </div>
-    <div class="col-md-6">
-        <div class="d-flex justify-content-end">
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary active" data-filter="all">All</button>
-                <button type="button" class="btn btn-outline-secondary" data-filter="today">Today</button>
-                <button type="button" class="btn btn-outline-secondary" data-filter="week">This Week</button>
-                <button type="button" class="btn btn-outline-secondary" data-filter="month">This Month</button>
+
+    <!-- Search and Filter Section -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="input-group input-group-lg input-group-md">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0 ps-0" 
+                       placeholder="Search announcements..." id="searchInput">
+                <button class="btn btn-outline-primary d-md-none" type="button" id="searchButtonMobile">
+                    Go
+                </button>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
+                <div class="btn-group btn-group-sm" role="group" aria-label="Filter buttons">
+                    <input type="radio" class="btn-check" name="filterOptions" id="filterAll" autocomplete="off" checked>
+                    <label class="btn btn-outline-secondary" for="filterAll" data-filter="all">All</label>
+                    
+                    <input type="radio" class="btn-check" name="filterOptions" id="filterToday" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="filterToday" data-filter="today">Today</label>
+                    
+                    <input type="radio" class="btn-check" name="filterOptions" id="filterWeek" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="filterWeek" data-filter="week">Week</label>
+                    
+                    <input type="radio" class="btn-check" name="filterOptions" id="filterMonth" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="filterMonth" data-filter="month">Month</label>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Announcements Table -->
-<div class="card shadow">
-    <div class="card-body">
-        {% if announcements %}
-        <div class="table-responsive">
-            <table class="table table-hover" id="announcementsTable">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Message Preview</th>
-                        <th>Date Posted</th>
-                        {% if request.user.role == 'ADMIN' %}
-                        <th>Actions</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
+    <!-- Announcements Cards for Mobile, Table for Desktop -->
+    <div class="card shadow border-0">
+        <div class="card-body p-2 p-md-3">
+            {% if announcements %}
+            
+            <!-- Mobile View: Cards -->
+            <div class="d-block d-lg-none">
+                <div class="row g-3" id="announcementsCards">
                     {% for announcement in announcements %}
-                    <tr class="announcement-row" 
-                        data-date="{{ announcement.created_at|date:'Y-m-d' }}"
-                        data-title="{{ announcement.title|lower }}"
-                        data-message="{{ announcement.message|lower }}">
-                        <td>
-                            <strong class="text-primary">{{ announcement.title }}</strong>
-                        </td>
-                        <td>
-                            <p class="mb-0 text-muted">
-                                {{ announcement.message|truncatewords:20 }}
-                            </p>
-                            <a href="{% url 'announcement_detail' announcement.pk %}" class="text-decoration-none">
-                                <small>Read more →</small>
-                            </a>
-                        </td>
-                        <td>
-                            <div>
-                                <span class="d-block">{{ announcement.created_at|date:"F d, Y" }}</span>
-                                <small class="text-muted">{{ announcement.created_at|timesince }} ago</small>
+                    <div class="col-12 announcement-card"
+                         data-date="{{ announcement.created_at|date:'Y-m-d' }}"
+                         data-title="{{ announcement.title|lower }}"
+                         data-message="{{ announcement.message|lower }}">
+                        <div class="card border hover-shadow">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title text-primary mb-0 flex-grow-1 me-2">
+                                        {{ announcement.title|truncatechars:50 }}
+                                    </h6>
+                                    {% if request.user.role == 'ADMIN' %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border-0" type="button" 
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'announcement_detail' announcement.pk %}">
+                                                    <i class="bi bi-eye me-2"></i>View
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'announcement_edit' announcement.pk %}">
+                                                    <i class="bi bi-pencil me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="{% url 'announcement_delete' announcement.pk %}">
+                                                    <i class="bi bi-trash me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="card-text text-muted small mb-2">
+                                    {{ announcement.message|truncatewords:15 }}
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            {{ announcement.created_at|date:"M d, Y" }}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ announcement.created_at|time:"g:i A" }}
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'announcement_detail' announcement.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        Read <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
-                        </td>
-                        {% if request.user.role == 'ADMIN' %}
-                        <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <a href="{% url 'announcement_detail' announcement.pk %}" 
-                                   class="btn btn-outline-primary" title="View">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{% url 'announcement_edit' announcement.pk %}" 
-                                   class="btn btn-outline-warning" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{% url 'announcement_delete' announcement.pk %}" 
-                                   class="btn btn-outline-danger" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        </td>
-                        {% endif %}
-                    </tr>
+                        </div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1">&laquo; First</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                </li>
+                </div>
+            </div>
+            
+            <!-- Desktop View: Table -->
+            <div class="d-none d-lg-block">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="announcementsTable">
+                        <thead>
+                            <tr>
+                                <th class="border-top-0">Title</th>
+                                <th class="border-top-0">Message Preview</th>
+                                <th class="border-top-0">Date Posted</th>
+                                {% if request.user.role == 'ADMIN' %}
+                                <th class="border-top-0 text-end">Actions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for announcement in announcements %}
+                            <tr class="announcement-row" 
+                                data-date="{{ announcement.created_at|date:'Y-m-d' }}"
+                                data-title="{{ announcement.title|lower }}"
+                                data-message="{{ announcement.message|lower }}">
+                                <td style="width: 25%">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-megaphone-fill text-primary me-3"></i>
+                                        <strong class="text-primary">{{ announcement.title }}</strong>
+                                    </div>
+                                </td>
+                                <td style="width: 45%">
+                                    <p class="mb-0 text-muted">
+                                        {{ announcement.message|truncatewords:20 }}
+                                    </p>
+                                    <a href="{% url 'announcement_detail' announcement.pk %}" 
+                                       class="text-decoration-none small">
+                                        Read more <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </td>
+                                <td style="width: 20%">
+                                    <div>
+                                        <span class="d-block">{{ announcement.created_at|date:"F d, Y" }}</span>
+                                        <small class="text-muted">{{ announcement.created_at|timesince }} ago</small>
+                                    </div>
+                                </td>
+                                {% if request.user.role == 'ADMIN' %}
+                                <td style="width: 10%" class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'announcement_detail' announcement.pk %}" 
+                                           class="btn btn-outline-primary" title="View" data-bs-toggle="tooltip">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'announcement_edit' announcement.pk %}" 
+                                           class="btn btn-outline-warning" title="Edit" data-bs-toggle="tooltip">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'announcement_delete' announcement.pk %}" 
+                                           class="btn btn-outline-danger" title="Delete" data-bs-toggle="tooltip">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center pagination-sm flex-wrap">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-megaphone text-muted" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-muted mb-3">No announcements yet</h4>
+                <p class="text-muted mb-4 px-3">When announcements are created, they'll appear here.</p>
+                {% if request.user.role == 'ADMIN' %}
+                <a href="{% url 'announcement_create' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i> Create First Announcement
+                </a>
                 {% endif %}
-                
-                {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
-        
-        {% else %}
-        <div class="text-center py-5">
-            <i class="bi bi-megaphone text-muted mb-3" style="font-size: 4rem;"></i>
-            <h4 class="text-muted">No announcements yet</h4>
-            <p class="text-muted mb-4">When announcements are created, they'll appear here.</p>
-            {% if request.user.role == 'ADMIN' %}
-            <a href="{% url 'announcement_create' %}" class="btn btn-primary btn-lg">
-                <i class="bi bi-plus-circle me-2"></i> Create First Announcement
-            </a>
+            </div>
             {% endif %}
         </div>
-        {% endif %}
     </div>
-</div>
 
-<!-- Statistics Card -->
-<div class="row mt-4">
-    <div class="col-md-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                <h3 class="text-primary">{{ announcements.count }}</h3>
-                <p class="text-muted mb-0">Total Announcements</p>
+    <!-- Statistics Cards -->
+    <div class="row g-3 mt-4">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-3">
+                    <h2 class="text-primary mb-2">{{ announcements.count }}</h2>
+                    <p class="text-muted mb-0 small">Total</p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                <h3 class="text-success">
-                    {% with announcements_today=announcements|length %}
-                    {{ announcements_today }}
-                    {% endwith %}
-                </h3>
-                <p class="text-muted mb-0">This Month</p>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-3">
+                    <h2 class="text-success mb-2">
+                        {% with announcements_today=announcements|length %}
+                        {{ announcements_today }}
+                        {% endwith %}
+                    </h2>
+                    <p class="text-muted mb-0 small">This Month</p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                <h3 class="text-warning">
-                    {% now "Y" as current_year %}
-                    {% with announcements_this_year=announcements|length %}
-                    {{ announcements_this_year }}
-                    {% endwith %}
-                </h3>
-                <p class="text-muted mb-0">{{ current_year }} Total</p>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-3">
+                    <h2 class="text-warning mb-2">
+                        {% now "Y" as current_year %}
+                        {% with announcements_this_year=announcements|length %}
+                        {{ announcements_this_year }}
+                        {% endwith %}
+                    </h2>
+                    <p class="text-muted mb-0 small">{{ current_year }} Total</p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                <h3 class="text-info">
-                    {{ latest_announcement_date|date:"d M"|default:"-" }}
-                </h3>
-                <p class="text-muted mb-0">Last Announcement</p>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-3">
+                    <h2 class="text-info mb-2">
+                        {{ latest_announcement_date|date:"d M"|default:"-" }}
+                    </h2>
+                    <p class="text-muted mb-0 small">Last Announcement</p>
+                </div>
             </div>
         </div>
     </div>
@@ -205,15 +312,22 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
     const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
     const announcementRows = document.querySelectorAll('.announcement-row');
+    const announcementCards = document.querySelectorAll('.announcement-card');
     const filterButtons = document.querySelectorAll('[data-filter]');
     
     // Search functionality
     function performSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         
+        // Handle table rows (desktop)
         announcementRows.forEach(row => {
             const title = row.getAttribute('data-title');
             const message = row.getAttribute('data-message');
@@ -226,16 +340,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.style.display = 'none';
             }
         });
+        
+        // Handle cards (mobile)
+        announcementCards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const message = card.getAttribute('data-message');
+            
+            if (searchTerm === '' || 
+                title.includes(searchTerm) || 
+                message.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
     }
     
-    if (searchInput && searchButton) {
-        searchInput.addEventListener('keyup', performSearch);
-        searchButton.addEventListener('click', performSearch);
+    // Real-time search with debouncing
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 300);
+        });
     }
     
     // Filter by date functionality
     function filterByDate(filterType) {
         const today = new Date();
+        
+        // Filter table rows
         announcementRows.forEach(row => {
             const dateStr = row.getAttribute('data-date');
             const announcementDate = new Date(dateStr);
@@ -244,8 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             switch(filterType) {
                 case 'today':
-                    const isToday = announcementDate.toDateString() === today.toDateString();
-                    show = isToday;
+                    show = announcementDate.toDateString() === today.toDateString();
                     break;
                 case 'week':
                     const oneWeekAgo = new Date(today);
@@ -265,17 +398,44 @@ document.addEventListener('DOMContentLoaded', function() {
             
             row.style.display = show ? '' : 'none';
         });
+        
+        // Filter cards
+        announcementCards.forEach(card => {
+            const dateStr = card.getAttribute('data-date');
+            const announcementDate = new Date(dateStr);
+            
+            let show = false;
+            
+            switch(filterType) {
+                case 'today':
+                    show = announcementDate.toDateString() === today.toDateString();
+                    break;
+                case 'week':
+                    const oneWeekAgo = new Date(today);
+                    oneWeekAgo.setDate(today.getDate() - 7);
+                    show = announcementDate >= oneWeekAgo;
+                    break;
+                case 'month':
+                    const oneMonthAgo = new Date(today);
+                    oneMonthAgo.setMonth(today.getMonth() - 1);
+                    show = announcementDate >= oneMonthAgo;
+                    break;
+                case 'all':
+                default:
+                    show = true;
+                    break;
+            }
+            
+            card.style.display = show ? '' : 'none';
+        });
     }
     
+    // Filter button event listeners
     if (filterButtons.length > 0) {
         filterButtons.forEach(button => {
             button.addEventListener('click', function() {
-                // Remove active class from all buttons
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
-                // Apply filter
-                filterByDate(this.getAttribute('data-filter'));
+                const filterType = this.getAttribute('data-filter');
+                filterByDate(filterType);
             });
         });
     }
@@ -285,8 +445,125 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape' && searchInput) {
             searchInput.value = '';
             performSearch();
+            searchInput.blur();
         }
     });
+    
+    // Touch-friendly enhancements
+    if ('ontouchstart' in window) {
+        // Increase tap targets for mobile
+        const actionButtons = document.querySelectorAll('.btn-group .btn, .dropdown-item');
+        actionButtons.forEach(btn => {
+            btn.style.minHeight = '44px';
+            btn.style.padding = '12px 16px';
+        });
+        
+        // Better dropdown handling for mobile
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(dropdown => {
+            dropdown.addEventListener('click', function(e) {
+                if (window.innerWidth < 768) {
+                    e.stopPropagation();
+                }
+            });
+        });
+    }
 });
 </script>
+
+<style>
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .card {
+        border-radius: 12px;
+    }
+    
+    .btn-group .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    /* Improve touch targets */
+    .announcement-card .btn {
+        min-height: 36px;
+        padding: 8px 16px;
+    }
+    
+    .dropdown-menu {
+        font-size: 0.875rem;
+    }
+    
+    .dropdown-item {
+        padding: 12px 16px;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 992px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .table th, .table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Hover effects for desktop only */
+@media (hover: hover) and (pointer: fine) {
+    .announcement-row:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+    
+    .announcement-card:hover .card {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+        transition: all 0.3s ease;
+    }
+}
+
+/* Loading state for search */
+#searchInput.loading {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23007bff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-6.219-8.56'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    padding-right: 40px;
+}
+
+/* Active state for filter buttons */
+.btn-check:checked + .btn-outline-secondary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .announcement-row,
+    .announcement-card .card {
+        transition: none;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .text-muted {
+        color: #a0aec0 !important;
+    }
+}
+</style>
 {% endblock %}
