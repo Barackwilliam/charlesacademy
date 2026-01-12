@@ -1,0 +1,520 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card">
+                <div class="parent-card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 mb-2">Welcome back, {{ parent.full_name }}!</h1>
+                            <p class="mb-0 opacity-90">
+                                <i class="bi bi-person-badge me-1"></i>
+                                {{ parent.relationship }} • 
+                                <i class="bi bi-people me-1"></i>
+                                {{ parent.children_count }} child{{ parent.children_count|pluralize:"ren" }}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                                <span class="badge parent-badge">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    {{ today|date:"l, F d, Y" }}
+                                </span>
+                                {% if school_settings %}
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-building me-1"></i>
+                                    {{ school_settings.name }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">
+                        Welcome to your parent dashboard. Here you can monitor your children's academic progress, 
+                        attendance records, fee status, and stay updated with school announcements.
+                    </p>
+                    
+                    <!-- Children Quick View -->
+                    {% if parent.children_count > 0 %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="bi bi-people me-2"></i>My Children
+                            </h5>
+                            <div class="row">
+                                {% for student in parent.students.all %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="child-avatar me-3">
+                                                {{ student.full_name|make_list|first }}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ student.full_name }}</h6>
+                                                <p class="mb-0 text-muted small">
+                                                    <i class="bi bi-person-workspace me-1"></i>
+                                                    {{ student.classroom|default:"No class assigned" }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <div class="mb-1">
+                                                <i class="bi bi-person-badge me-1"></i>
+                                                {{ student.registration_number }}
+                                            </div>
+                                            <div class="mb-1">
+                                                <i class="bi bi-gender-ambiguous me-1"></i>
+                                                {{ student.gender }}
+                                            </div>
+                                            <div>
+                                                <i class="bi bi-calendar me-1"></i>
+                                                Age: {{ student.age }} years
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 d-flex gap-2">
+                                            <a href="{% url 'parents:child_attendance_single' student.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-calendar-check me-1"></i>Attendance
+                                            </a>
+                                            <a href="{% url 'parents:child_results_single' student.id %}" 
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-award me-1"></i>Results
+                                            </a>
+                                            <a href="{% url 'parents:child_fees_single' student.id %}" 
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="bi bi-cash-stack me-1"></i>Fees
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-people display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Children Assigned</h4>
+                        <p class="text-muted">You don't have any children assigned to your account yet.</p>
+                        <a href="#" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-1"></i>Request Child Assignment
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="parent-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Children</h6>
+                            <h2 class="mb-0">{{ stats.total_children }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-people text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="parent-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Avg Attendance</h6>
+                            <h2 class="mb-0">{{ stats.avg_attendance }}%</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-calendar-check text-success" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="parent-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Fee Balance</h6>
+                            <h2 class="mb-0">TZS {{ stats.total_balance|floatformat:0 }}</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-cash-stack text-warning" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="parent-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">New Announcements</h6>
+                            <h2 class="mb-0">{{ stats.recent_announcements }}</h2>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-megaphone text-info" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Attendance Summary -->
+        <div class="col-lg-6 mb-4">
+            <div class="parent-card h-100">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>Attendance Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if attendance_summary %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Child</th>
+                                    <th>Class</th>
+                                    <th>Present</th>
+                                    <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendance in attendance_summary %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="child-avatar me-2">
+                                                {{ attendance.student.full_name|make_list|first }}
+                                            </div>
+                                            <span>{{ attendance.student.full_name|truncatechars:15 }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ attendance.student.classroom }}</td>
+                                    <td>{{ attendance.present_count }}/{{ attendance.total_count }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress progress-parent flex-grow-1 me-2">
+                                                <div class="progress-bar progress-parent-bar" 
+                                                     style="width: {{ attendance.percentage }}%">
+                                                </div>
+                                            </div>
+                                            <span class="fw-bold">{{ attendance.percentage|floatformat:0 }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{% url 'parents:child_attendance' %}" class="btn btn-outline-primary w-100 mt-2">
+                        <i class="bi bi-eye me-1"></i>View Full Attendance
+                    </a>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar-x display-4 text-muted mb-3"></i>
+                        <p class="text-muted">No attendance records available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Results -->
+        <div class="col-lg-6 mb-4">
+            <div class="parent-card h-100">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-award me-2"></i>Recent Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Child</th>
+                                    <th>Subject</th>
+                                    <th>Score</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in recent_results %}
+                                <tr>
+                                    <td>{{ result.student.full_name|truncatechars:12 }}</td>
+                                    <td>{{ result.subject.name|truncatechars:15 }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ result.marks|floatformat:1 }}</span>/{{ result.max_marks }}
+                                    </td>
+                                    <td>
+                                        {% if result.grade == 'A' %}
+                                        <span class="badge grade-A">{{ result.grade }}</span>
+                                        {% elif result.grade == 'B' %}
+                                        <span class="badge grade-B">{{ result.grade }}</span>
+                                        {% elif result.grade == 'C' %}
+                                        <span class="badge grade-C">{{ result.grade }}</span>
+                                        {% elif result.grade == 'D' %}
+                                        <span class="badge grade-D">{{ result.grade }}</span>
+                                        {% elif result.grade == 'E' %}
+                                        <span class="badge grade-E">{{ result.grade }}</span>
+                                        {% else %}
+                                        <span class="badge grade-F">{{ result.grade }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{% url 'parents:child_results' %}" class="btn btn-outline-success w-100 mt-2">
+                        <i class="bi bi-eye me-1"></i>View All Results
+                    </a>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-award display-4 text-muted mb-3"></i>
+                        <p class="text-muted">No recent results available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fee Summary and Announcements -->
+    <div class="row">
+        <!-- Fee Summary -->
+        <div class="col-lg-8 mb-4">
+            <div class="parent-card h-100">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-stack me-2"></i>Fee Status Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if fee_summary %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Child</th>
+                                    <th>Total Fee</th>
+                                    <th>Paid</th>
+                                    <th>Balance</th>
+                                    <th>Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in fee_summary %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="child-avatar me-2">
+                                                {{ fee.student.full_name|make_list|first }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ fee.student.full_name|truncatechars:15 }}</strong>
+                                                <div class="small text-muted">{{ fee.student.classroom }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>TZS {{ fee.total_fee|floatformat:0 }}</td>
+                                    <td class="text-success fw-bold">TZS {{ fee.total_paid|floatformat:0 }}</td>
+                                    <td>
+                                        {% if fee.balance > 0 %}
+                                        <span class="badge bg-danger">TZS {{ fee.balance|floatformat:0 }}</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Paid in Full</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-parent">
+                                            {% widthratio fee.total_paid fee.total_fee 100 as progress %}
+                                            <div class="progress-bar progress-parent-bar" 
+                                                 style="width: {{ progress }}%">
+                                                {{ progress|floatformat:0 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="{% url 'parents:child_fees' %}" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-cash-stack me-1"></i>View All Fees
+                        </a>
+                        {% if fee_summary.0.student %}
+                        <a href="{% url 'parents:download_fee_statement' fee_summary.0.student.id %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Statement
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-cash-coin display-4 text-muted mb-3"></i>
+                        <p class="text-muted">No fee information available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Announcements -->
+        <div class="col-lg-4 mb-4">
+            <div class="parent-card h-100">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-megaphone me-2"></i>Recent Announcements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_announcements %}
+                    <div class="list-group list-group-flush">
+                        {% for announcement in recent_announcements %}
+                        <div class="list-group-item border-0 px-0 py-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    {% if announcement.announcement_type == 'IMPORTANT' %}
+                                    <span class="badge bg-danger rounded-pill p-2">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </span>
+                                    {% elif announcement.announcement_type == 'EVENT' %}
+                                    <span class="badge bg-success rounded-pill p-2">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-primary rounded-pill p-2">
+                                        <i class="bi bi-info-circle"></i>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">{{ announcement.title|truncatechars:40 }}</h6>
+                                    <p class="small text-muted mb-2">
+                                        {{ announcement.content|truncatechars:80 }}
+                                    </p>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ announcement.created_at|timesince }} ago
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'parents:announcements' %}" class="btn btn-outline-primary w-100 mt-3">
+                        <i class="bi bi-megaphone-fill me-1"></i>View All Announcements
+                    </a>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-megaphone display-4 text-muted mb-3"></i>
+                        <p class="text-muted">No announcements available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Today's Attendance -->
+    {% if today_attendance %}
+    <div class="row">
+        <div class="col-12">
+            <div class="parent-card">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-day me-2"></i>Today's Attendance Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for item in today_attendance %}
+                        <div class="col-md-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="child-avatar me-3">
+                                        {{ item.student.full_name|make_list|first }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ item.student.full_name }}</h6>
+                                        <p class="mb-0 text-muted small">{{ item.student.classroom }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    {% if item.attendance %}
+                                        {% if item.attendance.status == 'PRESENT' %}
+                                        <span class="badge bg-success p-2 fs-6">
+                                            <i class="bi bi-check-circle me-1"></i>PRESENT
+                                        </span>
+                                        <div class="small text-muted mt-2">
+                                            Time In: {{ item.attendance.time_in|time:"H:i"|default:"-" }}
+                                        </div>
+                                        {% elif item.attendance.status == 'ABSENT' %}
+                                        <span class="badge bg-danger p-2 fs-6">
+                                            <i class="bi bi-x-circle me-1"></i>ABSENT
+                                        </span>
+                                        {% elif item.attendance.status == 'LATE' %}
+                                        <span class="badge bg-warning text-dark p-2 fs-6">
+                                            <i class="bi bi-clock-history me-1"></i>LATE
+                                        </span>
+                                        <div class="small text-muted mt-2">
+                                            Time In: {{ item.attendance.time_in|time:"H:i"|default:"-" }}
+                                        </div>
+                                        {% else %}
+                                        <span class="badge bg-info p-2 fs-6">
+                                            <i class="bi bi-info-circle me-1"></i>{{ item.attendance.status }}
+                                        </span>
+                                        {% endif %}
+                                    {% else %}
+                                    <span class="badge bg-secondary p-2 fs-6">
+                                        <i class="bi bi-question-circle me-1"></i>NOT MARKED
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dashboard charts can be added here
+    document.addEventListener('DOMContentLoaded', function() {
+        // You can add Chart.js graphs here for visual statistics
+    });
+</script>
+{% endblock %}

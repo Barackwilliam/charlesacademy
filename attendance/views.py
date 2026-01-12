@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib import messages
+from dashboard .models import SchoolSettings
 
 from students.models import Student
 from teachers.models import Teacher

@@ -1,0 +1,510 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}Fee Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="mb-3 mb-md-0">
+                            <h2 class="mb-1">
+                                <i class="bi bi-cash-stack me-2"></i>Fee Management
+                            </h2>
+                            <p class="mb-0 opacity-75">
+                                Track and manage your children's school fees
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light dropdown-toggle" type="button" 
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-filter me-1"></i>
+                                    {% if selected_student %}
+                                        {{ selected_student.full_name|truncatechars:15 }}
+                                    {% else %}
+                                        All Children
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'parents:child_fees' %}">
+                                            <i class="bi bi-people me-2"></i>All Children
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% for student in parent.students.all %}
+                                    <li>
+                                        <a class="dropdown-item" 
+                                           href="{% url 'parents:child_fees_single' student.id %}">
+                                            <i class="bi bi-person me-2"></i>{{ student.full_name }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#filterModal">
+                                <i class="bi bi-funnel me-1"></i>Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family Summary -->
+    {% if family_summary.total_children > 1 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="bi bi-people-fill me-2"></i>Family Summary
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h3 class="text-primary mb-1">{{ family_summary.total_children }}</h3>
+                                <p class="mb-0 small text-muted">Total Children</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h3 class="text-success mb-1">TZS {{ family_summary.total_paid|floatformat:0 }}</h3>
+                                <p class="mb-0 small text-muted">Total Paid</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h3 class="text-warning mb-1">TZS {{ family_summary.total_balance|floatformat:0 }}</h3>
+                                <p class="mb-0 small text-muted">Total Balance</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h3 class="text-info mb-1">TZS {{ family_summary.total_fee|floatformat:0 }}</h3>
+                                <p class="mb-0 small text-muted">Total Annual Fee</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% if family_summary.total_fee > 0 %}
+                    <div class="progress mt-3" style="height: 25px;">
+                        {% widthratio family_summary.total_paid family_summary.total_fee 100 as progress %}
+                        <div class="progress-bar bg-success" style="width: {{ progress }}%">
+                            Paid: {{ progress|floatformat:1 }}%
+                        </div>
+                        {% if progress < 100 %}
+                        <div class="progress-bar bg-warning" style="width: {% widthratio family_summary.total_balance family_summary.total_fee 100 %}%">
+                            Balance: {% widthratio family_summary.total_balance family_summary.total_fee 100 %}%
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Fee Details -->
+    {% for data in fees_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                            <div class="child-avatar me-3">
+                                {{ data.student.full_name|make_list|first }}
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ data.student.full_name }}</h5>
+                                <p class="mb-0 small opacity-75">
+                                    {{ data.student.classroom }} | {{ data.student.registration_number }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'parents:download_fee_statement' data.student.id %}" 
+                               class="btn btn-light btn-sm">
+                                <i class="bi bi-download me-1"></i>Statement
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Fee Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-success bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">TZS {{ data.statistics.total_paid|floatformat:0 }}</h3>
+                                <p class="mb-0 small text-muted">Total Paid</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center 
+                                {% if data.statistics.balance > 0 %}bg-warning bg-opacity-10{% else %}bg-success bg-opacity-10{% endif %}">
+                                <div class="mb-2">
+                                    <i class="bi bi-cash-stack {% if data.statistics.balance > 0 %}text-warning{% else %}text-success{% endif %}" 
+                                       style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">TZS {{ data.statistics.balance|floatformat:0 }}</h3>
+                                <p class="mb-0 small text-muted">
+                                    {% if data.statistics.balance > 0 %}Balance Due{% else %}Paid in Full{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-primary bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-receipt text-primary" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">{{ data.statistics.payments_count }}</h3>
+                                <p class="mb-0 small text-muted">Payments Made</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-info bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-percent text-info" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">{{ data.statistics.payment_percentage|floatformat:0 }}%</h3>
+                                <p class="mb-0 small text-muted">Payment Progress</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fee Structure -->
+                    {% if data.fee_structure %}
+                    <div class="mb-4">
+                        <h6 class="mb-3">
+                            <i class="bi bi-list-check me-2"></i>Fee Structure Details
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Fee Item</th>
+                                        <th class="text-end">Amount (TZS)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if data.fee_structure.tuition_fee > 0 %}
+                                    <tr>
+                                        <td>Tuition Fee</td>
+                                        <td class="text-end">{{ data.fee_structure.tuition_fee|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    {% if data.fee_structure.exam_fee > 0 %}
+                                    <tr>
+                                        <td>Examination Fee</td>
+                                        <td class="text-end">{{ data.fee_structure.exam_fee|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    {% if data.fee_structure.library_fee > 0 %}
+                                    <tr>
+                                        <td>Library Fee</td>
+                                        <td class="text-end">{{ data.fee_structure.library_fee|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    {% if data.fee_structure.sports_fee > 0 %}
+                                    <tr>
+                                        <td>Sports Fee</td>
+                                        <td class="text-end">{{ data.fee_structure.sports_fee|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    {% if data.fee_structure.lab_fee > 0 %}
+                                    <tr>
+                                        <td>Laboratory Fee</td>
+                                        <td class="text-end">{{ data.fee_structure.lab_fee|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    {% if data.fee_structure.activity_fee > 0 %}
+                                    <tr>
+                                        <td>Activity Fee</td>
+                                        <td class="text-end">{{ data.fee_structure.activity_fee|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    {% if data.fee_structure.other_charges > 0 %}
+                                    <tr>
+                                        <td>Other Charges</td>
+                                        <td class="text-end">{{ data.fee_structure.other_charges|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    
+                                    <tr class="table-primary">
+                                        <td><strong>TOTAL FEE</strong></td>
+                                        <td class="text-end"><strong>TZS {{ data.statistics.total_fee|floatformat:0 }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Payment History -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                <i class="bi bi-clock-history me-2"></i>Payment History
+                            </h6>
+                            {% if data.payments %}
+                            <span class="badge bg-primary">
+                                {{ data.payments.paginator.count }} payment{{ data.payments.paginator.count|pluralize }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if data.payments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Receipt No</th>
+                                        <th>Payment Mode</th>
+                                        <th>Amount (TZS)</th>
+                                        <th>Academic Year</th>
+                                        <th>Verified By</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in data.payments %}
+                                    <tr>
+                                        <td>{{ payment.date|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <code>{{ payment.receipt_no }}</code>
+                                            {% if payment.transaction_id %}
+                                            <br><small class="text-muted">Ref: {{ payment.transaction_id }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if payment.payment_mode == 'CASH' %}
+                                            <span class="badge bg-success">Cash</span>
+                                            {% elif payment.payment_mode == 'BANK' %}
+                                            <span class="badge bg-primary">Bank</span>
+                                            {% elif payment.payment_mode == 'MOBILE' %}
+                                            <span class="badge bg-info">Mobile</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ payment.payment_mode }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-success fw-bold">
+                                            {{ payment.amount_paid|floatformat:0 }}
+                                        </td>
+                                        <td>{{ payment.academic_year }}</td>
+                                        <td>
+                                            {% if payment.verified_by %}
+                                            {{ payment.verified_by.get_full_name|default:payment.verified_by.username }}
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if payment.is_verified %}
+                                            <span class="badge bg-success">Verified</span>
+                                            {% else %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="bg-light">
+                                    <tr>
+                                        <td colspan="3"><strong>Total Paid</strong></td>
+                                        <td class="text-success fw-bold">
+                                            TZS {{ data.statistics.total_paid|floatformat:0 }}
+                                        </td>
+                                        <td colspan="3"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if data.paginator.num_pages > 1 %}
+                        <nav aria-label="Payment history pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if data.payments.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ data.payments.previous_page_number }}{% if selected_student %}&student={{ selected_student.id }}{% endif %}" 
+                                       aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for num in data.paginator.page_range %}
+                                    {% if num == data.payments.number %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% else %}
+                                        {% if num > data.payments.number|add:'-3' and num < data.payments.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if selected_student %}&student={{ selected_student.id }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if data.payments.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ data.payments.next_page_number }}{% if selected_student %}&student={{ selected_student.id }}{% endif %}" 
+                                       aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-cash-coin display-4 text-muted mb-3"></i>
+                            <p class="text-muted">No payment records found.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Payment Summary -->
+                    {% if data.payment_modes %}
+                    <div class="mt-4 pt-4 border-top">
+                        <h6 class="mb-3">
+                            <i class="bi bi-pie-chart me-2"></i>Payment Summary by Mode
+                        </h6>
+                        <div class="row">
+                            {% for mode in data.payment_modes %}
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge 
+                                            {% if mode.payment_mode == 'CASH' %}bg-success
+                                            {% elif mode.payment_mode == 'BANK' %}bg-primary
+                                            {% elif mode.payment_mode == 'MOBILE' %}bg-info
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ mode.payment_mode }}
+                                        </span>
+                                        <span class="small text-muted">{{ mode.count }} payment{{ mode.count|pluralize }}</span>
+                                    </div>
+                                    <h5 class="mb-1">TZS {{ mode.total_amount|floatformat:0 }}</h5>
+                                    <div class="progress" style="height: 8px;">
+                                        {% widthratio mode.total_amount data.statistics.total_paid 100 as percentage %}
+                                        <div class="progress-bar 
+                                            {% if mode.payment_mode == 'CASH' %}bg-success
+                                            {% elif mode.payment_mode == 'BANK' %}bg-primary
+                                            {% elif mode.payment_mode == 'MOBILE' %}bg-info
+                                            {% else %}bg-secondary{% endif %}" 
+                                             style="width: {{ percentage }}%">
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted text-end mt-1">{{ percentage|floatformat:1 }}% of total</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="row">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-cash-coin display-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">No Fee Information</h4>
+                    <p class="text-muted">No fee information available for your children.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">
+                    <i class="bi bi-funnel me-2"></i>Filter Payments
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get" id="filterForm">
+                    {% if selected_student %}
+                    <input type="hidden" name="student" value="{{ selected_student.id }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Academic Year</label>
+                        <select name="year" class="form-select">
+                            <option value="ALL">All Years</option>
+                            {% for year in available_years %}
+                            <option value="{{ year }}" {% if year == filter_year %}selected{% endif %}>
+                                {{ year }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Payment Status</label>
+                        <select name="status" class="form-select">
+                            <option value="ALL">All Status</option>
+                            <option value="VERIFIED" {% if filter_status == "VERIFIED" %}selected{% endif %}>Verified Only</option>
+                            <option value="PENDING" {% if filter_status == "PENDING" %}selected{% endif %}>Pending Only</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function applyFilters() {
+        document.getElementById('filterForm').submit();
+    }
+    
+    // Format currency display
+    document.addEventListener('DOMContentLoaded', function() {
+        const currencyElements = document.querySelectorAll('[class*="TZS"]');
+        currencyElements.forEach(el => {
+            const text = el.textContent;
+            const amount = parseFloat(text.replace(/[^\d.]/g, ''));
+            if (!isNaN(amount)) {
+                el.textContent = 'TZS ' + amount.toLocaleString('en-US');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

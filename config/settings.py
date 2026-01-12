@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-67v28s=*bf@a$^9)of-_3d)99_*h_=7tx0ij&8h@2o!y!y&i7w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'exams',
     'fees',
     'dashboard',
+    'parents'
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -72,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'students.middleware.AutoLinkStudentMiddleware',
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -94,7 +97,8 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -153,4 +157,15 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
+
+
+
+# settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # For Gmail
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'info.charlesacademy@gmail.com'  # Your email
+EMAIL_HOST_PASSWORD = 'fxxh twid rtgt sdkv'  # App password (not your regular password)
+DEFAULT_FROM_EMAIL = 'info.charlesacademy@gmail.com'
 

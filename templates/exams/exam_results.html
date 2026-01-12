@@ -4,7 +4,31 @@
 {% block content %}
 <h3>Results for {{ exam.name }} ({{ exam.get_exam_type_display }})</h3>
 
-<table class="table table-bordered">
+<!-- Print and Download Controls -->
+<div class="mb-3 d-print-none">
+    <!-- <button class="btn btn-primary" onclick="window.print()">
+        <i class="fas fa-print"></i> Print Results
+    </button> -->
+    <button class="btn btn-success" onclick="downloadAsPDF()">
+        <i class="fas fa-download"></i> Download as PDF
+    </button>
+    <button class="btn btn-info" onclick="exportToExcel()">
+        <i class="fas fa-file-excel"></i> Export to Excel
+    </button>
+    <button class="btn btn-secondary" onclick="togglePrintView()">
+        <i class="fas fa-eye"></i> Toggle Print View
+    </button>
+</div>
+
+<!-- Print Header (only shows when printing) -->
+<div class="print-header d-none d-print-block">
+    <h2 class="text-center">{{ exam.name }} Results</h2>
+    <p class="text-center"><strong>Exam Type:</strong> {{ exam.get_exam_type_display }}</p>
+    <p class="text-center"><strong>Date:</strong> <span id="print-date"></span></p>
+    <hr>
+</div>
+
+<table class="table table-bordered" id="results-table">
     <thead>
         <tr>
             <th>#</th>
@@ -37,4 +61,259 @@
     </tbody>
 </table>
 
+<!-- Summary Statistics -->
+<div class="card mt-4 d-print-none">
+    <div class="card-header">
+        <h5>Summary Statistics</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <p><strong>Total Students:</strong> <span id="total-students">{{ students|length }}</span></p>
+            </div>
+            <div class="col-md-3">
+                <p><strong>Total Subjects:</strong> <span id="total-subjects">{{ subjects|length }}</span></p>
+            </div>
+            <div class="col-md-3">
+                <p><strong>Top Score:</strong> <span id="top-score">Calculating...</span></p>
+            </div>
+            <div class="col-md-3">
+                <p><strong>Class Average:</strong> <span id="class-average">Calculating...</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Print-specific styles */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        
+        .print-header, .print-header *,
+        #results-table, #results-table * {
+            visibility: visible;
+        }
+        
+        .print-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 10px;
+        }
+        
+        #results-table {
+            position: absolute;
+            top: 150px;
+            left: 0;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        #results-table th {
+            background-color: #f8f9fa !important;
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            font-weight: bold;
+        }
+        
+        #results-table td {
+            border: 1px solid #dee2e6;
+            padding: 6px;
+        }
+        
+        .btn, .card, .d-print-none {
+            display: none !important;
+        }
+        
+        @page {
+            size: landscape;
+            margin: 0.5cm;
+        }
+    }
+    
+    /* Screen styles */
+    .print-view table {
+        font-size: 12px;
+    }
+    
+    .print-view th, .print-view td {
+        padding: 4px 8px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+// Set current date for print
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const printDate = document.getElementById('print-date');
+    if (printDate) {
+        printDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+    }
+    
+    // Calculate statistics
+    calculateStatistics();
+});
+
+// Calculate summary statistics
+function calculateStatistics() {
+    const totalElements = document.querySelectorAll('td:nth-last-child(3)'); // Total column
+    const averageElements = document.querySelectorAll('td:nth-last-child(2)'); // Average column
+    const gradeElements = document.querySelectorAll('td:last-child'); // Grade column
+    
+    if (totalElements.length > 0) {
+        let maxTotal = 0;
+        let sumAverages = 0;
+        let gradeCounts = {};
+        
+        totalElements.forEach((td, index) => {
+            const total = parseFloat(td.textContent) || 0;
+            if (total > maxTotal) maxTotal = total;
+            
+            if (averageElements[index]) {
+                const avg = parseFloat(averageElements[index].textContent) || 0;
+                sumAverages += avg;
+            }
+            
+            if (gradeElements[index]) {
+                const grade = gradeElements[index].textContent.trim();
+                gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
+            }
+        });
+        
+        document.getElementById('top-score').textContent = maxTotal;
+        document.getElementById('class-average').textContent = 
+            (sumAverages / totalElements.length).toFixed(2);
+        
+        // Optional: Display grade distribution
+        console.log('Grade Distribution:', gradeCounts);
+    }
+}
+
+// Toggle print-friendly view
+function togglePrintView() {
+    document.body.classList.toggle('print-view');
+    document.getElementById('results-table').classList.toggle('table-sm');
+    
+    const button = event.target.closest('button');
+    if (document.body.classList.contains('print-view')) {
+        button.innerHTML = '<i class="fas fa-desktop"></i> Normal View';
+    } else {
+        button.innerHTML = '<i class="fas fa-eye"></i> Toggle Print View';
+    }
+}
+
+// Export to Excel
+function exportToExcel() {
+    const table = document.getElementById('results-table');
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.table_to_sheet(table);
+    
+    // Auto-size columns
+    const wscols = [];
+    const maxColumns = table.rows[0].cells.length;
+    for (let i = 0; i < maxColumns; i++) {
+        wscols.push({ wch: 15 });
+    }
+    worksheet['!cols'] = wscols;
+    
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+    XLSX.writeFile(workbook, `{{ exam.name|slugify }}-results-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// Download as PDF using jsPDF and html2canvas
+function downloadAsPDF() {
+    const element = document.getElementById('results-table');
+    const printHeader = document.querySelector('.print-header');
+    
+    // Create a temporary container for PDF generation
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.width = '1000px';
+    tempContainer.style.padding = '20px';
+    
+    // Clone the content
+    const headerClone = printHeader.cloneNode(true);
+    const tableClone = element.cloneNode(true);
+    
+    tempContainer.appendChild(headerClone);
+    tempContainer.appendChild(tableClone);
+    document.body.appendChild(tempContainer);
+    
+    html2canvas(tempContainer, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('landscape');
+        const imgWidth = 280; // PDF width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`{{ exam.name|slugify }}-results-${new Date().toISOString().slice(0,10)}.pdf`);
+        
+        // Clean up
+        document.body.removeChild(tempContainer);
+    });
+}
+
+// Enhanced print function
+function enhancedPrint() {
+    // Add print-specific classes
+    document.body.classList.add('printing');
+    
+    // Show loading indicator
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = '<div class="text-center p-5"><h3>Preparing for print...</h3></div>';
+    
+    // Wait a moment then trigger print
+    setTimeout(() => {
+        window.print();
+        
+        // Restore content
+        document.body.innerHTML = originalContent;
+        document.body.classList.remove('printing');
+        
+        // Re-attach event listeners
+        calculateStatistics();
+    }, 500);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + P
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        enhancedPrint();
+    }
+    
+    // Ctrl/Cmd + E for Excel
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        exportToExcel();
+    }
+});
+
+// Add event listeners to buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const printBtn = document.querySelector('button[onclick="window.print()"]');
+    if (printBtn) {
+        printBtn.setAttribute('onclick', 'enhancedPrint()');
+    }
+});
+</script>
 {% endblock %}

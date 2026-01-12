@@ -1,0 +1,41 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="parent-card fade-in">
+                <div class="card-body py-5">
+                    <i class="bi bi-exclamation-triangle display-1 text-danger mb-4"></i>
+                    <h1 class="display-4 text-danger mb-3">500</h1>
+                    <h2 class="mb-4">Server Error</h2>
+                    <p class="lead mb-4">
+                        Something went wrong on our end. Our team has been notified 
+                        and we're working to fix the issue.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'parents:dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                        </a>
+                        <a href="{% url 'parents:announcements' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-megaphone me-2"></i>View Announcements
+                        </a>
+                    </div>
+                    <hr class="my-4">
+                    <div class="text-start">
+                        <h6>What you can try:</h6>
+                        <ul class="text-start">
+                            <li>Refresh the page</li>
+                            <li>Clear your browser cache</li>
+                            <li>Try again in a few minutes</li>
+                            <li>Contact support if the problem persists</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

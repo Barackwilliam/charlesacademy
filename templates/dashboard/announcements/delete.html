@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Announcement - Charles Academy SMS{% endblock %}
+{% block page_title %}Delete Announcement{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Confirm Deletion</h5>
+                    <a href="{% url 'announcement_detail' announcement.pk %}" class="btn btn-sm btn-light">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Warning Icon -->
+                <div class="text-center mb-4">
+                    <div class="warning-icon mb-3">
+                        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-danger">Warning: Irreversible Action</h4>
+                </div>
+                
+                <!-- Announcement Preview -->
+                <div class="announcement-preview p-3 mb-4 border rounded bg-light">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 text-primary">{{ announcement.title }}</h6>
+                        <small class="text-muted">{{ announcement.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    <p class="text-muted mb-2">{{ announcement.message|truncatewords:30 }}</p>
+                    <div class="text-muted small">
+                        <i class="bi bi-clock me-1"></i>
+                        Posted {{ announcement.created_at|timesince }} ago
+                    </div>
+                </div>
+                
+                <!-- Warning Messages -->
+                <div class="alert alert-warning">
+                    <div class="d-flex">
+                        <i class="bi bi-exclamation-octagon me-3" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>This action cannot be undone!</strong><br>
+                            Once deleted, this announcement will be permanently removed from the system.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confirmation Checkboxes -->
+                <div class="mb-4">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="confirmDelete">
+                        <label class="form-check-label" for="confirmDelete">
+                            I understand that this action is permanent
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="confirmNoBackup">
+                        <label class="form-check-label" for="confirmNoBackup">
+                            I have backed up any important information
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="confirmAuthority">
+                        <label class="form-check-label" for="confirmAuthority">
+                            I have the authority to delete this announcement
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Deletion Form -->
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    
+                    <!-- Optional Reason for Deletion -->
+                    <div class="mb-4">
+                        <label for="deletionReason" class="form-label">
+                            <small>Reason for deletion (optional):</small>
+                        </label>
+                        <textarea class="form-control" 
+                                  id="deletionReason" 
+                                  name="deletion_reason" 
+                                  rows="3"
+                                  placeholder="Briefly explain why you're deleting this announcement..."></textarea>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'announcement_detail' announcement.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i> Cancel
+                        </a>
+                        <button type="submit" 
+                                class="btn btn-danger" 
+                                id="deleteButton"
+                                disabled>
+                            <i class="bi bi-trash me-2"></i> Delete Announcement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Statistics Card -->
+        <div class="card shadow mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Deletion Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="border rounded p-2">
+                            <h5 class="mb-0">{{ announcement.created_at|date:"d" }}</h5>
+                            <small class="text-muted">Days Old</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded p-2">
+                            <h5 class="mb-0">{{ announcement.pk|stringformat:"04d" }}</h5>
+                            <small class="text-muted">Announcement ID</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded p-2">
+                            <h5 class="mb-0">{{ announcement.message|wordcount }}</h5>
+                            <small class="text-muted">Word Count</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmDelete = document.getElementById('confirmDelete');
+    const confirmNoBackup = document.getElementById('confirmNoBackup');
+    const confirmAuthority = document.getElementById('confirmAuthority');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    // Enable/disable delete button based on checkboxes
+    function updateDeleteButton() {
+        if (confirmDelete.checked && confirmNoBackup.checked && confirmAuthority.checked) {
+            deleteButton.disabled = false;
+            deleteButton.innerHTML = '<i class="bi bi-trash me-2"></i> Confirm Deletion';
+        } else {
+            deleteButton.disabled = true;
+            deleteButton.innerHTML = '<i class="bi bi-trash me-2"></i> Delete Announcement';
+        }
+    }
+    
+    // Add event listeners to checkboxes
+    [confirmDelete, confirmNoBackup, confirmAuthority].forEach(checkbox => {
+        checkbox.addEventListener('change', updateDeleteButton);
+    });
+    
+    // Form submission with confirmation
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+            if (!confirmDelete.checked || !confirmNoBackup.checked || !confirmAuthority.checked) {
+                e.preventDefault();
+                alert('Please confirm all checkboxes before deleting.');
+                return;
+            }
+            
+            const finalConfirmation = confirm('Are you absolutely sure you want to delete this announcement?\n\nThis action cannot be undone.');
+            
+            if (!finalConfirmation) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Change button to show processing
+            deleteButton.disabled = true;
+            deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+            
+            // Optional: Add delay to show processing
+            setTimeout(() => {
+                // Form will submit
+            }, 1000);
+        });
+    }
+    
+    // Add confirmation modal on page leave (optional)
+    let formChanged = false;
+    const formInputs = deleteForm.querySelectorAll('input, textarea');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            formChanged = true;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+});
+
+// Countdown timer for auto-redirect after deletion (optional)
+function startCountdown(seconds) {
+    let timeLeft = seconds;
+    const countdownElement = document.getElementById('countdown');
+    
+    if (countdownElement) {
+        const countdownInterval = setInterval(() => {
+            countdownElement.textContent = timeLeft;
+            timeLeft--;
+            
+            if (timeLeft < 0) {
+                clearInterval(countdownInterval);
+                window.location.href = "{% url 'announcement_list' %}";
+            }
+        }, 1000);
+    }
+}
+</script>
+
+<style>
+.warning-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.announcement-preview {
+    border-left: 4px solid #dc3545 !important;
+    background: linear-gradient(to right, #fff 0%, #f8d7da 100%);
+}
+
+#deleteButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-check-input:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock %}

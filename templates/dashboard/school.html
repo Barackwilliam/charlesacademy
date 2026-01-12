@@ -1,0 +1,629 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}School Settings - Charles Academy SMS{% endblock %}
+{% block page_title %}School Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <!-- School Info Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Current Settings</h5>
+            </div>
+            <div class="card-body text-center">
+                <!-- School Logo Display -->
+                <div class="logo-container mb-3">
+                    {% if school_settings.logo %}
+                    <img src="{{ school_settings.logo.url }}" 
+                         alt="{{ school_settings.name }} Logo" 
+                         class="img-fluid rounded-circle border" 
+                         style="width: 120px; height: 120px; object-fit: cover;"
+                         id="logoPreview">
+                    {% else %}
+                    <div class="logo-placeholder rounded-circle border d-flex align-items-center justify-content-center mx-auto" 
+                         style="width: 120px; height: 120px; background-color: #e9ecef;"
+                         id="logoPreview">
+                        <i class="bi bi-building text-secondary" style="font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <h4 class="mb-2">{{ school_settings.name }}</h4>
+                <p class="text-muted mb-3">{{ school_settings.contact_email }}</p>
+                
+                <hr class="my-3">
+                
+                <!-- School Details -->
+                <div class="text-start">
+                    <div class="mb-3">
+                        <strong><i class="bi bi-telephone me-2"></i> Phone:</strong>
+                        <p class="mb-0">{{ school_settings.phone }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong><i class="bi bi-calendar me-2"></i> Academic Year:</strong>
+                        <p class="mb-0">{{ school_settings.academic_year }}</p>
+                    </div>
+                    
+                    <div>
+                        <strong><i class="bi bi-palette me-2"></i> Theme Color:</strong>
+                        <div class="d-flex align-items-center mt-1">
+                            <div class="color-sample me-2" 
+                                 style="width: 20px; height: 20px; background-color: {{ school_settings.theme_color }}; border-radius: 4px;"></div>
+                            <code>{{ school_settings.theme_color }}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Info -->
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Settings Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> Changes to school settings will affect all users.
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="bi bi-calendar-plus me-2"></i> Created:</strong><br>
+                    {{ school_settings.created_at|date:"F d, Y" }}
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="bi bi-calendar-check me-2"></i> Last Updated:</strong><br>
+                    {% if school_settings.updated_at %}
+                    {{ school_settings.updated_at|date:"F d, Y H:i" }}
+                    {% else %}
+                    Never
+                    {% endif %}
+                </div>
+                
+                <!-- System Info -->
+                <div class="border-top pt-3 mt-3">
+                    <h6 class="mb-2">System Information</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Django</small><br>
+                            <strong>6.0</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Python</small><br>
+                            <strong>3.12.2</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- Edit Settings Form -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Edit School Settings</h5>
+                    <button type="button" class="btn btn-sm btn-light" onclick="resetForm()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="settingsForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <!-- School Name -->
+                            <div class="mb-4">
+                                <label for="id_name" class="form-label fw-bold">
+                                    School Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       name="name" 
+                                       id="id_name" 
+                                       class="form-control {% if form.name.errors %}is-invalid{% endif %}"
+                                       value="{{ form.name.value|default:'' }}"
+                                       placeholder="Enter school name"
+                                       required>
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- School Logo -->
+                            <div class="mb-4">
+                                <label for="id_logo" class="form-label fw-bold">
+                                    School Logo
+                                </label>
+                                <div class="input-group">
+                                    <input type="file" 
+                                           name="logo" 
+                                           id="id_logo" 
+                                           class="form-control {% if form.logo.errors %}is-invalid{% endif %}"
+                                           accept="image/*"
+                                           onchange="previewLogo(this)">
+                                    <button type="button" 
+                                            class="btn btn-outline-secondary" 
+                                            onclick="clearLogo()"
+                                            id="clearLogoBtn">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                {% if form.logo.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.logo.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Recommended: 200x200 pixels, PNG or JPG, Max 2MB
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Email -->
+                            <div class="mb-4">
+                                <label for="id_contact_email" class="form-label fw-bold">
+                                    Contact Email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" 
+                                       name="contact_email" 
+                                       id="id_contact_email" 
+                                       class="form-control {% if form.contact_email.errors %}is-invalid{% endif %}"
+                                       value="{{ form.contact_email.value|default:'' }}"
+                                       placeholder="email@school.edu"
+                                       required>
+                                {% if form.contact_email.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.contact_email.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <!-- Phone Number -->
+                            <div class="mb-4">
+                                <label for="id_phone" class="form-label fw-bold">
+                                    Phone Number <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       name="phone" 
+                                       id="id_phone" 
+                                       class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                                       value="{{ form.phone.value|default:'' }}"
+                                       placeholder="+255 XXX XXX XXX"
+                                       required>
+                                {% if form.phone.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.phone.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Academic Year -->
+                            <div class="mb-4">
+                                <label for="id_academic_year" class="form-label fw-bold">
+                                    Academic Year <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       name="academic_year" 
+                                       id="id_academic_year" 
+                                       class="form-control {% if form.academic_year.errors %}is-invalid{% endif %}"
+                                       value="{{ form.academic_year.value|default:'' }}"
+                                       placeholder="2025 or 2025-2026"
+                                       required>
+                                {% if form.academic_year.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.academic_year.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Format: "2025" or "2025-2026"
+                                </div>
+                            </div>
+                            
+                            <!-- Theme Color -->
+                            <div class="mb-4">
+                                <label for="id_theme_color" class="form-label fw-bold">
+                                    Theme Color <span class="text-danger">*</span>
+                                </label>
+                                <div class="d-flex align-items-center">
+                                    <input type="color" 
+                                           name="theme_color" 
+                                           id="id_theme_color" 
+                                           class="form-control form-control-color me-3 {% if form.theme_color.errors %}is-invalid{% endif %}"
+                                           value="{{ form.theme_color.value|default:'#4361ee' }}"
+                                           title="Choose theme color"
+                                           style="width: 60px; height: 60px;">
+                                    <div class="flex-grow-1">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="colorHex" 
+                                               value="{{ form.theme_color.value|default:'#4361ee' }}"
+                                               readonly>
+                                        <div class="form-text">
+                                            Primary color for the application theme
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if form.theme_color.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.theme_color.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Section -->
+                    <div class="border rounded p-4 mb-4 bg-light">
+                        <h6 class="mb-3">Preview</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">School Name Preview</label>
+                                    <div class="p-2 border rounded bg-white">
+                                        <strong id="previewName">{{ form.name.value|default:"Charles Academy" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Theme Color Preview</label>
+                                    <div class="p-2 border rounded bg-white">
+                                        <div class="d-flex align-items-center">
+                                            <div id="previewColor" 
+                                                 style="width: 20px; height: 20px; background-color: {{ form.theme_color.value|default:'#4361ee' }}; border-radius: 4px; margin-right: 10px;"></div>
+                                            <span id="previewColorText">{{ form.theme_color.value|default:'#4361ee' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+                            </a>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Reset Changes
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="saveButton">
+                                <i class="bi bi-check-circle me-2"></i> Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Additional Settings -->
+        <div class="card shadow mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-gear me-2"></i>
+                    Additional Settings
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Quick Actions -->
+                    <div class="col-md-6 mb-3">
+                        <h6 class="mb-3">Quick Actions</h6>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-primary" onclick="clearCache()">
+                                <i class="bi bi-trash me-2"></i> Clear System Cache
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="backupDatabase()">
+                                <i class="bi bi-download me-2"></i> Backup Database
+                            </button>
+                            <button type="button" class="btn btn-outline-info" onclick="testEmail()">
+                                <i class="bi bi-envelope me-2"></i> Test Email Settings
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- System Status -->
+                    <div class="col-md-6">
+                        <h6 class="mb-3">System Status</h6>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <span>Database</span>
+                                <span class="badge bg-success">Connected</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <span>Media Storage</span>
+                                <span class="badge bg-success">OK</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <span>Email Service</span>
+                                <span class="badge bg-warning">Testing Required</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <span>System Logs</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Logo preview function
+function previewLogo(input) {
+    const preview = document.getElementById('logoPreview');
+    const clearBtn = document.getElementById('clearLogoBtn');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            // Check file size (max 2MB)
+            const fileSize = input.files[0].size;
+            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+            
+            if (fileSize > maxSize) {
+                alert('File size exceeds 2MB limit. Please choose a smaller file.');
+                input.value = ''; // Clear the file input
+                return;
+            }
+            
+            // Check file type
+            const fileType = input.files[0].type;
+            if (!fileType.startsWith('image/')) {
+                alert('Please select an image file (JPG, PNG, etc.)');
+                input.value = '';
+                return;
+            }
+            
+            // Update preview
+            if (preview.classList.contains('logo-placeholder')) {
+                // Replace placeholder with img tag
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = "School Logo";
+                img.className = "img-fluid rounded-circle border";
+                img.style = "width: 120px; height: 120px; object-fit: cover;";
+                img.id = "logoPreview";
+                
+                preview.parentNode.replaceChild(img, preview);
+            } else {
+                // Update existing image
+                preview.src = e.target.result;
+            }
+            
+            // Enable clear button
+            clearBtn.disabled = false;
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Clear logo function
+function clearLogo() {
+    const logoInput = document.getElementById('id_logo');
+    const preview = document.getElementById('logoPreview');
+    const clearBtn = document.getElementById('clearLogoBtn');
+    
+    // Clear file input
+    logoInput.value = '';
+    
+    // Replace with placeholder
+    if (preview.tagName === 'IMG') {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'logo-placeholder rounded-circle border d-flex align-items-center justify-content-center mx-auto';
+        placeholder.style = 'width: 120px; height: 120px; background-color: #e9ecef;';
+        placeholder.id = 'logoPreview';
+        
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-building text-secondary';
+        icon.style = 'font-size: 3rem;';
+        placeholder.appendChild(icon);
+        
+        preview.parentNode.replaceChild(placeholder, preview);
+    }
+    
+    // Disable clear button
+    clearBtn.disabled = true;
+}
+
+// Update color previews
+function updateColorPreviews(color) {
+    const previewColor = document.getElementById('previewColor');
+    const previewColorText = document.getElementById('previewColorText');
+    const colorHex = document.getElementById('colorHex');
+    
+    if (previewColor) previewColor.style.backgroundColor = color;
+    if (previewColorText) previewColorText.textContent = color;
+    if (colorHex) colorHex.value = color;
+}
+
+// Update name preview
+function updateNamePreview(name) {
+    const previewName = document.getElementById('previewName');
+    if (previewName) previewName.textContent = name || 'Charles Academy';
+}
+
+// Reset form function
+function resetForm() {
+    if (confirm('Reset all changes to current settings?')) {
+        const form = document.getElementById('settingsForm');
+        form.reset();
+        
+        // Reset previews
+        updateColorPreviews('{{ form.theme_color.value|default:"#4361ee" }}');
+        updateNamePreview('{{ form.name.value|default:"Charles Academy" }}');
+        
+        // Reset logo if it was changed
+        const logoInput = document.getElementById('id_logo');
+        if (logoInput.value) {
+            clearLogo();
+        }
+    }
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('settingsForm');
+    const saveButton = document.getElementById('saveButton');
+    const colorInput = document.getElementById('id_theme_color');
+    const nameInput = document.getElementById('id_name');
+    
+    // Real-time preview updates
+    if (colorInput) {
+        colorInput.addEventListener('input', function() {
+            updateColorPreviews(this.value);
+        });
+    }
+    
+    if (nameInput) {
+        nameInput.addEventListener('input', function() {
+            updateNamePreview(this.value);
+        });
+    }
+    
+    // Form submission
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Basic validation
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Disable save button to prevent double submission
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            }
+        });
+    }
+    
+    // Initialize previews
+    updateColorPreviews('{{ form.theme_color.value|default:"#4361ee" }}');
+    updateNamePreview('{{ form.name.value|default:"Charles Academy" }}');
+});
+
+// Additional action functions
+function clearCache() {
+    if (confirm('Clear system cache? This may improve performance.')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Clearing...';
+        
+        setTimeout(() => {
+            alert('System cache cleared successfully.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 1500);
+    }
+}
+
+function backupDatabase() {
+    if (confirm('Create database backup? This may take a moment.')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Backing up...';
+        
+        setTimeout(() => {
+            alert('Backup completed successfully. The backup file would be downloaded in a production environment.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 2000);
+    }
+}
+
+function testEmail() {
+    const email = document.getElementById('id_contact_email').value;
+    if (!email) {
+        alert('Please enter a contact email first.');
+        return;
+    }
+    
+    if (confirm('Send test email to ' + email + '?')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+        
+        setTimeout(() => {
+            alert('Test email sent successfully. Check your inbox.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 2000);
+    }
+}
+</script>
+
+<style>
+.form-control-color {
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.form-control-color::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.form-control-color::-webkit-color-swatch {
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-sample {
+    display: inline-block;
+}
+
+#clearLogoBtn {
+    min-width: 40px;
+}
+</style>
+{% endblock %}

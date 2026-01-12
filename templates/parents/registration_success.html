@@ -1,0 +1,64 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow text-center">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <div class="success-icon mb-3">
+                            <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                        </div>
+                        
+                        <h2 class="card-title mb-3">Registration Successful!</h2>
+                        
+                        <div class="alert alert-success mb-4">
+                            <i class="fas fa-envelope me-2"></i>
+                            A confirmation email has been sent to your email address.
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">What happens next?</h5>
+                            </div>
+                            <div class="card-body text-start">
+                                <ol class="mb-0">
+                                    <li class="mb-2">
+                                        <strong>Admin Approval:</strong> Your account is pending administrative approval.
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Email Notification:</strong> You will receive an email once your account is approved.
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Login Access:</strong> After approval, you can login using your credentials.
+                                    </li>
+                                    <li>
+                                        <strong>Portal Access:</strong> You will have access to your child's information, attendance, results, and fees.
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-clock me-2"></i>
+                            Approval typically takes 24-48 hours. If you don't hear back, please contact the school administration.
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-home me-2"></i>Back to Home
+                            </a>
+                            <a href="{% url 'parents:login' %}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Go to Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,343 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Profile Summary -->
+        <div class="col-lg-4 mb-4">
+            <div class="parent-card fade-in sticky-top" style="top: 20px;">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        {% if parent.profile_picture %}
+                        <img src="{{ parent.profile_picture.url }}" alt="{{ parent.full_name }}" 
+                             class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                        <div class="child-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2rem;">
+                            {{ parent.get_initials }}
+                        </div>
+                        {% endif %}
+                        <h4 class="mb-1">{{ parent.full_name }}</h4>
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-person-badge me-1"></i>
+                            {{ parent.get_relationship_display }}
+                        </p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-primary">
+                                <i class="bi bi-phone me-1"></i>{{ parent.phone }}
+                            </span>
+                            <span class="badge bg-success">
+                                <i class="bi bi-envelope me-1"></i>{{ parent.email }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-start mb-4">
+                        <h6 class="mb-3">
+                            <i class="bi bi-info-circle me-2"></i>Account Information
+                        </h6>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Username</small>
+                            <strong>{{ parent.user.username }}</strong>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Account Status</small>
+                            {% if parent.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Member Since</small>
+                            <strong>{{ parent.created_at|date:"d M Y" }}</strong>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Last Login</small>
+                            <strong>{{ parent.user.last_login|date:"d M Y H:i"|default:"Never" }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="text-start">
+                        <h6 class="mb-3">
+                            <i class="bi bi-people me-2"></i>Children Information
+                        </h6>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Number of Children</small>
+                            <h4 class="text-primary">{{ parent.children_count }}</h4>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Children List</small>
+                            <div class="mt-2">
+                                {% for student in parent.students.all %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="child-avatar me-2">
+                                        {{ student.full_name|make_list|first }}
+                                    </div>
+                                    <div>
+                                        <strong class="d-block">{{ student.full_name }}</strong>
+                                        <small class="text-muted">{{ student.classroom }}</small>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p class="text-muted small">No children assigned</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="col-lg-8">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if parent_form.errors or user_form.errors %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Please correct the errors below.
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <!-- Personal Information -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                {{ parent_form.full_name }}
+                                {% if parent_form.full_name.errors %}
+                                <div class="text-danger small">{{ parent_form.full_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Relationship *</label>
+                                {{ parent_form.relationship }}
+                                {% if parent_form.relationship.errors %}
+                                <div class="text-danger small">{{ parent_form.relationship.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone Number *</label>
+                                {{ parent_form.phone }}
+                                {% if parent_form.phone.errors %}
+                                <div class="text-danger small">{{ parent_form.phone.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Format: +255123456789</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address *</label>
+                                {{ parent_form.email }}
+                                {% if parent_form.email.errors %}
+                                <div class="text-danger small">{{ parent_form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Occupation</label>
+                                {{ parent_form.occupation }}
+                                {% if parent_form.occupation.errors %}
+                                <div class="text-danger small">{{ parent_form.occupation.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Profile Picture</label>
+                                {{ parent_form.profile_picture }}
+                                {% if parent_form.profile_picture.errors %}
+                                <div class="text-danger small">{{ parent_form.profile_picture.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Address *</label>
+                                {{ parent_form.address }}
+                                {% if parent_form.address.errors %}
+                                <div class="text-danger small">{{ parent_form.address.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h6 class="mb-3">
+                            <i class="bi bi-person-badge me-2"></i>User Account Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                <div class="text-danger small">{{ user_form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                <div class="text-danger small">{{ user_form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Email Address (for login)</label>
+                                {{ user_form.email }}
+                                {% if user_form.email.errors %}
+                                <div class="text-danger small">{{ user_form.email.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">This email will be used for login and password reset</div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'parents:dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="parent-card fade-in mt-4">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>Change Password
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'parents:change_password' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" name="current_password" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">New Password</label>
+                                <input type="password" name="new_password" class="form-control" required>
+                                <div class="form-text">Minimum 8 characters</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Confirm New Password</label>
+                                <input type="password" name="confirm_password" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-key me-1"></i>Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Information -->
+            <div class="parent-card fade-in mt-4">
+                <div class="parent-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-check me-2"></i>Security Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Account Security Tips</h6>
+                            <ul class="small">
+                                <li>Never share your login credentials with anyone</li>
+                                <li>Always log out after each session, especially on shared devices</li>
+                                <li>Use a strong, unique password</li>
+                                <li>Update your password regularly</li>
+                                <li>Report any suspicious activity immediately</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Contact Support</h6>
+                            <p class="small">
+                                <i class="bi bi-telephone me-2"></i>{{ school_settings.phone|default:"+255 123 456 789" }}<br>
+                                <i class="bi bi-envelope me-2"></i>{{ school_settings.contact_email|default:"support@school.edu" }}<br>
+                                <i class="bi bi-clock me-2"></i>Mon-Fri, 8:00 AM - 4:00 PM
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sticky-top {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+    
+    @media (max-width: 992px) {
+        .sticky-top {
+            position: static;
+        }
+    }
+    
+    /* Profile picture preview */
+    #id_profile_picture {
+        padding: 0.5rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--parent-primary);
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
+    }
+</style>
+
+{% block extra_js %}
+<script>
+    // Preview profile picture before upload
+    document.addEventListener('DOMContentLoaded', function() {
+        const profilePictureInput = document.getElementById('id_profile_picture');
+        const profilePicturePreview = document.querySelector('.child-avatar, img[alt*="{{ parent.full_name }}"]');
+        
+        if (profilePictureInput && profilePicturePreview) {
+            profilePictureInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (profilePicturePreview.tagName === 'IMG') {
+                            profilePicturePreview.src = e.target.result;
+                        } else {
+                            // If it's the avatar div, replace with image
+                            const parentDiv = profilePicturePreview.parentElement;
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.alt = "Profile Picture";
+                            img.className = "rounded-circle";
+                            img.style.width = "100px";
+                            img.style.height = "100px";
+                            img.style.objectFit = "cover";
+                            parentDiv.replaceChild(img, profilePicturePreview);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

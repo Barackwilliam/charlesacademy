@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ announcement.title }} - Charles Academy SMS{% endblock %}
+{% block page_title %}{{ announcement.title|truncatechars:30 }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Announcement Card -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Announcement Details</h5>
+                    <div class="btn-group">
+                        <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-light">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
+                        {% if request.user.role == 'ADMIN' %}
+                        <a href="{% url 'announcement_edit' announcement.pk %}" class="btn btn-sm btn-light ms-2">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Announcement Meta Info -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="badge bg-primary">
+                            <i class="bi bi-calendar-event me-1"></i>
+                            {{ announcement.created_at|date:"F d, Y" }}
+                        </span>
+                        <span class="badge bg-secondary ms-2">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ announcement.created_at|date:"h:i A" }}
+                        </span>
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            ID: #{{ announcement.pk|stringformat:"04d" }}
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Announcement Title -->
+                <h2 class="mb-4 text-primary">{{ announcement.title }}</h2>
+                
+                <!-- Announcement Message -->
+                <div class="announcement-content mb-4">
+                    <div class="message-body p-4 border rounded bg-light">
+                        {{ announcement.message|linebreaks }}
+                    </div>
+                </div>
+                
+                <!-- Announcement Stats -->
+                <div class="row text-center mb-4">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3">
+                            <h4 class="text-primary mb-0">{{ announcement.created_at|date:"d" }}</h4>
+                            <small class="text-muted">Day Posted</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3">
+                            <h4 class="text-success mb-0">{{ announcement.created_at|date:"m" }}</h4>
+                            <small class="text-muted">Month Posted</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3">
+                            <h4 class="text-warning mb-0">{{ announcement.created_at|date:"Y" }}</h4>
+                            <small class="text-muted">Year Posted</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Age Information -->
+                <div class="alert alert-info">
+                    <div class="d-flex">
+                        <i class="bi bi-info-circle me-3" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Information:</strong> This announcement was posted 
+                            <span class="fw-bold">{{ announcement.created_at|timesince }}</span> ago.
+                            {% if announcement.updated_at != announcement.created_at %}
+                            <br>
+                            <small>Last updated: {{ announcement.updated_at|date:"F d, Y H:i" }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">
+                            <i class="bi bi-person-circle me-1"></i>
+                            Posted by: System Admin
+                        </small>
+                    </div>
+                    <div>
+                        {% if request.user.role == 'ADMIN' %}
+                        <div class="btn-group">
+                            <a href="{% url 'announcement_edit' announcement.pk %}" 
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil me-1"></i> Edit
+                            </a>
+                            <a href="{% url 'announcement_delete' announcement.pk %}" 
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </a>
+                            <button class="btn btn-sm btn-outline-primary" onclick="shareAnnouncement()">
+                                <i class="bi bi-share me-1"></i> Share
+                            </button>
+                        </div>
+                        {% else %}
+                        <button class="btn btn-sm btn-outline-primary" onclick="shareAnnouncement()">
+                            <i class="bi bi-share me-1"></i> Share
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Cards -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                {% if previous_announcement %}
+                <div class="card shadow-sm border-primary">
+                    <div class="card-body">
+                        <small class="text-muted">Previous Announcement</small>
+                        <h6 class="mb-2">{{ previous_announcement.title|truncatechars:40 }}</h6>
+                        <p class="text-muted mb-2 small">{{ previous_announcement.created_at|date:"M d, Y" }}</p>
+                        <a href="{% url 'announcement_detail' previous_announcement.pk %}" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-chevron-left me-1"></i> View
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {% if next_announcement %}
+                <div class="card shadow-sm border-primary">
+                    <div class="card-body text-end">
+                        <small class="text-muted">Next Announcement</small>
+                        <h6 class="mb-2">{{ next_announcement.title|truncatechars:40 }}</h6>
+                        <p class="text-muted mb-2 small">{{ next_announcement.created_at|date:"M d, Y" }}</p>
+                        <a href="{% url 'announcement_detail' next_announcement.pk %}" 
+                           class="btn btn-sm btn-outline-primary">
+                            View <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function shareAnnouncement() {
+    const announcementTitle = "{{ announcement.title }}";
+    const announcementUrl = window.location.href;
+    const shareText = `Check out this announcement: ${announcementTitle}`;
+    
+    if (navigator.share) {
+        // Use Web Share API if available
+        navigator.share({
+            title: announcementTitle,
+            text: shareText,
+            url: announcementUrl
+        })
+        .then(() => console.log('Announcement shared successfully'))
+        .catch(error => console.log('Error sharing:', error));
+    } else {
+        // Fallback to clipboard
+        const shareData = `${shareText}\n\n${announcementUrl}`;
+        navigator.clipboard.writeText(shareData)
+            .then(() => {
+                alert('Announcement link copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback to prompt
+                prompt('Copy this link to share:', announcementUrl);
+            });
+    }
+}
+
+// Print announcement
+function printAnnouncement() {
+    const printContent = `
+        <html>
+        <head>
+            <title>{{ announcement.title }}</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+                h1 { color: #333; border-bottom: 2px solid #4361ee; padding-bottom: 10px; }
+                .meta { color: #666; margin-bottom: 20px; }
+                .content { margin: 20px 0; }
+                .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; color: #666; }
+            </style>
+        </head>
+        <body>
+            <h1>{{ announcement.title }}</h1>
+            <div class="meta">
+                <strong>Date:</strong> {{ announcement.created_at|date:"F d, Y" }}<br>
+                <strong>Time:</strong> {{ announcement.created_at|date:"h:i A" }}
+            </div>
+            <div class="content">
+                {{ announcement.message|linebreaks }}
+            </div>
+            <div class="footer">
+                Charles Academy<br>
+                Printed on: {% now "F d, Y h:i A" %}
+            </div>
+        </body>
+        </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 250);
+}
+
+// Add print button functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const footer = document.querySelector('.card-footer .btn-group');
+    if (footer) {
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-sm btn-outline-secondary';
+        printButton.innerHTML = '<i class="bi bi-printer me-1"></i> Print';
+        printButton.onclick = printAnnouncement;
+        footer.insertBefore(printButton, footer.firstChild);
+    }
+});
+</script>
+
+<style>
+.message-body {
+    background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.announcement-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.announcement-content p {
+    margin-bottom: 1rem;
+}
+
+.announcement-content ul, 
+.announcement-content ol {
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.announcement-content li {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

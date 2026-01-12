@@ -4,11 +4,15 @@ from students.models import Student
 from classes.models import Subject
 from django.contrib import messages
 from .utils import report_card_pdf
+from dashboard .models import SchoolSettings
 
 # List all exams
 def exam_list(request):
+    settings_obj = SchoolSettings.objects.first()
+
     exams = Exam.objects.all().order_by('-date')
-    return render(request, 'exams/exam_list.html', {'exams': exams})
+    return render(request, 'exams/exam_list.html', {'exams': exams,'school_settings': settings_obj,
+})
 
 
 
@@ -17,6 +21,8 @@ from .forms import ExamForm, ResultForm
 
 # Create new exam
 def create_exam(request):
+    settings_obj = SchoolSettings.objects.first()
+
     if request.method == 'POST':
         form = ExamForm(request.POST)
         if form.is_valid():
@@ -24,13 +30,16 @@ def create_exam(request):
             return redirect('exams:exam_list')
     else:
         form = ExamForm()
-    return render(request, 'exams/create_exam.html', {'form': form})
+    return render(request, 'exams/create_exam.html', {'form': form,'school_settings': settings_obj
+})
 
 
 
 
 
 def enter_marks(request, exam_id):
+    settings_obj = SchoolSettings.objects.first()
+
     exam = get_object_or_404(Exam, id=exam_id)
     students = Student.objects.filter(classroom=exam.classroom)
     subjects = Subject.objects.filter(classroom=exam.classroom)
@@ -69,11 +78,15 @@ def enter_marks(request, exam_id):
         'exam': exam,
         'students': students,
         'subjects': subjects,
-        'marks_dict': marks_dict
+        'marks_dict': marks_dict,
+        'school_settings': settings_obj,
+
     })
 
 # Generate report card PDF
 def student_report_card(request, student_id):
+    settings_obj = SchoolSettings.objects.first()
+
     student = get_object_or_404(Student, id=student_id)
     return report_card_pdf(student)
 # exams/views.py
@@ -81,6 +94,8 @@ from django.shortcuts import render, get_object_or_404
 from .models import Exam, Student, Result, Subject
 
 def exam_results(request, exam_id):
+    settings_obj = SchoolSettings.objects.first()
+
     exam = get_object_or_404(Exam, id=exam_id)
     students = Student.objects.filter(classroom=exam.classroom)
     subjects = exam.classroom.subject_set.all()  # assuming subjects related to classroom
@@ -110,4 +125,6 @@ def exam_results(request, exam_id):
         'students': students,
         'subjects': subjects,
         'results_dict': results_dict,
+        'school_settings': settings_obj,
+
     })

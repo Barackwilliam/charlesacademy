@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+
+{% block title %}Parent Login - Charles Academy{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="bi bi-people-fill me-2"></i>Parent Portal Login
+                    </h3>
+                    <p class="mb-0 mt-2">Access your child's academic information</p>
+                </div>
+                
+                <div class="card-body p-5">
+                    <!-- School Logo/Info -->
+                    <div class="text-center mb-4">
+                        {% if school_settings and school_settings.logo %}
+                            <img src="{{ school_settings.logo.url }}" alt="{{ school_settings.name }}" 
+                                 class="mb-3" style="max-height: 80px;">
+                        {% else %}
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="bi bi-mortarboard-fill" style="font-size: 2rem;"></i>
+                            </div>
+                        {% endif %}
+                        <h4 class="text-primary">{{ school_settings.name|default:"Charles Academy" }}</h4>
+                        <p class="text-muted mb-0">Parent Portal Access</p>
+                    </div>
+                    
+                    <!-- Messages -->
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <div class="d-flex align-items-center">
+                                {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                {% elif message.tags == 'warning' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                {% elif message.tags == 'info' %}
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Login Form -->
+                    <form method="post" action="{% url 'parents:login' %}" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person-circle me-2"></i>Username or Email
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="username" 
+                                   name="username" placeholder="Enter your username or email" required>
+                            <div class="form-text">Use the username or email provided by the school</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock me-2"></i>Password
+                            </label>
+                            <input type="password" class="form-control form-control-lg" id="password" 
+                                   name="password" placeholder="Enter your password" required>
+                            <div class="form-text">
+                                <a href="{% url 'parents:password_reset' %}" class="text-decoration-none">
+                                    <i class="bi bi-key me-1"></i>Forgot Password?
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">
+                                    Remember me on this device
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login to Parent Portal
+                            </button>
+                        </div>
+                        
+                        <!-- OR Divider -->
+                        <div class="position-relative my-4">
+                            <hr class="my-0">
+                            <div class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                                <small>OR</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Register Button Section -->
+                        <div class="text-center mb-4">
+                            <p class="text-muted mb-3">Don't have an account yet?</p>
+                            <a href="{% url 'parents:register' %}" class="btn btn-outline-success btn-lg w-100">
+                                <i class="bi bi-person-plus-fill me-2"></i>Register as Parent
+                            </a>
+                            <p class="mt-2 mb-0">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Registration requires child's admission number
+                                </small>
+                            </p>
+                        </div>
+                        
+                        <!-- Alternative Login Options -->
+                        <div class="text-center mb-4">
+                            <p class="text-muted mb-2">Having trouble logging in?</p>
+                            {% if school_settings.contact_email %}
+                            <a href="mailto:{{ school_settings.contact_email }}" class="btn btn-outline-secondary btn-sm me-2">
+                                <i class="bi bi-envelope me-1"></i>Email Support
+                            </a>
+                            {% endif %}
+                            {% if school_settings.phone %}
+                            <a href="tel:{{ school_settings.phone }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-telephone me-1"></i>Call Support
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                    
+                    <!-- Quick Info -->
+                    <div class="alert alert-info mt-4">
+                        <div class="d-flex">
+                            <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h6 class="alert-heading mb-2">Parent Portal Features</h6>
+                                <ul class="mb-0 ps-3">
+                                    <li>View your child's attendance records</li>
+                                    <li>Check academic results and reports</li>
+                                    <li>Monitor fee balance and payments</li>
+                                    <li>Receive school announcements</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="card-footer bg-light text-center py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 text-md-start mb-2 mb-md-0">
+                            <p class="mb-0">
+                                <a href="{% url 'login' %}" class="text-decoration-none">
+                                    <i class="bi bi-arrow-left me-1"></i>Back to Main Portal
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-0 text-muted">
+                                <small>
+                                    &copy; {% now "Y" %} {{ school_settings.name|default:"Charles Academy" }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom styles for parent login */
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
+    }
+    
+    .btn-outline-success {
+        border-color: #10b981;
+        color: #10b981;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border-color: transparent;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+    }
+    
+    .form-control-lg {
+        border-radius: 10px;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+    }
+    
+    .alert-info {
+        border-left: 4px solid #3b82f6;
+        border-radius: 10px;
+    }
+    
+    /* OR Divider */
+    .position-relative hr {
+        border-color: #e2e8f0;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+        
+        .container {
+            padding: 1rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Form validation and enhancements
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        // Add floating labels effect
+        [usernameInput, passwordInput].forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Basic validation
+            if (!usernameInput.value.trim()) {
+                showError(usernameInput, 'Username or email is required');
+                isValid = false;
+            }
+            
+            if (!passwordInput.value) {
+                showError(passwordInput, 'Password is required');
+                isValid = false;
+            } else if (passwordInput.value.length < 6) {
+                showError(passwordInput, 'Password must be at least 6 characters');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+        
+        function showError(input, message) {
+            // Remove existing error
+            const existingError = input.parentElement.querySelector('.invalid-feedback');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add error styling
+            input.classList.add('is-invalid');
+            
+            // Create error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            errorDiv.textContent = message;
+            input.parentElement.appendChild(errorDiv);
+            
+            // Focus on the input
+            input.focus();
+            
+            // Remove error on input
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                const error = this.parentElement.querySelector('.invalid-feedback');
+                if (error) {
+                    error.remove();
+                }
+            }, { once: true });
+        }
+        
+        // Remember me functionality
+        const rememberCheckbox = document.getElementById('remember');
+        if (localStorage.getItem('parentRemember') === 'true') {
+            rememberCheckbox.checked = true;
+            const savedUsername = localStorage.getItem('parentUsername');
+            if (savedUsername) {
+                usernameInput.value = savedUsername;
+            }
+        }
+        
+        rememberCheckbox.addEventListener('change', function() {
+            if (this.checked && usernameInput.value) {
+                localStorage.setItem('parentRemember', 'true');
+                localStorage.setItem('parentUsername', usernameInput.value);
+            } else {
+                localStorage.removeItem('parentRemember');
+                localStorage.removeItem('parentUsername');
+            }
+        });
+        
+        // Auto-focus on username field
+        usernameInput.focus();
+        
+        // Enter key navigation
+        usernameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                passwordInput.focus();
+            }
+        });
+        
+        passwordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                form.querySelector('button[type="submit"]').click();
+            }
+        });
+    });
+</script>
+{% endblock %}

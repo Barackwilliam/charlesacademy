@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charles Academy SMS</title>
+    <title>{% block title %}Charles Academy SMS{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,24 +14,28 @@
     
     <style>
         :root {
-            --primary-color: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary-color: #7209b7;
-            --accent-color: #4cc9f0;
+            --primary-color: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --secondary-color: #2563eb;
+            --accent-color: #60a5fa;
+            --sidebar-blue: #1e3a8a;
+            --sidebar-gradient: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+            --sidebar-hover: rgba(255, 255, 255, 0.15);
             --light-bg: #f8fafc;
             --dark-text: #1e293b;
             --light-text: #64748b;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
-            --sidebar-width: 260px;
-            --sidebar-collapsed: 70px;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
             --header-height: 70px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
             --border-radius: 12px;
-            --transition: all 0.3s ease;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         * {
@@ -60,59 +64,146 @@
             position: relative;
         }
         
-        /* Sidebar Styles */
+        /* Sidebar Styles - Blue Theme */
         .sidebar {
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: var(--sidebar-gradient);
             color: white;
             position: fixed;
             height: 100vh;
             z-index: 1000;
             overflow-y: auto;
             transition: var(--transition);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
         }
         
         .sidebar-header {
             padding: 1.5rem 1.25rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            min-height: 90px;
         }
         
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+            transition: var(--transition);
+            width: 100%;
         }
         
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+        .school-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+        
+        .school-logo:hover {
+            transform: scale(1.05) rotate(5deg);
+            border-color: var(--accent-color);
+            box-shadow: 0 6px 20px rgba(96, 165, 250, 0.4);
+        }
+        
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 5px;
+        }
+        
+        .logo-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        
+        .logo-placeholder i {
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .logo-text-container {
+            flex-grow: 1;
+            min-width: 0;
         }
         
         .logo-text {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 700;
             letter-spacing: 0.5px;
+            color: white;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .menu-toggle {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             color: white;
             font-size: 1.25rem;
             cursor: pointer;
-            display: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(180deg);
         }
         
         .sidebar-nav {
@@ -121,50 +212,90 @@
         }
         
         .nav-item {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            padding: 0 0.75rem;
         }
         
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 0.875rem 1.5rem;
+            gap: 14px;
+            padding: 0.875rem 1rem;
             color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
             transition: var(--transition);
             position: relative;
             font-weight: 500;
+            border-radius: 10px;
+            overflow: hidden;
         }
         
-        .nav-link:hover, .nav-link.active {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .nav-link:hover::before, .nav-link.active::before {
+        .nav-link::before {
             content: '';
             position: absolute;
             left: 0;
             top: 0;
             height: 100%;
-            width: 4px;
+            width: 0;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover {
+            color: white;
+            background-color: var(--sidebar-hover);
+            transform: translateX(5px);
+        }
+        
+        .nav-link:hover::before {
+            width: 100%;
+        }
+        
+        .nav-link.active {
+            color: white;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
             background-color: var(--accent-color);
-            border-radius: 0 4px 4px 0;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color);
         }
         
         .nav-icon {
             font-size: 1.25rem;
             width: 24px;
             text-align: center;
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover .nav-icon {
+            transform: scale(1.2);
+        }
+        
+        .nav-link.active .nav-icon {
+            color: var(--accent-color);
         }
         
         .nav-text {
             transition: var(--transition);
+            font-size: 0.95rem;
         }
         
         .sidebar-footer {
             padding: 1.25rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
         
         .user-info {
@@ -175,25 +306,53 @@
         }
         
         .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .user-details {
+            flex-grow: 1;
+        }
+        
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .user-role {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
         }
         
         .logout-btn {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             width: 100%;
             padding: 0.75rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
             color: white;
             font-weight: 500;
             transition: var(--transition);
@@ -201,7 +360,10 @@
         }
         
         .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         
         /* Main Content Area */
@@ -209,11 +371,13 @@
             flex: 1;
             margin-left: var(--sidebar-width);
             transition: var(--transition);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
         
         .top-header {
             height: var(--header-height);
-            background-color: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 0 1.5rem;
             display: flex;
             align-items: center;
@@ -222,12 +386,27 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .page-title h1 {
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 0;
+            color: var(--primary-dark);
+            position: relative;
+            padding-left: 1rem;
+        }
+        
+        .page-title h1::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border-radius: 2px;
         }
         
         .header-actions {
@@ -243,13 +422,26 @@
             font-size: 1.25rem;
             color: var(--light-text);
             cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .notification-btn:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            transform: translateY(-2px);
         }
         
         .notification-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--danger-color);
+            top: 2px;
+            right: 2px;
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
             color: white;
             font-size: 0.7rem;
             width: 18px;
@@ -258,27 +450,60 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .mobile-menu-btn {
-            background: transparent;
+            background: var(--primary-color);
             border: none;
             font-size: 1.5rem;
-            color: var(--primary-color);
+            color: white;
             cursor: pointer;
             display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .mobile-menu-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
         }
         
         .content-wrapper {
-            padding: 1.5rem;
+            padding: 2rem;
             min-height: calc(100vh - var(--header-height));
         }
         
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+            }
+            
+            .school-logo {
+                width: 55px;
+                height: 55px;
+            }
+            
+            .logo-text {
+                font-size: 1.2rem;
+            }
+        }
+        
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
                 width: 280px;
+                box-shadow: 8px 0 25px rgba(0, 0, 0, 0.15);
             }
             
             .sidebar.active {
@@ -290,11 +515,11 @@
             }
             
             .mobile-menu-btn {
-                display: block;
+                display: flex;
             }
             
             .menu-toggle {
-                display: block;
+                display: flex;
             }
             
             .overlay {
@@ -306,16 +531,22 @@
                 background-color: rgba(0, 0, 0, 0.5);
                 z-index: 999;
                 display: none;
+                backdrop-filter: blur(3px);
             }
             
             .overlay.active {
                 display: block;
             }
+            
+            .school-logo {
+                width: 60px;
+                height: 60px;
+            }
         }
         
         @media (max-width: 768px) {
             .content-wrapper {
-                padding: 1rem;
+                padding: 1.5rem;
             }
             
             .top-header {
@@ -328,8 +559,17 @@
                 width: 100%;
             }
             
+            .school-logo {
+                width: 50px;
+                height: 50px;
+            }
+            
             .logo-text {
                 font-size: 1.1rem;
+            }
+            
+            .content-wrapper {
+                padding: 1rem;
             }
         }
         
@@ -340,29 +580,35 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
             margin-bottom: 1.5rem;
+            background: white;
+            overflow: hidden;
         }
         
         .card:hover {
             box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
         
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border: none;
+            padding: 0.625rem 1.75rem;
+            border-radius: 10px;
             font-weight: 500;
+            transition: var(--transition);
         }
         
         .btn-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+            border: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
         }
         
         .badge {
-            padding: 0.35rem 0.65rem;
+            padding: 0.35rem 0.75rem;
             font-weight: 500;
-            border-radius: 6px;
+            border-radius: 20px;
         }
         
         .text-muted {
@@ -374,11 +620,55 @@
             width: var(--sidebar-collapsed);
         }
         
-        .sidebar.collapsed .logo-text,
+        .sidebar.collapsed .logo-text-container,
+        .sidebar.collapsed .logo-subtitle,
         .sidebar.collapsed .nav-text,
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed .logout-text {
+        .sidebar.collapsed .user-details,
+        .sidebar.collapsed .logout-text,
+        .sidebar.collapsed .user-role {
             display: none;
+        }
+        
+        .sidebar.collapsed .logo-container {
+            justify-content: center;
+            gap: 0;
+        }
+        
+        .sidebar.collapsed .user-info {
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.875rem;
+        }
+        
+        .sidebar.collapsed .school-logo {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto;
+        }
+        
+        .sidebar.collapsed .nav-link:hover .nav-text {
+            display: block;
+            position: absolute;
+            left: calc(100% + 15px);
+            background: var(--primary-dark);
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        
+        .sidebar.collapsed .nav-link:hover::after {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-right-color: var(--primary-dark);
         }
         
         .sidebar.collapsed ~ .main-content {
@@ -402,24 +692,127 @@
         
         /* Welcome Message */
         .welcome-card {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
             color: white;
             border-radius: var(--border-radius);
-            padding: 2rem;
+            padding: 2.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
         }
         
         .welcome-card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            position: relative;
         }
         
         .welcome-card p {
             opacity: 0.9;
             max-width: 600px;
+            font-size: 1.1rem;
+            position: relative;
+        }
+        
+        /* Messages */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Glass Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Logo glow effect */
+        .logo-glow {
+            position: relative;
+        }
+        
+        .logo-glow::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            animation: glow 20s linear infinite;
+        }
+        
+        .logo-glow:hover::after {
+            opacity: 1;
+        }
+        
+        @keyframes glow {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+        
+        /* Parent Portal Specific */
+        .btn-parent {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-parent:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        }
+        
+        .badge-parent {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
         }
     </style>
+    
+     
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <div class="app-container">
@@ -427,11 +820,39 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <div class="logo-icon">
-                        <i class="bi bi-mortarboard-fill"></i>
+                    <!-- School Logo - Dynamic from SchoolSettings -->
+                    <div class="school-logo logo-glow">
+                        {% if school_settings and school_settings.logo %}
+                            <img src="{{ school_settings.logo.url }}" 
+                                 alt="{{ school_settings.name }} Logo" 
+                                 title="{{ school_settings.name }}">
+                        {% else %}
+                            <div class="logo-placeholder">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="logo-text">Charles Academy</div>
+                    
+                    <!-- School Name and Info -->
+                    <div class="logo-text-container">
+                        <div class="logo-text">
+                            {% if school_settings %}
+                                {{ school_settings.name|default:"Charles Academy" }}
+                            {% else %}
+                                Charles Academy
+                            {% endif %}
+                        </div>
+                        <div class="logo-subtitle">
+                            {% if school_settings %}
+                                {{ school_settings.academic_year|default:"2025" }} • School Management
+                            {% else %}
+                                School Management System
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
+                
+                <!-- Collapse Toggle -->
                 <button class="menu-toggle" id="collapseToggle">
                     <i class="bi bi-chevron-left"></i>
                 </button>
@@ -439,83 +860,188 @@
             
             <nav class="sidebar-nav">
                 {% if request.user.is_authenticated %}
-                    {% if request.user.role == 'ADMIN' %}
+                    {% if request.user.role == 'ADMIN' or request.user.is_superuser %}
+                        <!-- Dashboard -->
                         <div class="nav-item">
-                            <a href="{% url 'dashboard' %}" class="nav-link active">
+                            <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' or request.path == '/' %}active{% endif %}">
                                 <i class="bi bi-speedometer2 nav-icon"></i>
                                 <span class="nav-text">Dashboard</span>
                             </a>
                         </div>
+                        
+                        <!-- Announcements -->
                         <div class="nav-item">
-                            <a href="{% url 'students:student_list' %}" class="nav-link">
+                            <a href="{% url 'announcement_list' %}" class="nav-link {% if 'announcements' in request.path %}active{% endif %}">
+                                <i class="bi bi-megaphone nav-icon"></i>
+                                <span class="nav-text">Announcements</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Settings -->
+                        <div class="nav-item">
+                            <a href="{% url 'settings' %}" class="nav-link {% if 'settings' in request.path %}active{% endif %}">
+                                <i class="bi bi-gear nav-icon"></i>
+                                <span class="nav-text">School Settings</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Students -->
+                        <div class="nav-item">
+                            <a href="{% url 'students:student_list' %}" class="nav-link {% if 'students' in request.path and 'student' not in request.path %}active{% endif %}">
                                 <i class="bi bi-people-fill nav-icon"></i>
                                 <span class="nav-text">Students</span>
                             </a>
                         </div>
+                        
+                        <!-- Teachers -->
                         <div class="nav-item">
-                            <a href="{% url 'teacher_list' %}" class="nav-link">
+                            <a href="{% url 'teacher_list' %}" class="nav-link {% if 'teachers' in request.path %}active{% endif %}">
                                 <i class="bi bi-person-badge-fill nav-icon"></i>
                                 <span class="nav-text">Teachers</span>
                             </a>
                         </div>
+                        
+                        <!-- Exams -->
                         <div class="nav-item">
-                            <a href="{% url 'exams:exam_list' %}" class="nav-link">
+                            <a href="{% url 'exams:exam_list' %}" class="nav-link {% if 'exams' in request.path %}active{% endif %}">
                                 <i class="bi bi-clipboard-data-fill nav-icon"></i>
                                 <span class="nav-text">Exams</span>
                             </a>
                         </div>
+                        
+                        <!-- Fees Management -->
                         <div class="nav-item">
-                            <a href="{% url 'fees:fee_structure_list' %}" class="nav-link">
+                            <a href="{% url 'fees:fee_structure_list' %}" class="nav-link {% if 'fees' in request.path %}active{% endif %}">
                                 <i class="bi bi-cash-stack nav-icon"></i>
-                                <span class="nav-text">Fees</span>
+                                <span class="nav-text">Fees Management</span>
                             </a>
                         </div>
+                        
+                        <!-- Parent Portal (ADDED) -->
+                        <div class="nav-item">
+                            <a href="{% url 'parents:dashboard' %}" class="nav-link {% if 'parents' in request.path %}active{% endif %}">
+                                <i class="bi bi-people-fill nav-icon"></i>
+                                <span class="nav-text">Parent Portal</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Reports -->
+                        <div class="nav-item">
+                            <a href="#" class="nav-link {% if 'reports' in request.path %}active{% endif %}">
+                                <i class="bi bi-bar-chart-line nav-icon"></i>
+                                <span class="nav-text">Reports</span>
+                            </a>
+                        </div>
+                        
                     {% elif request.user.role == 'TEACHER' %}
+                        <!-- Teacher Dashboard -->
                         <div class="nav-item">
                             <a href="{% url 'teacher_dashboard' %}" class="nav-link active">
                                 <i class="bi bi-speedometer2 nav-icon"></i>
                                 <span class="nav-text">Dashboard</span>
                             </a>
                         </div>
+                        
+                        <!-- Teacher Announcements -->
+                        <div class="nav-item">
+                            <a href="{% url 'announcement_list' %}" class="nav-link">
+                                <i class="bi bi-megaphone nav-icon"></i>
+                                <span class="nav-text">Announcements</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Attendance -->
                         <div class="nav-item">
                             <a href="{% url 'attendance:teacher_attendance_list' %}" class="nav-link">
                                 <i class="bi bi-calendar-check nav-icon"></i>
                                 <span class="nav-text">Attendance</span>
                             </a>
                         </div>
+                        
+                        <!-- Exams -->
                         <div class="nav-item">
-                            <a href="{% url 'exam_list' %}" class="nav-link">
+                            <a href="{% url 'exams:exam_list' %}" class="nav-link">
                                 <i class="bi bi-clipboard-data nav-icon"></i>
                                 <span class="nav-text">Exams</span>
                             </a>
                         </div>
+                        
+                        <!-- My Classes -->
+                       {% comment %}
+
+                        <div class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="bi bi-journal-text nav-icon"></i>
+                                <span class="nav-text">My Classes</span>
+                            </a>
+                        </div>
+                        <!-- Parent Portal for Teachers (ADDED) -->
+                        <div class="nav-item">
+                            <a href="{% url 'parents:dashboard' %}" class="nav-link">
+                                <i class="bi bi-people-fill nav-icon"></i>
+                                <span class="nav-text">Parent Portal</span>
+                            </a>
+                        </div>
+                          {% endcomment %}
+
+                        
                     {% elif request.user.role == 'STUDENT' %}
+                        <!-- My Fees -->
                         <div class="nav-item">
-                            <a href="{% url 'students:student_portal' %}" class="nav-link active">
-                                <i class="bi bi-speedometer2 nav-icon"></i>
-                                <span class="nav-text">My Dashboard</span>
+                            <a href="{% url 'fees:my_fees' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">My Fees</span>
                             </a>
                         </div>
-                        <div class="nav-item">
-                            <a href="{% url 'students:change_password' %}" class="nav-link">
-                                <i class="bi bi-shield-lock nav-icon"></i>
-                                <span class="nav-text">Change Password</span>
-                            </a>
-                        </div>
+                        
+                        <!-- Results -->
                         <div class="nav-item">
                             <a href="{% url 'students:student_portal' %}#results" class="nav-link">
                                 <i class="bi bi-graph-up nav-icon"></i>
                                 <span class="nav-text">Results</span>
                             </a>
                         </div>
+                        
+                        <!-- Student Announcements -->
                         <div class="nav-item">
-                            <a href="{% url 'attendance:my_attendance' %}" class="nav-link">
+                            <a href="{% url 'announcement_list' %}" class="nav-link {% if 'announcements' in request.path %}active{% endif %}">
+                                <i class="bi bi-megaphone nav-icon"></i>
+                                <span class="nav-text">Announcements</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Attendance -->
+                        <div class="nav-item">
+                            <a href="{% url 'attendance:my_attendance' %}" class="nav-link {% if 'my_attendance' in request.path %}active{% endif %}">
                                 <i class="bi bi-calendar-check nav-icon"></i>
                                 <span class="nav-text">My Attendance</span>
                             </a>
                         </div>
+                                    {% comment %}
+
+                        <!-- Parent Portal for Students (ADDED) -->
+
+                        <div class="nav-item">
+                            <a href="{% url 'parents:dashboard' %}" class="nav-link {% if 'parents' in request.path %}active{% endif %}">
+                                <i class="bi bi-people-fill nav-icon"></i>
+                                <span class="nav-text">Parent Portal</span>
+                            </a>
+                        </div>
+                                                                  {% endcomment %}
+
+                        <!-- Change Password -->
+                        <div class="nav-item">
+                            <a href="{% url 'students:change_password' %}" class="nav-link {% if 'change-password' in request.path %}active{% endif %}">
+                                <i class="bi bi-shield-lock nav-icon"></i>
+                                <span class="nav-text">Change Password</span>
+                            </a>
+                        </div>
+                        
                     {% endif %}
+                    
+                    
                 {% else %}
+                    <!-- Login for non-authenticated users -->
                     <div class="nav-item">
                         <a href="{% url 'login' %}" class="nav-link">
                             <i class="bi bi-box-arrow-in-right nav-icon"></i>
@@ -533,16 +1059,22 @@
                         </div>
                         <div class="user-details">
                             <div class="user-name">{{ request.user.first_name }} {{ request.user.last_name }}</div>
-                            <small class="user-role">{{ request.user.role|title }}</small>
+                            <small class="user-role">{{ request.user.role|title|default:"User" }}</small>
                         </div>
                     </div>
                     
-                    <a href="{% url 'logout' %}">
+                    <a href="{% url 'logout' %}" style="text-decoration: none;">
                         <button class="logout-btn">
                             <i class="bi bi-box-arrow-right"></i>
                             <span class="logout-text">Logout</span>
                         </button>
                     </a>
+                {% else %}
+                    <div class="text-center">
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Login
+                        </a>
+                    </div>
                 {% endif %}
             </div>
         </aside>
@@ -564,10 +1096,64 @@
                 </div>
                 
                 <div class="header-actions">
+                    <!-- Date Display -->
+                    <div class="d-none d-md-block me-3">
+                        <div class="text-end">
+                            <div class="text-muted small">{% now "l" %}</div>
+                            <div class="fw-semibold">{% now "F j, Y" %}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications -->
                     <button class="notification-btn">
                         <i class="bi bi-bell"></i>
                         <span class="notification-badge">3</span>
                     </button>
+                    
+                    <!-- Quick Actions Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" 
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-lightning-fill me-1"></i> Quick Actions
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- Parent Portal Link -->
+                                                     {% comment %}
+
+                            <li><a class="dropdown-item" href="{% url 'parents:dashboard' %}">
+                                <i class="bi bi-people-fill me-2"></i> Parent Portal
+                            </a></li>                {% endcomment %}
+
+                            
+                            {% if request.user.role == 'ADMIN' or request.user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'announcement_create' %}">
+                                <i class="bi bi-megaphone me-2"></i> New Announcement
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'fees:record_payment' %}">
+                                <i class="bi bi-cash me-2"></i> Record Fee Payment
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            
+                            {% if request.user.role == 'STUDENT' %}
+                            <li><a class="dropdown-item" href="{% url 'fees:my_fees' %}">
+                                <i class="bi bi-cash-stack me-2"></i> View My Fees
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            
+                            <li><a class="dropdown-item" href="">
+                                <i class="bi bi-person-circle me-2"></i> My Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'settings' %}">
+                                <i class="bi bi-gear me-2"></i> Settings
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                <i class="bi bi-box-arrow-right me-2"></i> Logout
+                            </a></li>
+                        </ul>
+                    </div>
                 </div>
             </header>
             
@@ -577,7 +1163,46 @@
                 {% if request.user.is_authenticated %}
                 <div class="welcome-card">
                     <h2>Welcome back, {{ request.user.first_name }}!</h2>
-                    <p>You're logged in as {{ request.user.role|title }}. Here's an overview of your recent activities.</p>
+                    <p>You're logged in as {{ request.user.role|title|default:"User" }}. Here's an overview of your recent activities.</p>
+                    <!-- Parent Portal Button -->
+                    {% if request.user.role == 'ADMIN' or request.user.is_superuser or request.user.role == 'STUDENT' %}
+                    <a href="{% url 'parents:dashboard' %}" class="btn btn-light btn-sm mt-2">
+                        <i class="bi bi-people-fill me-1"></i> Access Parent Portal
+                    </a>
+                    {% endif %}
+                    <div class="mt-3">
+                        <span class="badge bg-light text-primary me-2">{% now "F j, Y" %}</span>
+                        <span class="badge bg-light text-primary">{% now "h:i A" %}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Messages -->
+                {% if messages %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <div class="d-flex align-items-center">
+                                {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle-fill me-3" style="font-size: 1.5rem;"></i>
+                                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                <i class="bi bi-exclamation-circle-fill me-3" style="font-size: 1.5rem;"></i>
+                                {% elif message.tags == 'warning' %}
+                                <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+                                {% elif message.tags == 'info' %}
+                                <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
+                                {% else %}
+                                <i class="bi bi-bell-fill me-3" style="font-size: 1.5rem;"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    {{ message }}
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endif %}
                 
@@ -591,7 +1216,76 @@
                                 <div class="card-body">
                                     <h5 class="card-title">Welcome to Charles Academy SMS</h5>
                                     <p class="card-text">This is a modern, responsive school management system. Select an option from the sidebar to get started.</p>
-                                    <a href="#" class="btn btn-primary">Get Started</a>
+                                    <div class="mt-4">
+                                        {% if request.user.role == 'ADMIN' or request.user.is_superuser %}
+                                        <a href="{% url 'announcement_create' %}" class="btn btn-primary me-2">
+                                            <i class="bi bi-megaphone me-2"></i> Create Announcement
+                                        </a>
+                                        <a href="{% url 'settings' %}" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-gear me-2"></i> School Settings
+                                        </a>
+                                        <a href="{% url 'fees:fee_structure_list' %}" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-cash-stack me-2"></i> Manage Fees
+                                        </a>
+                                        <!-- Parent Portal Button -->
+                                        <a href="{% url 'parents:dashboard' %}" class="btn btn-parent me-2">
+                                            <i class="bi bi-people-fill me-2"></i> Parent Portal
+                                        </a>
+                                        {% endif %}
+                                        {% if request.user.role == 'STUDENT' %}
+                                        <a href="{% url 'fees:my_fees' %}" class="btn btn-primary me-2">
+                                            <i class="bi bi-cash-stack me-2"></i> View My Fees
+                                        </a>
+                                        <!-- Parent Portal for Students -->
+                                        <a href="{% url 'parents:dashboard' %}" class="btn btn-parent me-2">
+                                            <i class="bi bi-people-fill me-2"></i> Parent Portal
+                                        </a>
+                                        {% endif %}
+                                        <a href="{% url 'announcement_list' %}" class="btn btn-outline-primary">
+                                            <i class="bi bi-list-ul me-2"></i> View Announcements
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-megaphone text-primary mb-3" style="font-size: 2.5rem;"></i>
+                                    <h3>{{ announcements_count|default:"0" }}</h3>
+                                    <p class="text-muted mb-0">Announcements</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-people text-success mb-3" style="font-size: 2.5rem;"></i>
+                                    <h3>{{ students_count|default:"0" }}</h3>
+                                    <p class="text-muted mb-0">Students</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-person-badge text-warning mb-3" style="font-size: 2.5rem;"></i>
+                                    <h3>{{ teachers_count|default:"0" }}</h3>
+                                    <p class="text-muted mb-0">Teachers</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Parents Stats Card -->
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-people-fill text-info mb-3" style="font-size: 2.5rem;"></i>
+                                    <h3>{{ parents_count|default:"0" }}</h3>
+                                    <p class="text-muted mb-0">Parents</p>
                                 </div>
                             </div>
                         </div>
@@ -614,11 +1308,13 @@
         mobileMenuBtn.addEventListener('click', () => {
             sidebar.classList.add('active');
             overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         });
         
         overlay.addEventListener('click', () => {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
+            document.body.style.overflow = '';
         });
         
         // Collapse/Expand sidebar for desktop
@@ -632,23 +1328,55 @@
             if (sidebar.classList.contains('collapsed')) {
                 icon.classList.remove('bi-chevron-left');
                 icon.classList.add('bi-chevron-right');
+                localStorage.setItem('sidebarCollapsed', 'true');
             } else {
                 icon.classList.remove('bi-chevron-right');
                 icon.classList.add('bi-chevron-left');
+                localStorage.setItem('sidebarCollapsed', 'false');
             }
         });
         
-        // Set active nav link based on current page
+        // Check localStorage for sidebar state
         document.addEventListener('DOMContentLoaded', function() {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed && window.innerWidth > 992) {
+                sidebar.classList.add('collapsed');
+                const icon = collapseToggle.querySelector('i');
+                icon.classList.remove('bi-chevron-left');
+                icon.classList.add('bi-chevron-right');
+            }
+            
+            // Set active nav link based on current page
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.nav-link');
             
             navLinks.forEach(link => {
                 link.classList.remove('active');
                 
-                // Simple path matching - in a real app you'd want more robust logic
-                if (link.getAttribute('href') && currentPath.includes(link.getAttribute('href'))) {
-                    link.classList.add('active');
+                if (link.getAttribute('href')) {
+                    const linkPath = link.getAttribute('href');
+                    
+                    // Exact match
+                    if (currentPath === linkPath) {
+                        link.classList.add('active');
+                    }
+                    // Partial match for nested routes
+                    else if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+                        link.classList.add('active');
+                    }
+                    // Match for dashboard
+                    else if (linkPath === '/' && (currentPath === '/' || currentPath === '/dashboard/')) {
+                        link.classList.add('active');
+                    }
+                    // Match for fees paths
+                    else if ((linkPath.includes('fees') || linkPath.includes('my-fees')) && 
+                             currentPath.includes('fees')) {
+                        link.classList.add('active');
+                    }
+                    // Match for parent portal paths
+                    else if (linkPath.includes('parents') && currentPath.includes('parents')) {
+                        link.classList.add('active');
+                    }
                 }
             });
             
@@ -658,9 +1386,116 @@
                     link.addEventListener('click', () => {
                         sidebar.classList.remove('active');
                         overlay.classList.remove('active');
+                        document.body.style.overflow = '';
                     });
                 });
             }
+            
+            // Add ripple effect to buttons
+            const buttons = document.querySelectorAll('.btn-primary, .nav-link, .logout-btn, .btn-parent');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.5);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl + / to toggle sidebar
+                if (e.ctrlKey && e.key === '/') {
+                    e.preventDefault();
+                    collapseToggle.click();
+                }
+                // Escape to close sidebar on mobile
+                if (e.key === 'Escape' && window.innerWidth <= 992 && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+                // F for fees (admin only)
+                if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    {% if request.user.role == 'ADMIN' or request.user.is_superuser %}
+                    window.location.href = "{% url 'fees:fee_structure_list' %}";
+                    {% elif request.user.role == 'STUDENT' %}
+                    window.location.href = "{% url 'fees:my_fees' %}";
+                    {% endif %}
+                }
+                // P for Parent Portal
+                if (e.key === 'p' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    window.location.href = "{% url 'parents:dashboard' %}";
+                }
+                // A for Announcements
+                if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    window.location.href = "{% url 'announcement_list' %}";
+                }
+            });
+            
+            // Update notification count every 30 seconds (simulated)
+            setInterval(() => {
+                const badge = document.querySelector('.notification-badge');
+                if (badge && Math.random() > 0.7) {
+                    const current = parseInt(badge.textContent) || 0;
+                    badge.textContent = current + 1;
+                    badge.classList.add('pulse');
+                    setTimeout(() => badge.classList.remove('pulse'), 1000);
+                }
+            }, 30000);
+            
+            // Logo click effect
+            const schoolLogo = document.querySelector('.school-logo');
+            if (schoolLogo) {
+                schoolLogo.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'IMG' || e.target.closest('.school-logo')) {
+                        this.style.animation = 'none';
+                        setTimeout(() => {
+                            this.style.animation = 'float 2s ease-in-out';
+                        }, 10);
+                    }
+                });
+            }
+            
+            // Highlight Parent Portal buttons on hover
+            const parentButtons = document.querySelectorAll('.btn-parent, a[href*="parents"]');
+            parentButtons.forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    if (this.classList.contains('btn-parent')) {
+                        this.style.transform = 'translateY(-3px) scale(1.05)';
+                    }
+                });
+                btn.addEventListener('mouseleave', function() {
+                    if (this.classList.contains('btn-parent')) {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    }
+                });
+            });
         });
         
         // Responsive adjustments on window resize
@@ -668,8 +1503,46 @@
             if (window.innerWidth > 992) {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
+                document.body.style.overflow = '';
             }
         });
+        
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes logoSpin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            .school-logo:hover img {
+                animation: logoSpin 20s linear infinite;
+            }
+            
+            /* Parent Portal badge animation */
+            .badge-parent {
+                animation: pulse 2s infinite;
+            }
+            
+            @keyframes parentGlow {
+                0%, 100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.5); }
+                50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); }
+            }
+            
+            .btn-parent:hover {
+                animation: parentGlow 1.5s infinite;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

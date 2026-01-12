@@ -1,0 +1,956 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}My Fee Statement - {{ student.full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #1e40af;
+        --primary-light: #3b82f6;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --light-gray: #f8fafc;
+        --medium-gray: #e2e8f0;
+        --dark-gray: #64748b;
+        --text-dark: #1e293b;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --transition: all 0.3s ease;
+    }
+    
+    .fee-dashboard {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+    
+    /* Header Styles */
+    .fee-header {
+        background: white;
+        box-shadow: var(--shadow-sm);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+        .header-content {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+    
+    .student-info h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        line-height: 1.2;
+    }
+    
+    .student-info p {
+        color: var(--dark-gray);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+    
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.875rem;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    
+    .action-btn i {
+        font-size: 1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-light) 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 1px solid var(--medium-gray);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--light-gray);
+        border-color: var(--dark-gray);
+    }
+    
+    /* Student Profile Card */
+    .profile-card {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+    }
+    
+    .profile-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+    
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-light) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+    
+    .profile-details h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+    
+    .profile-details p {
+        color: var(--dark-gray);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    @media (min-width: 640px) {
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (min-width: 768px) {
+        .info-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    .info-item {
+        padding: 1rem;
+        background: var(--light-gray);
+        border-radius: var(--radius-sm);
+        border-left: 4px solid var(--primary-blue);
+    }
+    
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--dark-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    /* Fee Summary Cards */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    @media (min-width: 640px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .summary-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    .summary-card {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+    
+    .total-fee::before {
+        background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-light) 100%);
+    }
+    
+    .total-paid::before {
+        background: linear-gradient(90deg, var(--success-green) 0%, #34d399 100%);
+    }
+    
+    .balance-due::before {
+        background: linear-gradient(90deg, var(--danger-red) 0%, #dc2626 100%);
+    }
+    
+    .balance-paid::before {
+        background: linear-gradient(90deg, var(--success-green) 0%, #34d399 100%);
+    }
+    
+    .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .summary-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .total-fee .summary-icon {
+        background: rgba(30, 64, 175, 0.1);
+        color: var(--primary-blue);
+    }
+    
+    .total-paid .summary-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+    }
+    
+    .balance-due .summary-icon {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+    }
+    
+    .balance-paid .summary-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+    }
+    
+    .summary-title {
+        font-size: 0.875rem;
+        color: var(--dark-gray);
+        font-weight: 500;
+    }
+    
+    .summary-amount {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-subtitle {
+        font-size: 0.75rem;
+        color: var(--dark-gray);
+    }
+    
+    /* Progress Bar */
+    .progress-section {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .progress-percentage {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+    
+    .progress-bar {
+        height: 12px;
+        background: var(--medium-gray);
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--success-green) 0%, #34d399 100%);
+        border-radius: 6px;
+        transition: width 1s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: linear-gradient(
+            -45deg,
+            rgba(255, 255, 255, 0.2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.2) 75%,
+            transparent 75%,
+            transparent
+        );
+        background-size: 20px 20px;
+        animation: shimmer 2s linear infinite;
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: 0 0;
+        }
+        100% {
+            background-position: 40px 0;
+        }
+    }
+    
+    .progress-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--dark-gray);
+    }
+    
+    /* Payment History */
+    .history-section {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+    
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .history-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+    }
+    
+    .payment-count {
+        background: var(--light-gray);
+        color: var(--text-dark);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .history-table thead {
+        background: var(--light-gray);
+    }
+    
+    .history-table th {
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--medium-gray);
+    }
+    
+    .history-table tbody tr {
+        border-bottom: 1px solid var(--medium-gray);
+        transition: var(--transition);
+    }
+    
+    .history-table tbody tr:hover {
+        background: var(--light-gray);
+    }
+    
+    .history-table td {
+        padding: 1rem;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+    }
+    
+    .receipt-number {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--primary-blue);
+        background: rgba(30, 64, 175, 0.1);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+    }
+    
+    .payment-amount {
+        font-weight: 600;
+        color: var(--success-green);
+        font-size: 1rem;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-completed {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+    }
+    
+    .status-pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-orange);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--medium-gray);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-description {
+        color: var(--dark-gray);
+        max-width: 400px;
+        margin: 0 auto 1.5rem;
+    }
+    
+    /* Important Notice */
+    .notice-section {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border: 1px solid #fbbf24;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .notice-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .notice-icon {
+        color: #d97706;
+        font-size: 1.5rem;
+    }
+    
+    .notice-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #92400e;
+        margin: 0;
+    }
+    
+    .notice-content {
+        color: #92400e;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+    
+    .notice-content ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .notice-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Mobile Responsive Table */
+    @media (max-width: 768px) {
+        .history-table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .history-table th,
+        .history-table td {
+            min-width: 120px;
+        }
+        
+        .summary-amount {
+            font-size: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .profile-card,
+        .summary-card,
+        .progress-section,
+        .history-section,
+        .notice-section {
+            padding: 1rem;
+        }
+        
+        .student-info h1 {
+            font-size: 1.25rem;
+        }
+    }
+    
+    /* Print Styles */
+    @media print {
+        .fee-header,
+        .header-actions,
+        .btn-primary,
+        .btn-danger,
+        .btn-secondary {
+            display: none !important;
+        }
+        
+        .fee-dashboard {
+            background: white !important;
+        }
+        
+        .profile-card,
+        .summary-card,
+        .progress-section,
+        .history-section,
+        .notice-section {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fee-dashboard">
+    <!-- Header -->
+    <div class="fee-header">
+        <div class="header-content">
+            <div class="student-info">
+                <h1>{{ student.full_name }}</h1>
+                <p>Fee Statement • {{ student.classroom|default:"No Class Assigned" }}</p>
+            </div>
+            
+            <div class="header-actions">
+                <a href="{% url 'fees:download_pdf' student.id %}" 
+                   class="action-btn btn-danger"
+                   onclick="return confirm('Download fee statement as PDF?')">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Download PDF</span>
+                </a>
+                
+                <a href="{% url 'fees:my_fees' %}" class="action-btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+    
+    <div class="container mx-auto px-4 py-2">
+        <!-- Student Profile Card -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {{ student.full_name|first|upper }}
+                </div>
+                <div class="profile-details">
+                    <h3>{{ student.full_name }}</h3>
+                    <p>{{ student.registration_number }} • {{ student.classroom|default:"No Class" }}</p>
+                </div>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Admission Number</div>
+                    <div class="info-value">{{ student.registration_number }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Class</div>
+                    <div class="info-value">{{ student.classroom|default:"Not Assigned" }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Academic Year</div>
+                    <div class="info-value">{{ student.admission_year }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fee Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card total-fee">
+                <div class="summary-header">
+                    <div class="summary-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div>
+                        <div class="summary-title">Total Fee Due</div>
+                        <div class="summary-amount">Tsh {{ total_fee|floatformat:2|default:"0.00" }}</div>
+                        <div class="summary-subtitle">Annual school fee</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-card total-paid">
+                <div class="summary-header">
+                    <div class="summary-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="summary-title">Total Paid</div>
+                        <div class="summary-amount">Tsh {{ total_paid|floatformat:2|default:"0.00" }}</div>
+                        <div class="summary-subtitle">{{ payments.count }} payment{{ payments.count|pluralize }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-card {% if balance > 0 %}balance-due{% else %}balance-paid{% endif %}">
+                <div class="summary-header">
+                    <div class="summary-icon">
+                        {% if balance > 0 %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% else %}
+                            <i class="fas fa-check-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="summary-title">Remain</div>
+                        <div class="summary-amount">Tsh {{ balance|floatformat:2|default:"0.00" }}</div>
+                        <div class="summary-subtitle">
+                            {% if balance > 0 %}
+                                Payment required
+                            {% else %}
+                                Fully paid
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <div class="progress-label">Payment Progress</div>
+                <div class="progress-percentage">
+                    {% if total_fee > 0 %}
+                        {% widthratio total_paid total_fee 100 %}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" 
+                     style="width: {% if total_fee > 0 %}{% widthratio total_paid total_fee 100 %}%{% else %}0%{% endif %}">
+                </div>
+            </div>
+            
+            <div class="progress-stats">
+                <span>Tsh {{ total_paid|floatformat:2|default:"0.00" }} paid</span>
+                <span>Tsh {{ total_fee|floatformat:2|default:"0.00" }} total</span>
+            </div>
+        </div>
+        
+        <!-- Payment History -->
+        <div class="history-section">
+            <div class="history-header">
+                <h2 class="history-title">Payment History</h2>
+                <div class="payment-count">
+                    {{ payments.count }} payment{{ payments.count|pluralize }}
+                </div>
+            </div>
+            
+            {% if payments %}
+                <div class="table-responsive">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Receipt Number</th>
+                                <th>Amount Paid</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td>
+                                    <div class="text-sm font-semibold">{{ payment.date|date:"d M, Y" }}</div>
+                                    <div class="text-xs text-gray-500">{{ payment.date }}</div>
+                                </td>
+                                <td>
+                                    <span class="receipt-number">{{ payment.receipt_no }}</span>
+                                </td>
+                                <td>
+                                    <span class="payment-amount">Tsh {{ payment.amount_paid|floatformat:2 }}</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-completed">
+                                        <i class="fas fa-check-circle"></i>
+                                        Completed
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <h3 class="empty-title">No Payment Records</h3>
+                    <p class="empty-description">
+                        No payment records found for {{ student.full_name }}.
+                        Payment history will appear here once payments are recorded.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Important Notice -->
+        <div class="notice-section">
+            <div class="notice-header">
+                <i class="fas fa-info-circle notice-icon"></i>
+                <h3 class="notice-title">Important Information</h3>
+            </div>
+            <div class="notice-content">
+                <ul>
+                    <li>This is an official fee statement. Please keep it for your records.</li>
+                    <li>For any discrepancies, contact the accounts office within 7 days.</li>
+                    <li>All payments should be made to authorized bank accounts only.</li>
+                    <li>Payment deadline: End of current academic term.</li>
+                    <li>Late payments may attract a penalty fee.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Quick Actions (Mobile Only) -->
+        <div class="d-block d-md-none mt-4">
+            <div class="sticky-bottom" style="bottom: 1rem; z-index: 100;">
+                <div class="bg-white rounded-lg shadow-lg p-4 mx-4">
+                    <div class="flex justify-between gap-2">
+                        <a href="{% url 'fees:download_pdf' student.id %}" 
+                           class="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg text-center text-sm font-medium"
+                           onclick="return confirm('Download fee statement as PDF?')">
+                            <i class="fas fa-download mr-1"></i> PDF
+                        </a>
+                        
+                        <a href="{% url 'fees:my_fees' %}" 
+                           class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg text-center text-sm font-medium">
+                            <i class="fas fa-home mr-1"></i> Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Animate progress bar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressFill = document.querySelector('.progress-fill');
+        const computedWidth = getComputedStyle(progressFill).width;
+        progressFill.style.width = '0';
+        
+        setTimeout(() => {
+            progressFill.style.width = computedWidth;
+        }, 300);
+        
+        // Add hover effects to cards
+        const cards = document.querySelectorAll('.summary-card, .profile-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Smooth scroll for mobile
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+    });
+    
+    // Handle print button
+    document.querySelector('[onclick="window.print()"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.print();
+    });
+    
+    // Handle PDF download confirmation
+    document.querySelectorAll('a[href*="download-pdf"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!confirm('Download fee statement as PDF?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

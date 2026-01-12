@@ -42,6 +42,7 @@
                                 <div class="col-md-12">
                                     <label for="full_name" class="form-label fw-medium">
                                         <i class="bi bi-person me-1"></i> Full Name
+                                        <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white">
@@ -64,10 +65,11 @@
                                     </small>
                                 </div>
                                 
-                                <!-- Email (Optional) -->
-                                <div class="col-md-6">
+                                <!-- Email (REQUIRED) -->
+                                <div class="col-md-12">
                                     <label for="email" class="form-label fw-medium">
                                         <i class="bi bi-envelope me-1"></i> Email Address
+                                        <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white">
@@ -77,60 +79,43 @@
                                                name="email" 
                                                id="email"
                                                class="form-control" 
-                                               placeholder="student@example.com">
+                                               placeholder="student@example.com"
+                                               required>
+                                        <div class="invalid-feedback">
+                                            Please enter a valid email address.
+                                        </div>
                                     </div>
                                     <small class="text-muted mt-1 d-block">
-                                        Optional - For communication purposes
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                        Credentials will be sent to this email
                                     </small>
                                 </div>
                                 
-                                <!-- Phone Number (Optional) -->
-                                <div class="col-md-6">
-                                    <label for="phone" class="form-label fw-medium">
-                                        <i class="bi bi-phone me-1"></i> Phone Number
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white">
-                                            <i class="bi bi-phone text-muted"></i>
-                                        </span>
-                                        <input type="tel" 
-                                               name="phone" 
-                                               id="phone"
-                                               class="form-control" 
-                                               placeholder="+255 XXX XXX XXX">
+                                <!-- Email Preview (Auto-generated username and password) -->
+                                <div class="col-md-12">
+                                    <div class="alert alert-info p-3">
+                                        <h6 class="fw-bold mb-2">
+                                            <i class="bi bi-key me-1"></i> Auto-generated Credentials
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small class="text-muted d-block">Username will be:</small>
+                                                <code class="d-block p-2 bg-light rounded mt-1" id="usernamePreview">
+                                                    Registration Number
+                                                </code>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="text-muted d-block">Password will be:</small>
+                                                <code class="d-block p-2 bg-light rounded mt-1" id="passwordPreview">
+                                                    firstname@123
+                                                </code>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted mt-2 d-block">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            These credentials will be emailed to the student
+                                        </small>
                                     </div>
-                                    <small class="text-muted mt-1 d-block">
-                                        Optional - Parent/Guardian contact
-                                    </small>
-                                </div>
-                                
-                                <!-- Date of Birth (Optional) -->
-                                <div class="col-md-6">
-                                    <label for="dob" class="form-label fw-medium">
-                                        <i class="bi bi-calendar3 me-1"></i> Date of Birth
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white">
-                                            <i class="bi bi-calendar3 text-muted"></i>
-                                        </span>
-                                        <input type="date" 
-                                               name="dob" 
-                                               id="dob"
-                                               class="form-control">
-                                    </div>
-                                </div>
-                                
-                                <!-- Gender (Optional) -->
-                                <div class="col-md-6">
-                                    <label for="gender" class="form-label fw-medium">
-                                        <i class="bi bi-gender-ambiguous me-1"></i> Gender
-                                    </label>
-                                    <select name="gender" id="gender" class="form-select">
-                                        <option value="">Select Gender</option>
-                                        <option value="MALE">Male</option>
-                                        <option value="FEMALE">Female</option>
-                                        <option value="OTHER">Other</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +144,7 @@
                                                 required>
                                             <option value="" selected disabled>Select a class</option>
                                             {% for c in classes %}
-                                                <option value="{{ c.id }}">{{ c.name }}</option>
+                                                <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
                                             {% empty %}
                                                 <option value="" disabled>No classes available</option>
                                             {% endfor %}
@@ -170,40 +155,30 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Registration Number (Optional) -->
+                                <!-- Admission Year -->
                                 <div class="col-md-6">
-                                    <label for="reg_number" class="form-label fw-medium">
-                                        <i class="bi bi-card-text me-1"></i> Registration Number
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white">
-                                            <i class="bi bi-123 text-muted"></i>
-                                        </span>
-                                        <input type="text" 
-                                               name="registration_number" 
-                                               id="reg_number"
-                                               class="form-control" 
-                                               placeholder="Auto-generated if empty">
-                                    </div>
-                                    <small class="text-muted mt-1 d-block">
-                                        Leave empty for automatic generation
-                                    </small>
-                                </div>
-                                
-                                <!-- Admission Date -->
-                                <div class="col-md-6">
-                                    <label for="admission_date" class="form-label fw-medium">
-                                        <i class="bi bi-calendar-check me-1"></i> Admission Date
+                                    <label for="admission_year" class="form-label fw-medium">
+                                        <i class="bi bi-calendar-check me-1"></i> Admission Year
+                                        <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white">
                                             <i class="bi bi-calendar-check text-muted"></i>
                                         </span>
-                                        <input type="date" 
-                                               name="admission_date" 
-                                               id="admission_date"
-                                               class="form-control"
-                                               value="{{ today|date:'Y-m-d' }}">
+                                        <select name="admission_year" 
+                                                id="admission_year" 
+                                                class="form-select" 
+                                                required>
+                                            <option value="" selected disabled>Select year</option>
+                                            {% for year in years %}
+                                                <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>
+                                                    {{ year }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please select admission year.
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -220,41 +195,86 @@
                                             <option value="ACTIVE" selected>Active</option>
                                             <option value="GRADUATED">Graduated</option>
                                             <option value="TRANSFERRED">Transferred</option>
-                                            <option value="INACTIVE">Inactive</option>
                                         </select>
                                     </div>
+                                </div>
+                                
+                                <!-- Documents (Optional) -->
+                                <div class="col-md-6">
+                                    <label for="documents" class="form-label fw-medium">
+                                        <i class="bi bi-file-earmark me-1"></i> Documents (Optional)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-paperclip text-muted"></i>
+                                        </span>
+                                        <input type="file" 
+                                               name="documents" 
+                                               id="documents"
+                                               class="form-control"
+                                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        Upload admission documents (PDF, Word, Images)
+                                    </small>
+                                </div>
+                                
+                                <!-- Photo (Optional) -->
+                                <div class="col-md-12">
+                                    <label for="photo" class="form-label fw-medium">
+                                        <i class="bi bi-camera me-1"></i> Student Photo (Optional)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </span>
+                                        <input type="file" 
+                                               name="photo" 
+                                               id="photo"
+                                               class="form-control"
+                                               accept="image/*">
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        Recommended size: 200x200 pixels, max 2MB
+                                    </small>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Emergency Contact Section -->
+                        <!-- Generated Registration Number Preview -->
                         <div class="mb-4">
-                            <h6 class="fw-bold mb-3 text-primary">
-                                <i class="bi bi-telephone me-2"></i>
-                                Emergency Contact (Optional)
-                            </h6>
-                            
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="emergency_name" class="form-label fw-medium">
-                                        <i class="bi bi-person-circle me-1"></i> Contact Person
-                                    </label>
-                                    <input type="text" 
-                                           name="emergency_contact_name" 
-                                           id="emergency_name"
-                                           class="form-control" 
-                                           placeholder="Name of guardian">
+                            <div class="alert alert-warning">
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-123 me-1"></i> Registration Number Information
+                                </h6>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <small class="text-muted d-block">Registration number will be auto-generated:</small>
+                                        <code class="d-block p-2 bg-light rounded mt-1 fs-5" id="registrationPreview">
+                                            CA/CLASS/YEAR/0001
+                                        </code>
+                                    </div>
+                                    <button type="button" id="generateRegBtn" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Refresh Preview
+                                    </button>
                                 </div>
-                                
-                                <div class="col-md-6">
-                                    <label for="emergency_phone" class="form-label fw-medium">
-                                        <i class="bi bi-telephone-forward me-1"></i> Contact Phone
-                                    </label>
-                                    <input type="tel" 
-                                           name="emergency_contact_phone" 
-                                           id="emergency_phone"
-                                           class="form-control" 
-                                           placeholder="Emergency contact number">
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Format: CA/ClassCode/Year/Sequence
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Email Notification Toggle -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="sendEmailToggle" name="send_email" checked>
+                                <label class="form-check-label fw-medium" for="sendEmailToggle">
+                                    <i class="bi bi-envelope-check me-1"></i> Send credentials email to student
+                                </label>
+                                <div class="form-text">
+                                    When checked, login credentials will be sent to the student's email
                                 </div>
                             </div>
                         </div>
@@ -271,7 +291,7 @@
                                     <i class="bi bi-x-circle me-1"></i> Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary px-4">
-                                    <i class="bi bi-check-circle me-1"></i> Save Student
+                                    <i class="bi bi-person-plus me-1"></i> Register Student
                                 </button>
                             </div>
                         </div>
@@ -287,26 +307,47 @@
                 <div class="card-header bg-white border-0 py-3">
                     <h6 class="mb-0 fw-bold">
                         <i class="bi bi-info-circle text-info me-2"></i>
-                        Quick Tips
+                        Important Information
                     </h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled mb-0">
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            <small>Required fields are marked with <span class="text-danger">*</span></small>
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-envelope-check-fill text-primary me-2 mt-1"></i>
+                                <div>
+                                    <small class="fw-medium d-block">Email Required</small>
+                                    <small class="text-muted">Student email is mandatory for sending credentials</small>
+                                </div>
+                            </div>
                         </li>
-                        <li class="mb-2">
-                            <i class="bi bi-lightning-fill text-warning me-2"></i>
-                            <small>Registration numbers auto-generate if left empty</small>
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-key-fill text-warning me-2 mt-1"></i>
+                                <div>
+                                    <small class="fw-medium d-block">Auto-generated Credentials</small>
+                                    <small class="text-muted">Username: Registration Number</small><br>
+                                    <small class="text-muted">Password: firstname@123</small>
+                                </div>
+                            </div>
                         </li>
-                        <li class="mb-2">
-                            <i class="bi bi-people-fill text-primary me-2"></i>
-                            <small>Class selection determines student grouping</small>
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-shield-check text-success me-2 mt-1"></i>
+                                <div>
+                                    <small class="fw-medium d-block">Secure Registration</small>
+                                    <small class="text-muted">All data is encrypted and securely stored</small>
+                                </div>
+                            </div>
                         </li>
                         <li>
-                            <i class="bi bi-shield-check text-success me-2"></i>
-                            <small>All data is securely stored and encrypted</small>
+                            <div class="d-flex">
+                                <i class="bi bi-lightning-charge text-danger me-2 mt-1"></i>
+                                <div>
+                                    <small class="fw-medium d-block">Instant Email Delivery</small>
+                                    <small class="text-muted">Credentials are sent immediately after registration</small>
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -322,12 +363,15 @@
                 </div>
                 <div class="card-body text-center">
                     <div class="mb-3">
+                        <!-- Photo Preview -->
                         <div class="avatar-preview bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                             style="width: 80px; height: 80px;">
+                             style="width: 100px; height: 100px; overflow: hidden; border: 2px solid #e0e0e0;">
+                            <img src="" alt="Preview" id="photoPreview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
                             <span class="text-primary fs-2 fw-bold" id="avatarInitial">S</span>
                         </div>
                         <h5 id="previewName" class="fw-bold mb-1">Student Name</h5>
                         <p class="text-muted mb-2" id="previewClass">Not Assigned</p>
+                        <p class="text-muted mb-0" id="previewEmail">email@example.com</p>
                     </div>
                     
                     <div class="row g-2">
@@ -339,27 +383,47 @@
                         </div>
                         <div class="col-6">
                             <div class="p-2 bg-light rounded">
-                                <small class="text-muted d-block">Registration</small>
-                                <small class="fw-medium" id="previewReg">Auto</small>
+                                <small class="text-muted d-block">Admission Year</small>
+                                <small class="fw-medium" id="previewYear">{{ current_year }}</small>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Credentials Preview -->
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted d-block mb-2">Login Credentials:</small>
+                        <div class="text-start">
+                            <small class="d-block">
+                                <i class="bi bi-person-badge me-1"></i>
+                                Username: <code id="previewUsername">REG-NUMBER</code>
+                            </small>
+                            <small class="d-block mt-1">
+                                <i class="bi bi-key me-1"></i>
+                                Password: <code id="previewPassword">firstname@123</code>
+                            </small>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Quick Stats -->
+            <!-- Email Status Card -->
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <small class="text-muted d-block">Total Students</small>
-                            <h5 class="fw-bold mb-0">245</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bi bi-envelope-paper text-primary"></i>
                         </div>
-                        <div class="text-end">
-                            <small class="text-muted d-block">In Selected Class</small>
-                            <h5 class="fw-bold mb-0" id="classCount">0</h5>
+                        <div>
+                            <small class="text-muted d-block">Email Status</small>
+                            <h5 class="fw-bold mb-0">
+                                <span id="emailStatus" class="text-success">Ready to Send</span>
+                            </h5>
                         </div>
                     </div>
+                    <small class="text-muted d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Credentials will be sent to: <span id="targetEmail">-</span>
+                    </small>
                 </div>
             </div>
         </div>
@@ -378,7 +442,7 @@
     
     .avatar-preview {
         transition: all 0.3s ease;
-        border: 2px dashed #dee2e6;
+        position: relative;
     }
     
     .form-control, .form-select {
@@ -420,6 +484,15 @@
         border-color: #198754;
     }
     
+    /* Credential preview styles */
+    code {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .card-body {
@@ -427,6 +500,32 @@
         }
         
         .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .row.g-3 > .col-md-12,
+        .row.g-3 > .col-md-6 {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .d-flex.justify-content-between > div {
+            margin-bottom: 1rem;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .btn-group .btn {
             width: 100%;
             margin-bottom: 0.5rem;
         }
@@ -439,10 +538,10 @@
         initializeFormValidation();
         setupLivePreview();
         setupFormListeners();
+        generateRegistrationPreview();
     });
 
     function initializeFormValidation() {
-        // Form validation
         const form = document.getElementById('studentForm');
         
         form.addEventListener('submit', function(event) {
@@ -457,37 +556,72 @@
             if (form.checkValidity()) {
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Registering...';
                 submitBtn.disabled = true;
                 
-                // Reset button after 3 seconds (in case submission fails)
+                // Reset button after 5 seconds (in case submission fails)
                 setTimeout(() => {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
-                }, 3000);
+                }, 5000);
             }
         }, false);
     }
 
     function setupLivePreview() {
         const nameInput = document.getElementById('full_name');
+        const emailInput = document.getElementById('email');
         const classSelect = document.getElementById('classroom');
+        const yearSelect = document.getElementById('admission_year');
         const statusSelect = document.getElementById('status');
-        const regInput = document.getElementById('reg_number');
+        const photoInput = document.getElementById('photo');
         
-        // Name preview
+        // Name preview and password generation
         if (nameInput) {
             nameInput.addEventListener('input', function() {
                 const previewName = document.getElementById('previewName');
                 const avatarInitial = document.getElementById('avatarInitial');
+                const passwordPreview = document.getElementById('passwordPreview');
+                const previewPassword = document.getElementById('previewPassword');
                 
                 if (this.value.trim()) {
                     previewName.textContent = this.value;
                     // Get first letter for avatar
                     avatarInitial.textContent = this.value.charAt(0).toUpperCase();
+                    
+                    // Generate password preview
+                    const firstName = this.value.split(' ')[0].toLowerCase();
+                    const password = `${firstName}@123`;
+                    passwordPreview.textContent = password;
+                    previewPassword.textContent = password;
                 } else {
                     previewName.textContent = 'Student Name';
                     avatarInitial.textContent = 'S';
+                    passwordPreview.textContent = 'firstname@123';
+                    previewPassword.textContent = 'firstname@123';
+                }
+                
+                // Update registration preview if needed
+                generateRegistrationPreview();
+            });
+        }
+        
+        // Email preview
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                const previewEmail = document.getElementById('previewEmail');
+                const targetEmail = document.getElementById('targetEmail');
+                
+                if (this.value.trim()) {
+                    previewEmail.textContent = this.value;
+                    targetEmail.textContent = this.value;
+                    document.getElementById('emailStatus').textContent = 'Ready to Send';
+                    document.getElementById('emailStatus').className = 'text-success';
+                } else {
+                    previewEmail.textContent = 'email@example.com';
+                    targetEmail.textContent = '-';
+                    document.getElementById('emailStatus').textContent = 'Email Required';
+                    document.getElementById('emailStatus').className = 'text-danger';
                 }
             });
         }
@@ -500,9 +634,20 @@
                 
                 if (this.value) {
                     previewClass.textContent = selectedOption.text;
-                    updateClassCount(this.value);
+                    generateRegistrationPreview();
                 } else {
                     previewClass.textContent = 'Not Assigned';
+                }
+            });
+        }
+        
+        // Year preview
+        if (yearSelect) {
+            yearSelect.addEventListener('change', function() {
+                const previewYear = document.getElementById('previewYear');
+                if (this.value) {
+                    previewYear.textContent = this.value;
+                    generateRegistrationPreview();
                 }
             });
         }
@@ -527,10 +672,6 @@
                         badge.className = 'badge bg-warning';
                         badge.textContent = 'Transferred';
                         break;
-                    case 'INACTIVE':
-                        badge.className = 'badge bg-danger';
-                        badge.textContent = 'Inactive';
-                        break;
                     default:
                         badge.className = 'badge bg-secondary';
                         badge.textContent = this.value;
@@ -538,99 +679,198 @@
             });
         }
         
-        // Registration number preview
-        if (regInput) {
-            regInput.addEventListener('input', function() {
-                const previewReg = document.getElementById('previewReg');
-                if (this.value.trim()) {
-                    previewReg.textContent = this.value;
-                } else {
-                    previewReg.textContent = 'Auto';
+        // Photo preview
+        if (photoInput) {
+            photoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('photoPreview');
+                        const avatarInitial = document.getElementById('avatarInitial');
+                        
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        avatarInitial.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
         }
     }
 
-    function updateClassCount(classId) {
-        // This would typically make an API call to get student count for the class
-        // For now, we'll simulate with random data
-        const classCountElement = document.getElementById('classCount');
-        const counts = {
-            '1': 45,
-            '2': 52,
-            '3': 48,
-            '4': 38,
-            '5': 42
-        };
+    function generateRegistrationPreview() {
+        const classSelect = document.getElementById('classroom');
+        const yearSelect = document.getElementById('admission_year');
+        const regPreview = document.getElementById('registrationPreview');
+        const usernamePreview = document.getElementById('previewUsername');
         
-        if (classId && counts[classId]) {
-            classCountElement.textContent = counts[classId];
-        } else {
-            classCountElement.textContent = '0';
+        if (!classSelect.value || !yearSelect.value) {
+            regPreview.textContent = 'CA/CLASS/YEAR/0001';
+            usernamePreview.textContent = 'REG-NUMBER';
+            return;
         }
+        
+        // Get class code
+        const selectedClass = classSelect.options[classSelect.selectedIndex];
+        const classText = selectedClass.text;
+        const classCode = classText.match(/\(([^)]+)\)/);
+        const code = classCode ? classCode[1] : 'GEN';
+        
+        // Get year
+        const year = yearSelect.value;
+        
+        // Generate registration number format
+        const regNumber = `CA/${code}/${year}/0001`;
+        regPreview.textContent = regNumber;
+        usernamePreview.textContent = regNumber;
     }
 
     function setupFormListeners() {
-        // Generate registration number button
-        const generateRegBtn = document.createElement('button');
-        generateRegBtn.type = 'button';
-        generateRegBtn.className = 'btn btn-outline-secondary btn-sm mt-2';
-        generateRegBtn.innerHTML = '<i class="bi bi-shuffle me-1"></i> Generate Registration Number';
+        // Refresh registration preview button
+        const generateRegBtn = document.getElementById('generateRegBtn');
+        if (generateRegBtn) {
+            generateRegBtn.addEventListener('click', function() {
+                generateRegistrationPreview();
+                showToast('Registration preview refreshed!', 'info');
+            });
+        }
         
-        const regInputGroup = document.getElementById('reg_number').parentNode;
-        regInputGroup.parentNode.insertBefore(generateRegBtn, regInputGroup.nextSibling);
+        // Auto-save draft functionality
+        let saveTimeout;
+        const form = document.getElementById('studentForm');
         
-        generateRegBtn.addEventListener('click', function() {
-            const regInput = document.getElementById('reg_number');
-            const currentYear = new Date().getFullYear();
-            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            const classSelect = document.getElementById('classroom');
-            const className = classSelect.value ? classSelect.options[classSelect.selectedIndex].text.substring(0, 3).toUpperCase() : 'GEN';
+        if (form) {
+            form.addEventListener('input', function() {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(function() {
+                    const formData = new FormData(form);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        data[key] = value;
+                    });
+                    
+                    // Save to localStorage
+                    localStorage.setItem('studentFormDraft', JSON.stringify(data));
+                    
+                    // Show auto-save indicator
+                    showAutoSaveIndicator();
+                }, 1000);
+            });
             
-            const generatedReg = `${currentYear}/${className}/${randomNum}`;
-            regInput.value = generatedReg;
+            // Load draft on page load
+            loadFormDraft();
             
-            // Update preview
-            document.getElementById('previewReg').textContent = generatedReg;
-            
-            // Show success message
-            showToast('Registration number generated successfully!', 'success');
-        });
+            // Clear draft on successful submit
+            form.addEventListener('submit', function() {
+                localStorage.removeItem('studentFormDraft');
+            });
+        }
         
-        // Phone number formatting
-        const phoneInput = document.getElementById('phone');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function() {
-                let value = this.value.replace(/\D/g, '');
-                if (value.length > 0) {
-                    if (!value.startsWith('255')) {
-                        value = '255' + value;
-                    }
-                    this.value = value.replace(/(\d{3})(\d{3})(\d{3})/, '+$1 $2 $3');
+        // Email validation
+        const emailInput = document.getElementById('email');
+        if (emailInput) {
+            emailInput.addEventListener('blur', function() {
+                const email = this.value.trim();
+                if (email && !isValidEmail(email)) {
+                    this.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = 'Please enter a valid email address';
+                    this.parentNode.appendChild(errorDiv);
+                }
+            });
+            
+            emailInput.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
                 }
             });
         }
         
-        // Emergency phone formatting
-        const emergencyPhone = document.getElementById('emergency_phone');
-        if (emergencyPhone) {
-            emergencyPhone.addEventListener('input', function() {
-                let value = this.value.replace(/\D/g, '');
-                if (value.length > 0) {
-                    if (!value.startsWith('255')) {
-                        value = '255' + value;
-                    }
-                    this.value = value.replace(/(\d{3})(\d{3})(\d{3})/, '+$1 $2 $3');
+        // Toggle email sending
+        const emailToggle = document.getElementById('sendEmailToggle');
+        if (emailToggle) {
+            emailToggle.addEventListener('change', function() {
+                const emailStatus = document.getElementById('emailStatus');
+                if (this.checked) {
+                    emailStatus.textContent = 'Ready to Send';
+                    emailStatus.className = 'text-success';
+                } else {
+                    emailStatus.textContent = 'Email Disabled';
+                    emailStatus.className = 'text-muted';
                 }
             });
         }
-        
-        // Auto-fill today's date for admission
-        const admissionDate = document.getElementById('admission_date');
-        if (admissionDate && !admissionDate.value) {
-            const today = new Date().toISOString().split('T')[0];
-            admissionDate.value = today;
+    }
+
+    function loadFormDraft() {
+        const draft = localStorage.getItem('studentFormDraft');
+        if (draft) {
+            try {
+                const data = JSON.parse(draft);
+                const form = document.getElementById('studentForm');
+                
+                for (const key in data) {
+                    const element = form.querySelector(`[name="${key}"]`);
+                    if (element && data[key] && element.type !== 'file') {
+                        element.value = data[key];
+                        
+                        // Trigger change events for preview
+                        if (element.dispatchEvent) {
+                            element.dispatchEvent(new Event('input'));
+                            element.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+                
+                // Show draft loaded message
+                setTimeout(() => {
+                    showToast('Form restored from previous session', 'info');
+                }, 500);
+            } catch (e) {
+                console.error('Error loading draft:', e);
+            }
         }
+    }
+
+    function showAutoSaveIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'position-fixed';
+        indicator.style.cssText = 'bottom: 20px; right: 20px; z-index: 9999;';
+        indicator.innerHTML = `
+            <div class="toast show" role="alert">
+                <div class="toast-header bg-success text-white">
+                    <i class="bi bi-save me-2"></i>
+                    <strong class="me-auto">Auto-saved</strong>
+                    <small>Just now</small>
+                </div>
+                <div class="toast-body">
+                    Form draft saved locally
+                </div>
+            </div>
+        `;
+        
+        const existingIndicator = document.querySelector('.position-fixed[style*="bottom: 20px; right: 20px"]');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
+        document.body.appendChild(indicator);
+        
+        // Remove indicator after 3 seconds
+        setTimeout(() => {
+            if (indicator.parentNode) {
+                indicator.remove();
+            }
+        }, 3000);
+    }
+
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
     }
 
     function showToast(message, type = 'info') {
@@ -645,7 +885,9 @@
         toast.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">
-                    <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-info-circle'} me-2"></i>
+                    <i class="bi ${type === 'success' ? 'bi-check-circle' : 
+                                  type === 'warning' ? 'bi-exclamation-triangle' : 
+                                  type === 'danger' ? 'bi-x-circle' : 'bi-info-circle'} me-2"></i>
                     ${message}
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -663,74 +905,27 @@
             document.body.removeChild(toast);
         });
     }
-
-    // Auto-save draft functionality
-    let saveTimeout;
-    const form = document.getElementById('studentForm');
     
-    if (form) {
-        form.addEventListener('input', function() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(function() {
-                const formData = new FormData(form);
-                const data = {};
-                formData.forEach((value, key) => {
-                    data[key] = value;
-                });
-                
-                // Save to localStorage
-                localStorage.setItem('studentFormDraft', JSON.stringify(data));
-                
-                // Show auto-save indicator
-                const indicator = document.createElement('small');
-                indicator.className = 'text-muted position-fixed';
-                indicator.style.cssText = 'bottom: 10px; right: 10px; font-size: 0.8rem;';
-                indicator.innerHTML = '<i class="bi bi-save me-1"></i> Draft saved';
-                indicator.id = 'saveIndicator';
-                
-                const existingIndicator = document.getElementById('saveIndicator');
-                if (existingIndicator) {
-                    existingIndicator.remove();
-                }
-                
-                document.body.appendChild(indicator);
-                
-                // Remove indicator after 2 seconds
-                setTimeout(() => {
-                    if (indicator.parentNode) {
-                        indicator.remove();
-                    }
-                }, 2000);
-            }, 1000);
-        });
-        
-        // Load draft on page load
-        const draft = localStorage.getItem('studentFormDraft');
-        if (draft) {
-            const data = JSON.parse(draft);
-            for (const key in data) {
-                const element = form.querySelector(`[name="${key}"]`);
-                if (element && data[key]) {
-                    element.value = data[key];
-                    
-                    // Trigger change events for preview
-                    if (element.dispatchEvent) {
-                        element.dispatchEvent(new Event('input'));
-                        element.dispatchEvent(new Event('change'));
-                    }
-                }
-            }
+    // Generate years for admission year dropdown
+    function generateYearOptions() {
+        const yearSelect = document.getElementById('admission_year');
+        if (yearSelect) {
+            const currentYear = new Date().getFullYear();
+            const startYear = currentYear - 10;
             
-            // Show draft loaded message
-            setTimeout(() => {
-                showToast('Draft restored from previous session', 'info');
-            }, 500);
+            for (let year = currentYear; year >= startYear; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
         }
-        
-        // Clear draft on successful submit
-        form.addEventListener('submit', function() {
-            localStorage.removeItem('studentFormDraft');
-        });
     }
+    
+    // Call year generation on load
+    generateYearOptions();
 </script>
 {% endblock %}

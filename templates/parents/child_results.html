@@ -1,0 +1,348 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}Academic Results{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="mb-3 mb-md-0">
+                            <h2 class="mb-1">
+                                <i class="bi bi-award me-2"></i>Academic Results
+                            </h2>
+                            <p class="mb-0 opacity-75">
+                                View your children's academic performance
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light dropdown-toggle" type="button" 
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-filter me-1"></i>
+                                    {% if selected_student %}
+                                        {{ selected_student.full_name|truncatechars:15 }}
+                                    {% else %}
+                                        All Children
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'parents:child_results' %}">
+                                            <i class="bi bi-people me-2"></i>All Children
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% for student in parent.students.all %}
+                                    <li>
+                                        <a class="dropdown-item" 
+                                           href="{% url 'parents:child_results_single' student.id %}">
+                                            <i class="bi bi-person me-2"></i>{{ student.full_name }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#filterModal">
+                                <i class="bi bi-funnel me-1"></i>Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Data -->
+    {% for data in results_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                            <div class="child-avatar me-3">
+                                {{ data.student.full_name|make_list|first }}
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ data.student.full_name }}</h5>
+                                <p class="mb-0 small opacity-75">
+                                    {{ data.student.classroom }} | Avg Score: {{ data.statistics.average_marks|floatformat:1 }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'parents:download_results_pdf' data.student.id %}" 
+                               class="btn btn-light btn-sm">
+                                <i class="bi bi-download me-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Performance Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-primary bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-journal-text text-primary" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">{{ data.statistics.exams_count }}</h3>
+                                <p class="mb-0 small text-muted">Exams Taken</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-success bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-book text-success" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">{{ data.statistics.total_subjects }}</h3>
+                                <p class="mb-0 small text-muted">Subjects</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-warning bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-graph-up text-warning" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">{{ data.statistics.average_marks|floatformat:1 }}</h3>
+                                <p class="mb-0 small text-muted">Average Score</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border rounded p-3 text-center bg-info bg-opacity-10">
+                                <div class="mb-2">
+                                    <i class="bi bi-trophy text-info" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h3 class="mb-1">{{ data.statistics.total_marks|floatformat:0 }}</h3>
+                                <p class="mb-0 small text-muted">Total Marks</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results by Exam -->
+                    {% for exam_name, exam_data in data.exams_data.items %}
+                    <div class="mb-5">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+                            <h5 class="mb-2 mb-md-0">
+                                <i class="bi bi-file-text me-2"></i>{{ exam_name }}
+                                {% if exam_data.exam.date %}
+                                <small class="text-muted">({{ exam_data.exam.date|date:"M Y" }})</small>
+                                {% endif %}
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-primary">
+                                    Average: {{ exam_data.average|floatformat:1 }}
+                                </span>
+                                <span class="badge {% if exam_data.overall_grade == 'A' %}grade-A
+                                                   {% elif exam_data.overall_grade == 'B' %}grade-B
+                                                   {% elif exam_data.overall_grade == 'C' %}grade-C
+                                                   {% elif exam_data.overall_grade == 'D' %}grade-D
+                                                   {% elif exam_data.overall_grade == 'E' %}grade-E
+                                                   {% else %}grade-F{% endif %}">
+                                    Grade: {{ exam_data.overall_grade }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Score</th>
+                                        <th>Out of</th>
+                                        <th>Percentage</th>
+                                        <th>Grade</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in exam_data.results %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ result.subject.name }}</strong>
+                                            {% if result.subject.code %}
+                                            <br><small class="text-muted">{{ result.subject.code }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ result.marks|floatformat:1 }}</td>
+                                        <td>{{ result.max_marks|floatformat:1 }}</td>
+                                        <td>
+                                            {% widthratio result.marks result.max_marks 100 as percentage %}
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                    <div class="progress-bar {% if percentage >= 80 %}bg-success{% elif percentage >= 60 %}bg-primary{% elif percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                         role="progressbar" 
+                                                         style="width: {{ percentage }}%">
+                                                    </div>
+                                                </div>
+                                                <span>{{ percentage|floatformat:1 }}%</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if result.grade == 'A' %}
+                                            <span class="badge grade-A">{{ result.grade }}</span>
+                                            {% elif result.grade == 'B' %}
+                                            <span class="badge grade-B">{{ result.grade }}</span>
+                                            {% elif result.grade == 'C' %}
+                                            <span class="badge grade-C">{{ result.grade }}</span>
+                                            {% elif result.grade == 'D' %}
+                                            <span class="badge grade-D">{{ result.grade }}</span>
+                                            {% elif result.grade == 'E' %}
+                                            <span class="badge grade-E">{{ result.grade }}</span>
+                                            {% else %}
+                                            <span class="badge grade-F">{{ result.grade }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ result.remarks|default:"-" }}</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-light">
+                                        <td><strong>Total/Average</strong></td>
+                                        <td><strong>{{ exam_data.total_marks|floatformat:1 }}</strong></td>
+                                        <td><strong>{{ exam_data.subject_count * 100 }}</strong></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                                                    <div class="progress-bar {% if exam_data.percentage >= 80 %}bg-success{% elif exam_data.percentage >= 60 %}bg-primary{% elif exam_data.percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                         role="progressbar" 
+                                                         style="width: {{ exam_data.percentage }}%">
+                                                    </div>
+                                                </div>
+                                                <strong>{{ exam_data.percentage|floatformat:1 }}%</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if exam_data.overall_grade == 'A' %}grade-A
+                                                              {% elif exam_data.overall_grade == 'B' %}grade-B
+                                                              {% elif exam_data.overall_grade == 'C' %}grade-C
+                                                              {% elif exam_data.overall_grade == 'D' %}grade-D
+                                                              {% elif exam_data.overall_grade == 'E' %}grade-E
+                                                              {% else %}grade-F{% endif %}">
+                                                {{ exam_data.overall_grade }}
+                                            </span>
+                                        </td>
+                                        <td>-</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if not data.exams_data %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-file-earmark-x display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Results Available</h4>
+                        <p class="text-muted">No exam results found for {{ data.student.full_name }}.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="row">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-file-earmark-x display-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">No Results Found</h4>
+                    <p class="text-muted">No academic results available for your children.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">
+                    <i class="bi bi-funnel me-2"></i>Filter Results
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get" id="filterForm">
+                    {% if selected_student %}
+                    <input type="hidden" name="student" value="{{ selected_student.id }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Year</label>
+                        <select name="year" class="form-select">
+                            <option value="">All Years</option>
+                            {% for year in data.available_years %}
+                            <option value="{{ year }}" {% if year|stringformat:"s" == filter_year %}selected{% endif %}>
+                                {{ year }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Exam</label>
+                        <select name="exam" class="form-select">
+                            <option value="ALL">All Exams</option>
+                            {% for exam in data.available_exams %}
+                            <option value="{{ exam.id }}" {% if exam.id|stringformat:"s" == filter_exam %}selected{% endif %}>
+                                {{ exam.name }} ({{ exam.date|date:"M Y" }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select name="subject" class="form-select">
+                            <option value="ALL">All Subjects</option>
+                            {% for subject in data.available_subjects %}
+                            <option value="{{ subject.id }}" {% if subject.id|stringformat:"s" == filter_subject %}selected{% endif %}>
+                                {{ subject.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function applyFilters() {
+        document.getElementById('filterForm').submit();
+    }
+    
+    // Highlight grades on hover
+    document.addEventListener('DOMContentLoaded', function() {
+        const gradeBadges = document.querySelectorAll('.badge[class*="grade-"]');
+        gradeBadges.forEach(badge => {
+            badge.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.transition = 'transform 0.2s';
+            });
+            badge.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.full_name }} - Student Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Student Profile</h1>
+            <p class="text-muted mb-0">{{ student.full_name }}</p>
+        </div>
+        <div>
+            <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to List
+            </a>
+            <a href="{% url 'students:edit_student' student.id %}" class="btn btn-primary btn-sm ms-2">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Student Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow">
+                <div class="card-body text-center">
+                    <!-- Photo -->
+                    {% if student.photo %}
+                        <img src="{{ student.photo.url }}" alt="{{ student.full_name }}" 
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 150px; height: 150px;">
+                            <span class="fs-1 fw-bold">{{ student.full_name|slice:":1"|upper }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Basic Info -->
+                    <h4 class="fw-bold">{{ student.full_name }}</h4>
+                    <p class="text-muted">{{ student.registration_number }}</p>
+                    
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <span class="badge {% if student.status == 'ACTIVE' %}bg-success{% elif student.status == 'GRADUATED' %}bg-info{% elif student.status == 'TRANSFERRED' %}bg-warning{% else %}bg-secondary{% endif %}">
+                            {{ student.get_status_display }}
+                        </span>
+                        <span class="badge bg-primary">{{ student.classroom.name|default:"No Class" }}</span>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="text-start mt-4">
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bi bi-info-circle me-2"></i>Information
+                            </h6>
+                            <div class="ps-3">
+                                <p class="mb-1">
+                                    <i class="bi bi-envelope me-2 text-muted"></i>
+                                    <strong>Email:</strong> {{ student.email|default:"Not provided" }}
+                                </p>
+                                <p class="mb-1">
+                                    <i class="bi bi-calendar me-2 text-muted"></i>
+                                    <strong>Admission Year:</strong> {{ student.admission_year }}
+                                </p>
+                                <p class="mb-1">
+                                    <i class="bi bi-building me-2 text-muted"></i>
+                                    <strong>Class:</strong> {{ student.classroom.name|default:"Not assigned" }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Account Info -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bi bi-person-badge me-2"></i>Account
+                            </h6>
+                            <div class="ps-3">
+                                <p class="mb-1">
+                                    <i class="bi bi-person me-2 text-muted"></i>
+                                    <strong>Username:</strong> {{ student.registration_number }}
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-key me-2 text-muted"></i>
+                                    <strong>Account Status:</strong>
+                                    {% if student.user %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">No Account</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Documents -->
+                        {% if student.documents %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bi bi-file-earmark me-2"></i>Documents
+                            </h6>
+                            <div class="ps-3">
+                                <a href="{{ student.documents.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download me-1"></i>View Documents
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Student Activities -->
+        <div class="col-lg-8">
+            <!-- Attendance Summary -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calendar-check text-primary me-2"></i>
+                        Recent Attendance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if attendance_records %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Time In</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in attendance_records %}
+                                    <tr>
+                                        <td>{{ record.date|date:"Y-m-d" }}</td>
+                                        <td>
+                                            <span class="badge {% if record.status == 'PRESENT' %}bg-success{% elif record.status == 'ABSENT' %}bg-danger{% elif record.status == 'LATE' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                {{ record.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ record.time_in|default:"-" }}</td>
+                                        <td>{{ record.remarks|default:"-" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="{% url 'attendance:student_attendance_list' %}?student={{ student.id }}" 
+                           class="btn btn-sm btn-outline-primary">
+                            View All Attendance
+                        </a>
+                    {% else %}
+                        <p class="text-muted mb-0">No attendance records found.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Exam Results -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-mortarboard text-primary me-2"></i>
+                        Recent Exam Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if exam_results %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Exam</th>
+                                        <th>Subject</th>
+                                        <th>Marks</th>
+                                        <th>Grade</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in exam_results %}
+                                    <tr>
+                                        <td>{{ result.exam.name }}</td>
+                                        <td>{{ result.subject.name }}</td>
+                                        <td>{{ result.marks }} / {{ result.max_marks }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if result.grade == 'A' %}bg-success
+                                                {% elif result.grade == 'B' %}bg-primary
+                                                {% elif result.grade == 'C' %}bg-info
+                                                {% elif result.grade == 'D' %}bg-warning
+                                                {% else %}bg-danger{% endif %}">
+                                                {{ result.grade }}
+                                            </span>
+                                        </td>
+                                        <td>{{ result.exam.date|date:"Y-m-d" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No exam results found.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Fee Payments -->
+            <div class="card border-0 shadow">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-cash-coin text-primary me-2"></i>
+                        Recent Fee Payments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if fee_payments %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Mode</th>
+                                        <th>Receipt No</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in fee_payments %}
+                                    <tr>
+                                        <td>{{ payment.date|date:"Y-m-d" }}</td>
+                                        <td>TZS {{ payment.amount_paid|floatformat:2 }}</td>
+                                        <td>{{ payment.payment_mode }}</td>
+                                        <td>{{ payment.receipt_no }}</td>
+                                        <td>
+                                            {% if payment.is_verified %}
+                                                <span class="badge bg-success">Verified</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No fee payments found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

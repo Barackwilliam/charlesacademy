@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Charles Academy SMS{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ page_title }}</h5>
+                    <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-light">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate id="announcementForm">
+                    {% csrf_token %}
+                    
+                    <!-- Title Field -->
+                    <div class="mb-4">
+                        <label for="id_title" class="form-label fw-bold">
+                            Title <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               name="title" 
+                               id="id_title" 
+                               class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}"
+                               value="{{ form.title.value|default:'' }}"
+                               placeholder="Enter announcement title"
+                               required
+                               maxlength="200">
+                        {% if form.title.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.title.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Maximum 200 characters. Current: <span id="titleCharCount">0</span>/200
+                        </div>
+                    </div>
+                    
+                    <!-- Message Field -->
+                    <div class="mb-4">
+                        <label for="id_message" class="form-label fw-bold">
+                            Message <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="message" 
+                                  id="id_message" 
+                                  class="form-control {% if form.message.errors %}is-invalid{% endif %}"
+                                  rows="8"
+                                  placeholder="Enter announcement message"
+                                  required>{{ form.message.value|default:'' }}</textarea>
+                        {% if form.message.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.message.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                            You can use basic formatting. Maximum 5000 characters. Current: <span id="messageCharCount">0</span>/5000
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Live Preview</h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshPreview()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="announcement-preview p-3 border rounded bg-light">
+                            <h4 id="previewTitle" class="text-primary">Announcement Title</h4>
+                            <hr>
+                            <p id="previewMessage" class="mb-2">Announcement message will appear here...</p>
+                            <div class="text-end">
+                                <small class="text-muted">
+                                    Posted on <span id="previewDate">{% now "F d, Y" %}</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div>
+                            <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
+                            </a>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-warning me-2" onclick="clearForm()">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Clear
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                {% if announcement %}
+                                <i class="bi bi-check-circle me-2"></i> Update Announcement
+                                {% else %}
+                                <i class="bi bi-plus-circle me-2"></i> Create Announcement
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Tips Card -->
+        <div class="card shadow mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightbulb text-warning me-2"></i>
+                    Tips for Effective Announcements
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Keep titles clear and concise</li>
+                    <li>Use bullet points for multiple items</li>
+                    <li>Include important dates and deadlines</li>
+                    <li>Use a friendly but professional tone</li>
+                    <li>Proofread before publishing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('id_title');
+    const messageInput = document.getElementById('id_message');
+    const titleCharCount = document.getElementById('titleCharCount');
+    const messageCharCount = document.getElementById('messageCharCount');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewMessage = document.getElementById('previewMessage');
+    const form = document.getElementById('announcementForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Initialize character counts
+    if (titleInput && titleCharCount) {
+        titleCharCount.textContent = titleInput.value.length;
+    }
+    if (messageInput && messageCharCount) {
+        messageCharCount.textContent = messageInput.value.length;
+    }
+    
+    // Update character counts and preview in real-time
+    function updateCountsAndPreview() {
+        // Update character counts
+        if (titleInput && titleCharCount) {
+            titleCharCount.textContent = titleInput.value.length;
+            if (titleInput.value.length >= 190) {
+                titleCharCount.classList.add('text-warning');
+                if (titleInput.value.length >= 200) {
+                    titleCharCount.classList.remove('text-warning');
+                    titleCharCount.classList.add('text-danger');
+                }
+            } else {
+                titleCharCount.classList.remove('text-warning', 'text-danger');
+            }
+        }
+        
+        if (messageInput && messageCharCount) {
+            messageCharCount.textContent = messageInput.value.length;
+            if (messageInput.value.length >= 4500) {
+                messageCharCount.classList.add('text-warning');
+                if (messageInput.value.length >= 5000) {
+                    messageCharCount.classList.remove('text-warning');
+                    messageCharCount.classList.add('text-danger');
+                }
+            } else {
+                messageCharCount.classList.remove('text-warning', 'text-danger');
+            }
+        }
+        
+        // Update preview
+        if (previewTitle) {
+            previewTitle.textContent = titleInput.value || 'Announcement Title';
+        }
+        if (previewMessage) {
+            previewMessage.textContent = messageInput.value || 'Announcement message will appear here...';
+        }
+    }
+    
+    // Attach event listeners
+    if (titleInput) {
+        titleInput.addEventListener('input', updateCountsAndPreview);
+    }
+    if (messageInput) {
+        messageInput.addEventListener('input', updateCountsAndPreview);
+    }
+    
+    // Initial update
+    updateCountsAndPreview();
+    
+    // Form submission handling
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Validate form
+            if (!titleInput.value.trim() || !messageInput.value.trim()) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Disable submit button to prevent double submission
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+            }
+        });
+    }
+});
+
+// Clear form function
+function clearForm() {
+    if (confirm('Clear all form fields?')) {
+        document.getElementById('id_title').value = '';
+        document.getElementById('id_message').value = '';
+        
+        // Trigger input events to update preview
+        document.getElementById('id_title').dispatchEvent(new Event('input'));
+        document.getElementById('id_message').dispatchEvent(new Event('input'));
+    }
+}
+
+// Refresh preview function
+function refreshPreview() {
+    const titleInput = document.getElementById('id_title');
+    const messageInput = document.getElementById('id_message');
+    
+    if (titleInput && messageInput) {
+        titleInput.dispatchEvent(new Event('input'));
+        messageInput.dispatchEvent(new Event('input'));
+    }
+}
+
+// Auto-save draft (optional feature)
+let autoSaveTimeout;
+function autoSaveDraft() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        const title = document.getElementById('id_title').value;
+        const message = document.getElementById('id_message').value;
+        
+        if (title || message) {
+            // Save to localStorage
+            localStorage.setItem('announcement_draft', JSON.stringify({
+                title: title,
+                message: message,
+                timestamp: new Date().toISOString()
+            }));
+            
+            console.log('Draft auto-saved');
+        }
+    }, 2000);
+}
+
+// Load draft if exists
+window.addEventListener('load', function() {
+    const draft = localStorage.getItem('announcement_draft');
+    if (draft && !window.location.href.includes('edit')) {
+        const draftData = JSON.parse(draft);
+        const titleInput = document.getElementById('id_title');
+        const messageInput = document.getElementById('id_message');
+        
+        if (titleInput && !titleInput.value) {
+            titleInput.value = draftData.title;
+        }
+        if (messageInput && !messageInput.value) {
+            messageInput.value = draftData.message;
+        }
+        
+        // Update preview
+        if (titleInput && messageInput) {
+            titleInput.dispatchEvent(new Event('input'));
+            messageInput.dispatchEvent(new Event('input'));
+        }
+        
+        // Clear draft after loading
+        localStorage.removeItem('announcement_draft');
+    }
+});
+</script>
+
+<style>
+.announcement-preview {
+    min-height: 200px;
+    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+#previewTitle {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+#previewMessage {
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.form-control-lg {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+}
+</style>
+{% endblock %}

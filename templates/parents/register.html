@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>Parent Registration</h3>
+                </div>
+                <div class="card-body">
+                    {% if not registration_open %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Parent registration is currently closed. Please contact school administration.
+                        </div>
+                        <a href="{% url 'home' %}" class="btn btn-secondary">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    {% else %}
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please fill in all required fields. Your account will be activated after admin approval.
+                        </div>
+                        
+                        <form method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Personal Information -->
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-user me-2"></i>Personal Information
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.full_name.id_for_label }}" class="form-label">
+                                            Full Name *
+                                        </label>
+                                        {{ form.full_name }}
+                                        {% if form.full_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.full_name.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.relationship.id_for_label }}" class="form-label">
+                                            Relationship *
+                                        </label>
+                                        {{ form.relationship }}
+                                        {% if form.relationship.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.relationship.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                            Phone Number *
+                                        </label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.phone.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">
+                                            Format: +255123456789
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                                            Email Address *
+                                        </label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.email.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.occupation.id_for_label }}" class="form-label">
+                                            Occupation
+                                        </label>
+                                        {{ form.occupation }}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.profile_picture.id_for_label }}" class="form-label">
+                                            Profile Picture
+                                        </label>
+                                        {{ form.profile_picture }}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.address.id_for_label }}" class="form-label">
+                                        Address *
+                                    </label>
+                                    {{ form.address }}
+                                    {% if form.address.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.address.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Account Information -->
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-key me-2"></i>Account Information
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.username.id_for_label }}" class="form-label">
+                                            Username *
+                                        </label>
+                                        {{ form.username }}
+                                        {% if form.username.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.username.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.id_number.id_for_label }}" class="form-label">
+                                            ID Number (Optional)
+                                        </label>
+                                        {{ form.id_number }}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.password.id_for_label }}" class="form-label">
+                                            Password *
+                                        </label>
+                                        {{ form.password }}
+                                        {% if form.password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.password.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="password-strength mt-1">
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar" id="passwordStrength" 
+                                                     role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Password strength: <span id="strengthText">Very weak</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.confirm_password.id_for_label }}" class="form-label">
+                                            Confirm Password *
+                                        </label>
+                                        {{ form.confirm_password }}
+                                        {% if form.confirm_password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.confirm_password.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="mt-1">
+                                            <small id="passwordMatch" class="form-text text-danger d-none">
+                                                <i class="fas fa-times me-1"></i>Passwords don't match
+                                            </small>
+                                            <small id="passwordMatchSuccess" class="form-text text-success d-none">
+                                                <i class="fas fa-check me-1"></i>Passwords match
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Student Information -->
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-child me-2"></i>Student Information
+                                </h5>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    You need at least one child registered in our school to create a parent account.
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.student_registration_number.id_for_label }}" 
+                                           class="form-label">
+                                        Student Admission/Registration Number *
+                                    </label>
+                                    {{ form.student_registration_number }}
+                                    {% if form.student_registration_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.student_registration_number.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Enter your child's admission number as provided by the school
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Terms and Conditions -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           id="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        I agree to the <a href="#" data-bs-toggle="modal" 
+                                        data-bs-target="#termsModal">Terms and Conditions</a> *
+                                    </label>
+                                    <div class="invalid-feedback">
+                                        You must agree to the terms and conditions
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- william@123 -->
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-user-plus me-2"></i>Register
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-4 text-center">
+                            <p class="mb-0">
+                                Already have an account? 
+                                <a href="{% url 'parents:login' %}">Login here</a>
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">
+                    <i class="fas fa-file-contract me-2"></i>Terms and Conditions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Parent Portal Terms of Use</h6>
+                <p>By registering for the Parent Portal, you agree to the following terms:</p>
+                
+                <h6>1. Account Responsibility</h6>
+                <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+                
+                <h6>2. Accurate Information</h6>
+                <p>You agree to provide accurate and complete information during registration and to update it as necessary.</p>
+                
+                <h6>3. Student Information Access</h6>
+                <p>You may only access information for students you are legally authorized to represent.</p>
+                
+                <h6>4. Acceptable Use</h6>
+                <p>You agree not to use the portal for any unlawful purpose or in any way that could damage the school's systems.</p>
+                
+                <h6>5. Privacy</h6>
+                <p>Your personal information will be handled in accordance with our privacy policy.</p>
+                
+                <h6>6. Account Approval</h6>
+                <p>All parent accounts require administrative approval. The school reserves the right to deny or revoke access at its discretion.</p>
+                
+                <h6>7. Communication</h6>
+                <p>The portal is an official communication channel. Important notices will be sent through the portal and you are responsible for checking it regularly.</p>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    By clicking "Register", you acknowledge that you have read, understood, and agree to these terms.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Password strength checker
+    $('#{{ form.password.id_for_label }}').on('keyup', function() {
+        var password = $(this).val();
+        var strength = 0;
+        var text = "Very weak";
+        
+        if (password.length >= 8) strength += 25;
+        if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
+        if (password.match(/\d/)) strength += 25;
+        if (password.match(/[^a-zA-Z\d]/)) strength += 25;
+        
+        if (strength >= 75) text = "Strong";
+        else if (strength >= 50) text = "Good";
+        else if (strength >= 25) text = "Weak";
+        
+        $('#passwordStrength').css('width', strength + '%');
+        $('#strengthText').text(text);
+        
+        if (strength < 25) {
+            $('#passwordStrength').removeClass('bg-warning bg-success').addClass('bg-danger');
+        } else if (strength < 75) {
+            $('#passwordStrength').removeClass('bg-danger bg-success').addClass('bg-warning');
+        } else {
+            $('#passwordStrength').removeClass('bg-danger bg-warning').addClass('bg-success');
+        }
+    });
+    
+    // Password match checker
+    $('#{{ form.confirm_password.id_for_label }}').on('keyup', function() {
+        var password = $('#{{ form.password.id_for_label }}').val();
+        var confirm = $(this).val();
+        
+        if (confirm.length === 0) {
+            $('#passwordMatch').addClass('d-none');
+            $('#passwordMatchSuccess').addClass('d-none');
+        } else if (password === confirm) {
+            $('#passwordMatch').addClass('d-none');
+            $('#passwordMatchSuccess').removeClass('d-none');
+        } else {
+            $('#passwordMatch').removeClass('d-none');
+            $('#passwordMatchSuccess').addClass('d-none');
+        }
+    });
+    
+    // Form validation
+    $('form').submit(function(e) {
+        if (!$('#terms').is(':checked')) {
+            e.preventDefault();
+            alert('Please agree to the terms and conditions');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

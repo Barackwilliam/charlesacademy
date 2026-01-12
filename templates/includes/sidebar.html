@@ -1,0 +1,144 @@
+{% load custom_filters %}
+
+<!-- Sidebar Navigation -->
+<div class="sidebar-navigation">
+    <div class="sidebar-user-info text-center mb-4 p-3 bg-primary text-white rounded">
+        {% if user.is_authenticated %}
+            {% if user.profile.photo %}
+            <img src="{{ user.profile.photo.url }}" alt="Profile Photo" 
+                 class="rounded-circle mb-2" width="80" height="80">
+            {% else %}
+            <div class="avatar-placeholder rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
+                 style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2);">
+                <i class="bi bi-person-fill text-white" style="font-size: 2rem;"></i>
+            </div>
+            {% endif %}
+            <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+            <span class="badge bg-light text-dark">{{ user.profile.role }}</span>
+        {% else %}
+            <div class="avatar-placeholder rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
+                 style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2);">
+                <i class="bi bi-person-fill text-white" style="font-size: 2rem;"></i>
+            </div>
+            <h6 class="mb-1">Guest User</h6>
+            <span class="badge bg-light text-dark">Guest</span>
+        {% endif %}
+    </div>
+
+    <ul class="nav flex-column">
+        <!-- Dashboard -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+        </li>
+
+        <!-- Admin & Teacher Sections -->
+        {% if user.is_authenticated and user.profile.role == 'ADMIN' or user.profile.role == 'TEACHER' %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'students' in request.path %}active{% endif %}" 
+               href="{% url 'student_list' %}">
+                <i class="bi bi-people-fill me-2"></i> Students
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'attendance' in request.path %}active{% endif %}" 
+               href="{% url 'mark_attendance' %}">
+                <i class="bi bi-calendar-check me-2"></i> Attendance
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'teachers' in request.path %}active{% endif %}" 
+               href="{% url 'teacher_list' %}">
+                <i class="bi bi-person-badge me-2"></i> Teachers
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'exams' in request.path %}active{% endif %}" 
+               href="{% url 'exam_list' %}">
+                <i class="bi bi-clipboard-data me-2"></i> Exams
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Admin & Accountant Sections -->
+{% if user.is_authenticated and user.profile.role == 'ADMIN' or user.profile.role == 'ACCOUNTANT' %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'fees' in request.path %}active{% endif %}" 
+               href="{% url 'fee_payments' %}">
+                <i class="bi bi-cash-stack me-2"></i> Fees
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Student Portal -->
+        {% if user.is_authenticated and user.profile.role == 'STUDENT' %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'student-portal' in request.path %}active{% endif %}" 
+               href="{% url 'student_portal' %}">
+                <i class="bi bi-person-video me-2"></i> Student Portal
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Parent Portal -->
+        {% if user.is_authenticated and user.profile.role == 'PARENT' %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'parent-portal' in request.path %}active{% endif %}" 
+               href="{% url 'parent_portal' %}">
+                <i class="bi bi-people-fill me-2"></i> Parent Portal
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Accountant Portal -->
+        {% if user.is_authenticated and user.profile.role == 'ACCOUNTANT' %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'accountant' in request.path %}active{% endif %}" 
+               href="{% url 'accountant_dashboard' %}">
+                <i class="bi bi-calculator me-2"></i> Accountant
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Common Links for All Authenticated Users -->
+        
+
+        <!-- Admin Only -->
+        {% if user.is_authenticated and user.profile.role == 'ADMIN' %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'settings' in request.path %}active{% endif %}" 
+               href="{% url 'settings' %}">
+                <i class="bi bi-gear me-2"></i> Settings
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Logout for Authenticated Users -->
+        {% if user.is_authenticated %}
+        <li class="nav-item mt-4">
+            <a class="nav-link text-danger" href="{% url 'logout' %}">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Login for Anonymous Users -->
+        {% if not user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Login
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <!-- School Info -->
+    <div class="sidebar-footer mt-auto p-3 text-center text-muted">
+        <small>
+            <i class="bi bi-info-circle me-1"></i>
+            {{ school_settings.name }}<br>
+            {{ school_settings.academic_year }}
+        </small>
+    </div>
+</div>

@@ -1,0 +1,340 @@
+{% extends 'parents/base.html' %}
+
+{% block title %}School Announcements{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="mb-3 mb-md-0">
+                            <h2 class="mb-1">
+                                <i class="bi bi-megaphone me-2"></i>School Announcements
+                            </h2>
+                            <p class="mb-0 opacity-75">
+                                Stay updated with school news and important notices
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#filterModal">
+                                <i class="bi bi-funnel me-1"></i>Filter
+                            </button>
+                            {% if filter_type or filter_audience or search_query %}
+                            <a href="{% url 'parents:announcements' %}" class="btn btn-outline-light">
+                                <i class="bi bi-x-circle me-1"></i>Clear Filters
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Announcements -->
+    {% if important_announcements %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header bg-danger">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Important Announcements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for announcement in important_announcements %}
+                        <div class="col-md-6 mb-3">
+                            <div class="border-start border-4 border-danger ps-3 py-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-1">{{ announcement.title }}</h6>
+                                    <small class="text-muted">{{ announcement.created_at|date:"d M" }}</small>
+                                </div>
+                                <p class="small mb-2">{{ announcement.content|truncatechars:120 }}</p>
+                                <a href="{% url 'parents:announcement_detail' announcement.id %}" 
+                                   class="btn btn-sm btn-outline-danger">
+                                    Read More
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Events -->
+    {% if upcoming_events %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header bg-success">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>Upcoming Events
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for event in upcoming_events %}
+                        <div class="col-md-4 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-0">{{ event.title|truncatechars:40 }}</h6>
+                                    {% if event.event_date %}
+                                    <span class="badge bg-success">
+                                        {{ event.event_date|date:"d M" }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="small text-muted mb-2">{{ event.content|truncatechars:80 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{% url 'parents:announcement_detail' event.id %}" 
+                                       class="btn btn-sm btn-outline-success">
+                                        Details
+                                    </a>
+                                    {% if event.event_date %}
+                                    <small class="text-muted">
+                                        {{ event.event_date|timeuntil }} to go
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- All Announcements -->
+    <div class="row">
+        <div class="col-12">
+            <div class="parent-card fade-in">
+                <div class="parent-card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Announcements</h5>
+                        <span class="badge bg-light text-dark">
+                            {{ announcements.paginator.count }} announcement{{ announcements.paginator.count|pluralize }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if announcements %}
+                    <div class="list-group list-group-flush">
+                        {% for announcement in announcements %}
+                        <div class="list-group-item border-0 px-0 py-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    {% if announcement.announcement_type == 'IMPORTANT' %}
+                                    <span class="badge bg-danger rounded-pill p-2">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </span>
+                                    {% elif announcement.announcement_type == 'EVENT' %}
+                                    <span class="badge bg-success rounded-pill p-2">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </span>
+                                    {% elif announcement.announcement_type == 'ACADEMIC' %}
+                                    <span class="badge bg-primary rounded-pill p-2">
+                                        <i class="bi bi-book"></i>
+                                    </span>
+                                    {% elif announcement.announcement_type == 'GENERAL' %}
+                                    <span class="badge bg-info rounded-pill p-2">
+                                        <i class="bi bi-info-circle"></i>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h6 class="mb-0">{{ announcement.title }}</h6>
+                                        <small class="text-muted">{{ announcement.created_at|date:"d M Y" }}</small>
+                                    </div>
+                                    
+                                    <p class="small text-muted mb-2">
+                                        {{ announcement.content|truncatechars:150 }}
+                                    </p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            {% if announcement.audience == 'PARENTS' %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-people me-1"></i>FOR PARENTS
+                                            </span>
+                                            {% elif announcement.audience == 'ALL' %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-globe me-1"></i>FOR EVERYONE
+                                            </span>
+                                            {% endif %}
+                                            
+                                            {% if announcement.posted_by %}
+                                            <span class="badge bg-light text-dark ms-2">
+                                                <i class="bi bi-person me-1"></i>
+                                                {{ announcement.posted_by.get_full_name|default:announcement.posted_by.username }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div>
+                                            <a href="{% url 'parents:announcement_detail' announcement.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                Read More
+                                            </a>
+                                            {% if announcement.attachment %}
+                                            <a href="{{ announcement.attachment.url }}" 
+                                               class="btn btn-sm btn-outline-secondary ms-1" target="_blank">
+                                                <i class="bi bi-paperclip"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if paginator.num_pages > 1 %}
+                    <nav aria-label="Announcements pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if announcements.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ announcements.previous_page_number }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_audience %}&audience={{ filter_audience }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                   aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in paginator.page_range %}
+                                {% if num == announcements.number %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% else %}
+                                    {% if num > announcements.number|add:'-3' and num < announcements.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_audience %}&audience={{ filter_audience }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if announcements.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ announcements.next_page_number }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_audience %}&audience={{ filter_audience }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                   aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-megaphone display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Announcements Found</h4>
+                        <p class="text-muted">
+                            {% if filter_type or filter_audience or search_query %}
+                            Try changing your filters or search criteria.
+                            {% else %}
+                            There are no announcements at the moment.
+                            {% endif %}
+                        </p>
+                        {% if filter_type or filter_audience or search_query %}
+                        <a href="{% url 'parents:announcements' %}" class="btn btn-primary">
+                            Clear Filters
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">
+                    <i class="bi bi-funnel me-2"></i>Filter Announcements
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get" id="filterForm">
+                    <div class="mb-3">
+                        <label class="form-label">Search</label>
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Search announcements..." value="{{ filter.search|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="ALL">All Types</option>
+                            {% for type_code, type_name in announcement_types %}
+                            <option value="{{ type_code }}" {% if type_code == filter.type %}selected{% endif %}>
+                                {{ type_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Audience</label>
+                        <select name="audience" class="form-select">
+                            <option value="ALL">All Audiences</option>
+                            {% for audience_code, audience_name in audience_types %}
+                            <option value="{{ audience_code }}" {% if audience_code == filter.audience %}selected{% endif %}>
+                                {{ audience_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function applyFilters() {
+        document.getElementById('filterForm').submit();
+    }
+    
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="search"]');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 2 || this.value.length === 0) {
+                    document.getElementById('filterForm').submit();
+                }
+            }, 500);
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

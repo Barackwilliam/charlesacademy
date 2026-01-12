@@ -1,3 +1,4 @@
+#exams/model
 from django.db import models
 from classes.models import ClassRoom, Subject
 from students.models import Student
