@@ -112,26 +112,29 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 ## Charles Old Db
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres', 
-#         'USER': 'postgres.dbaweyitfkgsqwdcldep',  
-#         'PASSWORD': 'NyumbaChap@123', 
-#         'HOST': 'aws-1-eu-west-1.pooler.supabase.com',  
-#         'PORT': '5432',  
-#     }
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres', 
-        'USER': 'postgres.lcprcweukbxuhrezgana',  
+        'USER': 'postgres.dbaweyitfkgsqwdcldep',  
         'PASSWORD': 'NyumbaChap@123', 
         'HOST': 'aws-1-eu-west-1.pooler.supabase.com',  
         'PORT': '5432',  
     }
 }
+
+## Charles new Db
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres', 
+#         'USER': 'postgres.lcprcweukbxuhrezgana',  
+#         'PASSWORD': 'NyumbaChap@123', 
+#         'HOST': 'aws-1-eu-west-1.pooler.supabase.com',  
+#         'PORT': '5432',  
+#     }
+# }
 
 
 

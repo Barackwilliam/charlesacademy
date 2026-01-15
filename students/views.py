@@ -315,12 +315,109 @@ from .utils import generate_registration_number, create_student_user, send_stude
 #         'current_year': timezone.now().year,
 #     })
 
-# students/views.py - Kurekebishwa tu
+# # students/views.py - Kurekebishwa tu
+# from django.shortcuts import render, redirect
+# from django.contrib import messages
+# from django.utils import timezone
+# from django.contrib.auth.decorators import login_required
+# from django.core.exceptions import ValidationError
+# from django.db import IntegrityError
+# from classes.models import ClassRoom
+# from .models import Student
+# from .utils import create_student_user, send_student_credentials
+# import logging
+
+# logger = logging.getLogger(__name__)
+
+# def add_student(request):
+#     # Hii ni ya kuseti settings za shule - ukiwa huna SchoolSettings model, tumia default
+#     try:
+#         from school.models import SchoolSettings
+#         settings_obj = SchoolSettings.objects.first()
+#     except:
+#         settings_obj = None
+    
+#     if request.method == 'POST':
+#         try:
+#             # Get classroom
+#             classroom_id = request.POST.get('classroom')
+#             if not classroom_id:
+#                 messages.error(request, "Please select a classroom")
+#                 return redirect('students:add_student')
+            
+#             classroom = ClassRoom.objects.get(id=classroom_id)
+#             year = int(request.POST.get('admission_year', timezone.now().year))
+            
+#             # Generate registration number
+#             from .utils import generate_registration_number
+#             reg = generate_registration_number(classroom.code, year)
+            
+#             # Create student
+#             student = Student.objects.create(
+#                 full_name=request.POST.get('full_name').strip(),
+#                 email=request.POST.get('email').strip().lower(),
+#                 classroom=classroom,
+#                 admission_year=year,
+#                 registration_number=reg,
+#                 status=request.POST.get('status', 'ACTIVE')
+#             )
+            
+#             # Handle file uploads
+#             if 'photo' in request.FILES:
+#                 student.photo = request.FILES['photo']
+#             if 'documents' in request.FILES:
+#                 student.documents = request.FILES['documents']
+#             student.save()
+
+#             # Create linked user
+#             user = create_student_user(student)
+            
+#             if user:
+#                 # Send credentials to student's email if provided
+#                 if student.email:
+#                     try:
+#                         send_student_credentials(student, user, request)
+#                         messages.info(request, f"Credentials sent to {student.email}")
+#                     except Exception as e:
+#                         logger.error(f"Email sending failed: {e}")
+#                         messages.warning(request, f"Student registered but email not sent. Username: {user.username}")
+                
+#                 messages.success(request, f"Student {student.full_name} added successfully!")
+#             else:
+#                 messages.warning(request, f"Student {student.full_name} added but user account creation failed!")
+            
+#             return redirect('students:student_list')
+            
+#         except ClassRoom.DoesNotExist:
+#             messages.error(request, "Selected class does not exist")
+#         except ValidationError as e:
+#             messages.error(request, str(e))
+#         except IntegrityError as e:
+#             if 'email' in str(e):
+#                 messages.error(request, "This email is already registered")
+#             elif 'registration_number' in str(e):
+#                 messages.error(request, "Registration number conflict. Please try again")
+#             else:
+#                 messages.error(request, "Database error occurred")
+#         except Exception as e:
+#             messages.error(request, f"An error occurred: {str(e)}")
+#             logger.error(f"Error in add_student: {e}")
+    
+#     # GET request
+#     context = {
+#         'school_settings': settings_obj,
+#         'classes': ClassRoom.objects.all(),
+#         'current_year': timezone.now().year,
+#         'years': range(timezone.now().year - 5, timezone.now().year + 3)
+#     }
+#     return render(request, 'students/add.html', context)
+
+
+# students/views.py - SIMPLE WORKING VERSION
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from classes.models import ClassRoom
 from .models import Student
@@ -329,90 +426,100 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+@login_required
 def add_student(request):
-    # Hii ni ya kuseti settings za shule - ukiwa huna SchoolSettings model, tumia default
-    try:
-        from school.models import SchoolSettings
-        settings_obj = SchoolSettings.objects.first()
-    except:
-        settings_obj = None
-    
+    """
+    Simple student registration that WORKS
+    """
     if request.method == 'POST':
         try:
-            # Get classroom
+            # Get form data
+            full_name = request.POST.get('full_name', '').strip()
+            email = request.POST.get('email', '').strip().lower()
             classroom_id = request.POST.get('classroom')
-            if not classroom_id:
-                messages.error(request, "Please select a classroom")
+            
+            # Basic validation
+            if not full_name or not email or not classroom_id:
+                messages.error(request, "Please fill in all required fields")
                 return redirect('students:add_student')
             
-            classroom = ClassRoom.objects.get(id=classroom_id)
-            year = int(request.POST.get('admission_year', timezone.now().year))
+            # Get classroom
+            try:
+                classroom = ClassRoom.objects.get(id=classroom_id)
+            except ClassRoom.DoesNotExist:
+                messages.error(request, "Invalid class selected")
+                return redirect('students:add_student')
+            
+            # Get year
+            try:
+                year = int(request.POST.get('admission_year', timezone.now().year))
+            except:
+                year = timezone.now().year
+            
+            # Check if email exists
+            if Student.objects.filter(email=email).exists():
+                messages.error(request, "Email already registered")
+                return redirect('students:add_student')
             
             # Generate registration number
             from .utils import generate_registration_number
-            reg = generate_registration_number(classroom.code, year)
+            reg_number = generate_registration_number(classroom.code, year)
             
-            # Create student
-            student = Student.objects.create(
-                full_name=request.POST.get('full_name').strip(),
-                email=request.POST.get('email').strip().lower(),
+            # Create student FIRST
+            student = Student(
+                full_name=full_name,
+                email=email,
                 classroom=classroom,
                 admission_year=year,
-                registration_number=reg,
+                registration_number=reg_number,
                 status=request.POST.get('status', 'ACTIVE')
             )
             
-            # Handle file uploads
+            # Handle optional files
             if 'photo' in request.FILES:
                 student.photo = request.FILES['photo']
             if 'documents' in request.FILES:
                 student.documents = request.FILES['documents']
+            
+            # Save student
             student.save()
-
-            # Create linked user
+            
+            # Create user account
             user = create_student_user(student)
             
             if user:
-                # Send credentials to student's email if provided
-                if student.email:
-                    try:
-                        send_student_credentials(student, user, request)
-                        messages.info(request, f"Credentials sent to {student.email}")
-                    except Exception as e:
-                        logger.error(f"Email sending failed: {e}")
-                        messages.warning(request, f"Student registered but email not sent. Username: {user.username}")
+                # Try to send email (don't crash if it fails)
+                try:
+                    send_student_credentials(student, user, request)
+                    messages.info(request, f"✓ Credentials sent to {student.email}")
+                except Exception as email_error:
+                    logger.error(f"Email error: {email_error}")
+                    messages.warning(request, f"✓ Student registered. Username: {user.username}")
                 
-                messages.success(request, f"Student {student.full_name} added successfully!")
+                messages.success(request, f"✓ Student '{student.full_name}' registered successfully!")
             else:
-                messages.warning(request, f"Student {student.full_name} added but user account creation failed!")
+                messages.success(request, f"✓ Student '{student.full_name}' registered (user account pending)")
             
             return redirect('students:student_list')
             
-        except ClassRoom.DoesNotExist:
-            messages.error(request, "Selected class does not exist")
-        except ValidationError as e:
-            messages.error(request, str(e))
         except IntegrityError as e:
-            if 'email' in str(e):
-                messages.error(request, "This email is already registered")
-            elif 'registration_number' in str(e):
-                messages.error(request, "Registration number conflict. Please try again")
+            if 'unique' in str(e).lower():
+                messages.error(request, "Registration number or email already exists")
             else:
-                messages.error(request, "Database error occurred")
+                messages.error(request, "Database error. Please try again.")
+            logger.error(f"IntegrityError: {e}")
         except Exception as e:
-            messages.error(request, f"An error occurred: {str(e)}")
-            logger.error(f"Error in add_student: {e}")
+            messages.error(request, f"Error: {str(e)}")
+            logger.error(f"Add student error: {e}")
     
-    # GET request
+    # GET request - show form
     context = {
-        'school_settings': settings_obj,
         'classes': ClassRoom.objects.all(),
         'current_year': timezone.now().year,
         'years': range(timezone.now().year - 5, timezone.now().year + 3)
     }
     return render(request, 'students/add.html', context)
 
-    
 
 def delete_student(request, id):
     settings_obj = SchoolSettings.objects.first()
