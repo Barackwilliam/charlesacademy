@@ -412,8 +412,6 @@ from .utils import generate_registration_number, create_student_user, send_stude
 #     }
 #     return render(request, 'students/add.html', context)
 
-
-# students/views.py - SIMPLE WORKING VERSION
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
@@ -428,42 +426,38 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def add_student(request):
-    """
-    Simple student registration that WORKS
-    """
     if request.method == 'POST':
         try:
-            # Get form data
             full_name = request.POST.get('full_name', '').strip()
             email = request.POST.get('email', '').strip().lower()
             classroom_id = request.POST.get('classroom')
             
-            # Basic validation
             if not full_name or not email or not classroom_id:
                 messages.error(request, "Please fill in all required fields")
                 return redirect('students:add_student')
             
-            # Get classroom
             try:
                 classroom = ClassRoom.objects.get(id=classroom_id)
             except ClassRoom.DoesNotExist:
                 messages.error(request, "Invalid class selected")
                 return redirect('students:add_student')
             
-            # Get year
             try:
                 year = int(request.POST.get('admission_year', timezone.now().year))
             except:
                 year = timezone.now().year
             
-            # Check if email exists
             if Student.objects.filter(email=email).exists():
                 messages.error(request, "Email already registered")
                 return redirect('students:add_student')
             
-            # Generate registration number
-            from .utils import generate_registration_number
-            reg_number = generate_registration_number(classroom.code, year)
+            # HAPA NIMEBADILISHA: tumia registration number ya mwenyewe
+            reg_number = request.POST.get('registration_number', '').strip()
+            
+            # Kama registration number haijatolewa, generate moja
+            if not reg_number:
+                from .utils import generate_registration_number
+                reg_number = generate_registration_number(classroom.code, year)
             
             # Create student FIRST
             student = Student(
@@ -475,20 +469,17 @@ def add_student(request):
                 status=request.POST.get('status', 'ACTIVE')
             )
             
-            # Handle optional files
             if 'photo' in request.FILES:
                 student.photo = request.FILES['photo']
             if 'documents' in request.FILES:
                 student.documents = request.FILES['documents']
             
-            # Save student
             student.save()
             
-            # Create user account
+            # Create user account - username iwe registration number
             user = create_student_user(student)
             
             if user:
-                # Try to send email (don't crash if it fails)
                 try:
                     send_student_credentials(student, user, request)
                     messages.info(request, f"✓ Credentials sent to {student.email}")
@@ -512,7 +503,6 @@ def add_student(request):
             messages.error(request, f"Error: {str(e)}")
             logger.error(f"Add student error: {e}")
     
-    # GET request - show form
     context = {
         'classes': ClassRoom.objects.all(),
         'current_year': timezone.now().year,
@@ -520,7 +510,7 @@ def add_student(request):
     }
     return render(request, 'students/add.html', context)
 
-
+    
 def delete_student(request, id):
     settings_obj = SchoolSettings.objects.first()
 
