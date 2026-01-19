@@ -80,7 +80,6 @@ from .models import Announcement, SchoolSettings
 from .forms import AnnouncementForm, SchoolSettingsForm
 
 # Announcements Views
-@login_required
 def announcement_list(request):
     """List all announcements"""
     announcements = Announcement.objects.all().order_by('-created_at')
@@ -161,7 +160,6 @@ def announcement_delete(request, pk):
     }
     return render(request, 'dashboard/announcements/delete.html', context)
 
-@login_required
 def announcement_detail(request, pk):
     settings_obj = SchoolSettings.objects.first()
 

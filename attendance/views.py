@@ -89,7 +89,6 @@ from django.contrib.auth.decorators import login_required
 from .models import StudentAttendance
 from students.models import Student
 
-@login_required
 def my_attendance(request):
     try:
         student = request.user.student

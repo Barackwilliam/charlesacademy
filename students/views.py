@@ -510,7 +510,7 @@ def add_student(request):
     }
     return render(request, 'students/add.html', context)
 
-    
+
 def delete_student(request, id):
     settings_obj = SchoolSettings.objects.first()
 
@@ -607,7 +607,6 @@ def student_portal(request):
     
     # Get student results from exams app
     results = Result.objects.filter(student=student).select_related('exam', 'subject')
-    
     # Calculate average marks if results exist
     average_marks = 0
     if results.exists():
@@ -631,7 +630,6 @@ def student_portal(request):
     })
 
 
-@login_required
 def download_results_pdf(request):
     """Download student results as PDF"""
     user = request.user
@@ -1139,7 +1137,6 @@ def generate_simple_results_pdf(student, results, school_settings):
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
-@login_required
 def change_password(request):
     settings_obj = SchoolSettings.objects.first()
 
@@ -1160,7 +1157,6 @@ def change_password(request):
 
 
 # students/views.py
-@login_required
 @role_required(['ADMIN', 'TEACHER', 'STUDENT'])
 def student_detail(request, student_id):
     """View student details"""

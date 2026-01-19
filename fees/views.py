@@ -22,7 +22,6 @@ import os
 # DEBUG VIEW - Check Database Records
 # =============================================
 
-@login_required
 def debug_fees(request):
     """Debug view to see what's in the database"""
     context = {}
@@ -68,7 +67,6 @@ def debug_fees(request):
 # =============================================
 # MAIN FEE VIEWS
 # =============================================
-@login_required
 def my_fees(request):
     settings_obj = SchoolSettings.objects.first()
 
@@ -129,7 +127,6 @@ def my_fees(request):
     return student_fee_detail(request, student.id)
 
 
-@login_required
 def link_student_account(request, student_id):
     settings_obj = SchoolSettings.objects.first()
 
@@ -159,7 +156,6 @@ def link_student_account(request, student_id):
     
     return redirect('fees:my_fees')
 
-@login_required
 def student_fee_detail(request, student_id=None):
     settings_obj = SchoolSettings.objects.first()
 
