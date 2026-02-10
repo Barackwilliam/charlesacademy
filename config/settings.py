@@ -185,3 +185,9 @@ EMAIL_HOST_USER = 'info.charlesacademy@gmail.com'  # Your email
 EMAIL_HOST_PASSWORD = 'fxxh twid rtgt sdkv'  # App password (not your regular password)
 DEFAULT_FROM_EMAIL = 'info.charlesacademy@gmail.com'
 
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.SlashFriendlyModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

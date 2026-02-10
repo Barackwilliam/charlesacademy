@@ -412,103 +412,245 @@ from .utils import generate_registration_number, create_student_user, send_stude
 #     }
 #     return render(request, 'students/add.html', context)
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction, IntegrityError
+from django.core.exceptions import ValidationError
 from classes.models import ClassRoom
 from .models import Student
-from .utils import create_student_user, send_student_credentials
+from .utils import (
+    create_student_user, 
+    send_student_credentials,
+    get_next_registration_sequence,
+    generate_registration_number
+)
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
 @login_required
+@permission_required('students.add_student', raise_exception=True)
 def add_student(request):
+    """Add new student with automatic user creation"""
     if request.method == 'POST':
         try:
-            full_name = request.POST.get('full_name', '').strip()
-            email = request.POST.get('email', '').strip().lower()
-            classroom_id = request.POST.get('classroom')
-            
-            if not full_name or not email or not classroom_id:
-                messages.error(request, "Please fill in all required fields")
-                return redirect('students:add_student')
-            
-            try:
-                classroom = ClassRoom.objects.get(id=classroom_id)
-            except ClassRoom.DoesNotExist:
-                messages.error(request, "Invalid class selected")
-                return redirect('students:add_student')
-            
-            try:
-                year = int(request.POST.get('admission_year', timezone.now().year))
-            except:
-                year = timezone.now().year
-            
-            if Student.objects.filter(email=email).exists():
-                messages.error(request, "Email already registered")
-                return redirect('students:add_student')
-            
-            # HAPA NIMEBADILISHA: tumia registration number ya mwenyewe
-            reg_number = request.POST.get('registration_number', '').strip()
-            
-            # Kama registration number haijatolewa, generate moja
-            if not reg_number:
-                from .utils import generate_registration_number
-                reg_number = generate_registration_number(classroom.code, year)
-            
-            # Create student FIRST
-            student = Student(
-                full_name=full_name,
-                email=email,
-                classroom=classroom,
-                admission_year=year,
-                registration_number=reg_number,
-                status=request.POST.get('status', 'ACTIVE')
-            )
-            
-            if 'photo' in request.FILES:
-                student.photo = request.FILES['photo']
-            if 'documents' in request.FILES:
-                student.documents = request.FILES['documents']
-            
-            student.save()
-            
-            # Create user account - username iwe registration number
-            user = create_student_user(student)
-            
-            if user:
-                try:
-                    send_student_credentials(student, user, request)
-                    messages.info(request, f"✓ Credentials sent to {student.email}")
-                except Exception as email_error:
-                    logger.error(f"Email error: {email_error}")
-                    messages.warning(request, f"✓ Student registered. Username: {user.username}")
+            with transaction.atomic():
+                # Get form data
+                full_name = request.POST.get('full_name', '').strip()
+                email = request.POST.get('email', '').strip().lower()
+                classroom_id = request.POST.get('classroom')
+                admission_year = request.POST.get('admission_year', timezone.now().year)
+                status = request.POST.get('status', 'ACTIVE')
                 
-                messages.success(request, f"✓ Student '{student.full_name}' registered successfully!")
-            else:
-                messages.success(request, f"✓ Student '{student.full_name}' registered (user account pending)")
-            
-            return redirect('students:student_list')
-            
+                # Validate required fields
+                if not all([full_name, email, classroom_id]):
+                    messages.error(request, "All fields are required")
+                    return redirect('students:add_student')
+                
+                # Get classroom
+                try:
+                    classroom = ClassRoom.objects.get(id=classroom_id)
+                except ClassRoom.DoesNotExist:
+                    messages.error(request, "Invalid class selected")
+                    return redirect('students:add_student')
+                
+                # Validate email format
+                if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+                    messages.error(request, "Invalid email format")
+                    return redirect('students:add_student')
+                
+                # Check if email exists
+                if Student.objects.filter(email__iexact=email).exists():
+                    messages.error(request, "Email already registered")
+                    return redirect('students:add_student')
+                
+                # Handle registration number
+                reg_number = request.POST.get('registration_number', '').strip().upper()
+                
+                if reg_number:
+                    # Validate custom registration number
+                    if not re.match(r'^CA/[A-Z]+/\d{4}/\d{4}$', reg_number):
+                        messages.error(request, 
+                            "Invalid registration number format. Use: CA/CLASS/YEAR/NUMBER (e.g., CA/CS1/2024/0001)")
+                        return redirect('students:add_student')
+                    
+                    # Check if registration number exists
+                    if Student.objects.filter(registration_number__iexact=reg_number).exists():
+                        messages.error(request, "Registration number already exists")
+                        return redirect('students:add_student')
+                else:
+                    # Generate registration number
+                    try:
+                        admission_year = int(admission_year)
+                        sequence = get_next_registration_sequence(classroom.code, admission_year)
+                        reg_number = generate_registration_number(
+                            classroom.code, 
+                            admission_year, 
+                            sequence
+                        )
+                    except Exception as e:
+                        logger.error(f"Error generating reg number: {e}")
+                        messages.error(request, "Error generating registration number")
+                        return redirect('students:add_student')
+                
+                # Create student object
+                student = Student(
+                    full_name=full_name,
+                    email=email,
+                    classroom=classroom,
+                    admission_year=admission_year,
+                    registration_number=reg_number,
+                    status=status
+                )
+                
+                # Handle file uploads
+                if 'photo' in request.FILES:
+                    student.photo = request.FILES['photo']
+                
+                if 'documents' in request.FILES:
+                    student.documents = request.FILES['documents']
+                
+                # Save student
+                student.save()
+                
+                # Create user account
+                user = create_student_user(student)
+                
+                if user:
+                    # Send credentials email
+                    password = f"{student.get_first_name()}@123"
+                    email_sent = send_student_credentials(student, user, password, request)
+                    
+                    if email_sent:
+                        messages.success(request, 
+                            f"Student '{student.full_name}' registered successfully! "
+                            f"Credentials sent to {student.email}")
+                    else:
+                        messages.success(request, 
+                            f"Student '{student.full_name}' registered successfully! "
+                            f"Username: {user.username}, Password: {password}")
+                else:
+                    messages.warning(request, 
+                        f"Student '{student.full_name}' registered but user account creation failed. "
+                        "Please contact administrator.")
+                
+                return redirect('students:student_list')
+                
         except IntegrityError as e:
             if 'unique' in str(e).lower():
                 messages.error(request, "Registration number or email already exists")
             else:
-                messages.error(request, "Database error. Please try again.")
-            logger.error(f"IntegrityError: {e}")
+                messages.error(request, "Database error occurred")
+            logger.error(f"Integrity error: {e}")
+            
+        except ValidationError as e:
+            messages.error(request, str(e))
+            
         except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
-            logger.error(f"Add student error: {e}")
+            messages.error(request, f"An error occurred: {str(e)}")
+            logger.error(f"Add student error: {e}", exc_info=True)
     
+    # GET request - show form
     context = {
-        'classes': ClassRoom.objects.all(),
+        'classes': ClassRoom.objects.all().order_by('name'),
         'current_year': timezone.now().year,
         'years': range(timezone.now().year - 5, timezone.now().year + 3)
     }
     return render(request, 'students/add.html', context)
+
+@login_required
+def student_list(request):
+    """Display list of all students"""
+    students = Student.objects.select_related('user', 'classroom').all()
+    
+    # Filter by status if provided
+    status_filter = request.GET.get('status')
+    if status_filter:
+        students = students.filter(status=status_filter)
+    
+    # Search by name or registration number
+    search_query = request.GET.get('q')
+    if search_query:
+        students = students.filter(
+            models.Q(full_name__icontains=search_query) |
+            models.Q(registration_number__icontains=search_query) |
+            models.Q(email__icontains=search_query)
+        )
+    
+    context = {
+        'students': students,
+        'status_choices': Student.STATUS_CHOICES,
+        'total_students': students.count(),
+        'active_students': students.filter(status='ACTIVE').count(),
+    }
+    
+    return render(request, 'students/list.html', context)
+
+@login_required
+@permission_required('students.change_student', raise_exception=True)
+def reset_student_password(request, student_id):
+    """Reset student password"""
+    try:
+        student = get_object_or_404(Student, id=student_id)
+        
+        if not student.user:
+            messages.error(request, "Student does not have a user account")
+            return redirect('students:student_list')
+        
+        # Generate new password
+        new_password = f"{student.get_first_name()}@123"
+        
+        # Update password
+        student.user.set_password(new_password)
+        student.user.save()
+        
+        # Send new credentials
+        send_student_credentials(student, student.user, new_password, request)
+        
+        messages.success(request, 
+            f"Password reset for {student.full_name}. "
+            f"New password: {new_password}")
+            
+    except Exception as e:
+        messages.error(request, f"Error resetting password: {str(e)}")
+        logger.error(f"Password reset error: {e}")
+    
+    return redirect('students:student_list')
+
+@login_required
+@permission_required('students.add_student', raise_exception=True)
+def bulk_create_users(request):
+    """Create user accounts for students without users"""
+    if request.method == 'POST':
+        try:
+            students_without_users = Student.objects.filter(user__isnull=True)
+            
+            if not students_without_users.exists():
+                messages.info(request, "All students already have user accounts")
+                return redirect('students:student_list')
+            
+            success_count = 0
+            failed_count = 0
+            
+            for student in students_without_users:
+                try:
+                    create_student_user(student)
+                    success_count += 1
+                except Exception as e:
+                    logger.error(f"Failed to create user for {student.registration_number}: {e}")
+                    failed_count += 1
+            
+            messages.success(request, 
+                f"Created {success_count} user accounts. "
+                f"{failed_count} failed.")
+                
+        except Exception as e:
+            messages.error(request, f"Bulk operation failed: {str(e)}")
+    
+    return redirect('students:student_list')
 
 
 def delete_student(request, id):

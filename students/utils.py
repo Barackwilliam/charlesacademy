@@ -5,223 +5,207 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.urls import reverse
 from .models import Student
-import uuid
 import logging
-from django.db import connection
+import re
+from django.db import connection, transaction
 
 logger = logging.getLogger(__name__)
 
-def fix_user_sequence():
+def generate_registration_number(class_code, year, sequence_number):
+    """Generate registration number: CA/CLASS/YEAR/SEQUENCE"""
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT setval(pg_get_serial_sequence('accounts_user', 'id'), 
-                COALESCE((SELECT MAX(id) FROM accounts_user), 1), false);
-            """)
-            logger.info("✓ Fixed User ID sequence")
-    except Exception as e:
-        logger.error(f"✗ Error fixing sequence: {e}")
-
-def generate_registration_number(class_code, year):
-    try:
-        last_student = Student.objects.filter(
-            classroom__code=class_code,
-            admission_year=year
-        ).count() + 1
-
-        return f"CA/{class_code}/{year}/{str(last_student).zfill(4)}"
+        # Format: CA/CS1/2024/0001
+        return f"CA/{class_code}/{year}/{str(sequence_number).zfill(4)}"
     except Exception as e:
         logger.error(f"Error generating reg number: {e}")
         return f"CA/{class_code}/{year}/0001"
 
-def create_student_user(student):
+def get_next_registration_sequence(class_code, year):
+    """Pata nambari inayofuata ya registration kwa darasa na mwaka"""
+    try:
+        # Tafuta registration number ya mwisho kwa darasa hilo na mwaka
+        last_student = Student.objects.filter(
+            classroom__code=class_code,
+            admission_year=year
+        ).order_by('-registration_number').first()
+        
+        if last_student and last_student.registration_number:
+            # Extract sequence number from registration number
+            match = re.search(r'/(\d{4})$', last_student.registration_number)
+            if match:
+                return int(match.group(1)) + 1
+        
+        return 1
+    except Exception as e:
+        logger.error(f"Error getting sequence: {e}")
+        return 1
+def create_username_from_reg_number(registration_number):
+    """Create username kutoka kwa registration number (keep original format)"""
+    # Return registration number as-is (lowercase)
+    username = registration_number.strip().lower()
+    
+    # Clean - remove extra spaces, keep slashes
+    username = username.replace(' ', '')
+    
+    return username
+
+def create_student_user(student, password=None):
     """
-    Create a unique user account for student - username iwe registration number
+    Create user account for student
+    Username = registration number (lowercase, with slashes)
+    Password = firstname@123
     """
     try:
-        fix_user_sequence()
-        
-        # Get first name for password
-        first_name_parts = student.full_name.split()
-        if first_name_parts:
-            first_name = first_name_parts[0].lower()
-        else:
-            first_name = "student"
-        
-        # Password: firstname@123
-        password = f"{first_name}@123"
-        
-        # HAPA NIMEBADILISHA: username iwe registration number
-        username = student.registration_number  # Tumia registration number moja kwa moja
-        
-        # Check if username exists - kama ipo, ongeza suffix
-        if User.objects.filter(username=username).exists():
-            import time
-            username = f"{student.registration_number}_{int(time.time()) % 10000}"
-        
-        # Get email
-        email = student.email.strip().lower() if student.email else f"{username}@charlesacademy.com"
-        
-        if User.objects.filter(email=email).exists():
-            base_email = email.split('@')[0]
-            domain = email.split('@')[1] if '@' in email else "charlesacademy.com"
-            import time
-            email = f"{base_email}_{int(time.time()) % 10000}@{domain}"
-        
-        # Split name
-        name_parts = student.full_name.split()
-        if len(name_parts) >= 2:
-            first_name_part = name_parts[0]
-            last_name_part = ' '.join(name_parts[1:])
-        else:
-            first_name_part = student.full_name if student.full_name else ''
-            last_name_part = ''
-        
-        # CREATE USER
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT nextval('accounts_user_id_seq')")
-                next_id = cursor.fetchone()[0]
+        with transaction.atomic():
+            # 1. CREATE USERNAME (kutoka kwa registration number, keep slashes)
+            username = student.registration_number.strip().lower()
             
-            user = User(
-                id=next_id,
-                username=username,
-                email=email,
-                first_name=first_name_part,
-                last_name=last_name_part,
-                role='STUDENT'
-            )
-            user.set_password(password)
-            user.save()
+            # Hakikisha username ni unique
+            original_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{original_username}_{counter}"
+                counter += 1
+                if counter > 100:
+                    # Fallback: badilisha / kuwa _
+                    username = original_username.replace('/', '_')
+                    if User.objects.filter(username=username).exists():
+                        username = f"{username}_{counter}"
             
-        except Exception as id_error:
-            logger.error(f"ID creation failed: {id_error}")
+            # 2. CREATE PASSWORD
+            if not password:
+                password = f"{student.get_first_name()}@123"
+            
+            # 3. CREATE EMAIL (kama hakuna)
+            email = student.email
+            if not email or email == "":
+                email = f"{username.replace('/', '_')}@charlesacademy.com"
+            
+            # 4. SPLIT NAME
+            name_parts = student.full_name.split()
+            if len(name_parts) >= 2:
+                first_name = name_parts[0]
+                last_name = ' '.join(name_parts[1:])
+            else:
+                first_name = student.full_name
+                last_name = ""
+            
+            # 5. CREATE USER
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 password=password,
-                first_name=first_name_part,
-                last_name=last_name_part,
-                role='STUDENT'
-            )
-        
-        # Link user to student
-        student.user = user
-        student.save()
-        
-        logger.info(f"✓ Created user: {username} for student: {student.registration_number}")
-        return user
-        
-    except Exception as e:
-        logger.error(f"✗ Error creating user for student {student.registration_number}: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        
-        try:
-            unique_username = f"{student.registration_number}_{uuid.uuid4().hex[:6]}"
-            
-            user = User.objects.create_user(
-                username=unique_username,
-                password="student@123",
-                email=f"{unique_username}@charlesacademy.com",
-                first_name=student.full_name.split()[0] if student.full_name.split() else '',
-                last_name=' '.join(student.full_name.split()[1:]) if len(student.full_name.split()) > 1 else '',
+                first_name=first_name,
+                last_name=last_name,
                 role='STUDENT'
             )
             
+            # 6. LINK STUDENT TO USER
             student.user = user
-            student.save()
-            logger.info(f"✓ Created fallback user: {unique_username}")
+            student.save(update_fields=['user'])
+            
+            logger.info(f"✓ Created user '{username}' for student '{student.registration_number}'")
             return user
             
-        except Exception as e2:
-            logger.error(f"✗ Ultimate fallback failed: {e2}")
-            return None
+    except Exception as e:
+        logger.error(f"✗ Error creating user: {e}", exc_info=True)
+        raise
 
-def send_student_credentials(student, user, request=None):
+def send_student_credentials(student, user, password, request=None):
+    """Send login credentials to student email"""
     try:
-        if not hasattr(settings, 'EMAIL_HOST') or not settings.EMAIL_HOST:
-            logger.info("Email not configured, skipping")
+        # Check email configuration
+        if not all([settings.EMAIL_HOST, settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD]):
+            logger.warning("Email not configured, skipping email send")
             return False
         
-        first_name_parts = student.full_name.split()
-        if first_name_parts:
-            first_name = first_name_parts[0].lower()
-        else:
-            first_name = "student"
-        password = f"{first_name}@123"
-        
+        # Prepare login URL
         if request:
             login_url = request.build_absolute_uri(reverse('login'))
         else:
-            login_url = "https://www.charlesacademy.co.tz/accounts/login/"
+            login_url = f"{settings.SITE_URL}/accounts/login/" if hasattr(settings, 'SITE_URL') else "https://charlesacademy.co.tz/accounts/login/"
         
-        subject = f"Your Student Portal Login - {student.registration_number}"
+        # Prepare subject
+        subject = f"Student Portal Login Credentials - {student.registration_number}"
         
-        html_message = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background: #4361ee; color: white; padding: 20px; text-align: center;">
-                    <h2>Welcome to Charles Academy!</h2>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 20px; border: 1px solid #ddd;">
-                    <p>Dear <strong>{first_name.capitalize()}</strong>,</p>
-                    
-                    <p>Your student portal account has been created.</p>
-                    
-                    <div style="background: white; border: 2px solid #4361ee; padding: 15px; margin: 15px 0;">
-                        <h3>Login Details:</h3>
-                        <p><strong>Name:</strong> {student.full_name}</p>
-                        <p><strong>Reg No:</strong> {student.registration_number}</p>
-                        <p><strong>Username:</strong> <code>{user.username}</code></p>
-                        <p><strong>Password:</strong> <code>{password}</code></p>
-                        <p><strong>Login:</strong> <a href="{login_url}">{login_url}</a></p>
-                    </div>
-                    
-                    <p><strong>Note:</strong> Change password after first login.</p>
-                    
-                    <p>Best regards,<br>
-                    <strong>Charles Academy</strong></p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
+        # Prepare context for template
+        context = {
+            'student': student,
+            'user': user,
+            'password': password,
+            'login_url': login_url,
+            'school_name': "Charles Academy"
+        }
         
+        # HTML message
+        html_message = render_to_string('students/email/credentials_email.html', context)
+        
+        # Plain text message
         plain_message = f"""
-        Welcome to Charles Academy!
-        
-        Dear {first_name.capitalize()},
-        
-        Your student portal account has been created.
-        
-        Login Details:
-        - Name: {student.full_name}
-        - Reg No: {student.registration_number}
-        - Username: {user.username}
-        - Password: {password}
-        - Login URL: {login_url}
-        
-        Note: Please change your password after first login.
-        
-        Best regards,
-        Charles Academy
+Dear {student.full_name},
+
+Your student portal account has been created successfully.
+
+LOGIN DETAILS:
+- Username: {user.username}
+- Registration Number: {student.registration_number}
+- Password: {password}
+- Login URL: {login_url}
+
+IMPORTANT:
+1. Use your username or registration number to login
+2. Change your password after first login
+3. Keep your credentials secure
+
+For assistance, contact the administration.
+
+Best regards,
+Charles Academy
         """
         
+        # Send email
         send_mail(
             subject=subject,
-            message=plain_message,
+            message=plain_message.strip(),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[student.email],
             html_message=html_message,
-            fail_silently=True,
+            fail_silently=False,
         )
         
-        logger.info(f"✓ Email sent to {student.email}")
+        logger.info(f"✓ Credentials email sent to {student.email}")
         return True
         
     except Exception as e:
-        logger.error(f"✗ Email failed: {e}")
+        logger.error(f"✗ Failed to send email: {e}", exc_info=True)
         return False
+
+def batch_create_student_users(students):
+    """Create user accounts for multiple students"""
+    results = {
+        'success': [],
+        'failed': []
+    }
+    
+    for student in students:
+        try:
+            if student.user:
+                results['success'].append({
+                    'student': student,
+                    'message': 'Already has user account'
+                })
+                continue
+                
+            user = create_student_user(student)
+            results['success'].append({
+                'student': student,
+                'user': user
+            })
+            
+        except Exception as e:
+            results['failed'].append({
+                'student': student,
+                'error': str(e)
+            })
+    
+    return results
