@@ -562,34 +562,6 @@ def add_student(request):
     return render(request, 'students/add.html', context)
 
 @login_required
-def student_list(request):
-    """Display list of all students"""
-    students = Student.objects.select_related('user', 'classroom').all()
-    
-    # Filter by status if provided
-    status_filter = request.GET.get('status')
-    if status_filter:
-        students = students.filter(status=status_filter)
-    
-    # Search by name or registration number
-    search_query = request.GET.get('q')
-    if search_query:
-        students = students.filter(
-            models.Q(full_name__icontains=search_query) |
-            models.Q(registration_number__icontains=search_query) |
-            models.Q(email__icontains=search_query)
-        )
-    
-    context = {
-        'students': students,
-        'status_choices': Student.STATUS_CHOICES,
-        'total_students': students.count(),
-        'active_students': students.filter(status='ACTIVE').count(),
-    }
-    
-    return render(request, 'students/list.html', context)
-
-@login_required
 @permission_required('students.change_student', raise_exception=True)
 def reset_student_password(request, student_id):
     """Reset student password"""
@@ -659,67 +631,101 @@ def delete_student(request, id):
     Student.objects.filter(id=id).delete()
     return redirect('students:student_list')
 
-
-
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from .models import Student
-# students/views.py - FIXED
-def edit_student(request, id):  # CHANGED: student_id → id
+from classes.models import ClassRoom  # ← Hii imekosekana!
+from dashboard.models import SchoolSettings  # ← Na hii pia!
+
+@login_required  # ← Usisahau kuongeza decorator
+def edit_student(request, id):
     """Edit student information"""
-    student = get_object_or_404(Student, id=id)  # CHANGED: student_id → id
-    settings_obj = SchoolSettings.objects.first()
+    student = get_object_or_404(Student, id=id)
+    
+    # Handle case where SchoolSettings doesn't exist
+    try:
+        settings_obj = SchoolSettings.objects.first()
+    except:
+        settings_obj = None
     
     if request.method == 'POST':
-        # Check if email is being added for the first time
-        old_email = student.email
-        new_email = request.POST.get('email')
-        
-        # Update student info
-        student.full_name = request.POST.get('full_name')
-        student.email = new_email
-        
-        # Handle classroom
-        classroom_id = request.POST.get('classroom')
-        if classroom_id:
-            try:
-                student.classroom = ClassRoom.objects.get(id=classroom_id)
-            except ClassRoom.DoesNotExist:
-                messages.error(request, "Selected class does not exist.")
-                return render(request, 'students/edit.html', {
-                    'student': student,
-                    'school_settings': settings_obj,
-                    'classes': ClassRoom.objects.all()
-                })
-        
-        student.status = request.POST.get('status')
-        
-        # Handle file uploads
-        if 'photo' in request.FILES:
-            student.photo = request.FILES['photo']
-        if 'documents' in request.FILES:
-            student.documents = request.FILES['documents']
-        
-        student.save()
-        
-        # Send credentials if email changed
-        if new_email and (not old_email or old_email != new_email) and student.user:
-            try:
-                # Import function here
-                from .utils import send_student_credentials
-                send_student_credentials(student, student.user, request)
-                messages.info(request, f"New credentials sent to {new_email}")
-            except Exception as e:
-                messages.warning(request, f"Student updated but failed to send email: {str(e)}")
-        
-        messages.success(request, "Student updated successfully!")
-        return redirect('students:student_list')
+        try:
+            # Get form data
+            full_name = request.POST.get('full_name', '').strip()
+            classroom_id = request.POST.get('classroom')
+            status = request.POST.get('status', 'ACTIVE')
+            email = request.POST.get('email', '').strip()
+            
+            # Validate required fields
+            if not full_name:
+                messages.error(request, "Full name is required")
+                return redirect('students:edit_student', id=id)
+            
+            # Update student info
+            student.full_name = full_name
+            student.email = email
+            student.status = status
+            
+            # Update classroom if provided
+            if classroom_id:
+                try:
+                    classroom = ClassRoom.objects.get(id=classroom_id)
+                    student.classroom = classroom
+                except ClassRoom.DoesNotExist:
+                    messages.warning(request, "Selected class not found, keeping previous class")
+            
+            # Handle file uploads (if any in form)
+            if 'photo' in request.FILES:
+                # Delete old photo if exists
+                if student.photo:
+                    student.photo.delete(save=False)
+                student.photo = request.FILES['photo']
+                
+            if 'documents' in request.FILES:
+                if student.documents:
+                    student.documents.delete(save=False)
+                student.documents = request.FILES['documents']
+            
+            # Save the student
+            student.save()
+            
+            # Check if email changed and send notification
+            old_email = student.email
+            if email and email != old_email and student.user:
+                try:
+                    from .utils import send_student_credentials
+                    # Generate new password or use existing
+                    new_password = f"{student.get_first_name()}@123"
+                    student.user.set_password(new_password)
+                    student.user.save()
+                    send_student_credentials(student, student.user, new_password, request)
+                    messages.info(request, f"New credentials sent to {email}")
+                except Exception as e:
+                    messages.warning(request, f"Student updated but email notification failed: {str(e)}")
+            
+            messages.success(request, f"Student '{student.full_name}' updated successfully!")
+            return redirect('students:student_list')
+            
+        except Exception as e:
+            messages.error(request, f"Error updating student: {str(e)}")
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Edit student error: {e}", exc_info=True)
     
-    return render(request, 'students/edit.html', {
+    # GET request - show form with current data
+    context = {
         'student': student,
         'school_settings': settings_obj,
-        'classes': ClassRoom.objects.all()
-    })
+        'classes': ClassRoom.objects.all().order_by('name'),
+        'status_choices': Student.STATUS_CHOICES,
+    }
+    
+    return render(request, 'students/edit.html', context)
 
+
+    
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages

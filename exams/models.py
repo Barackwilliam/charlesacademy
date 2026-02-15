@@ -3,6 +3,7 @@ from django.db import models
 from classes.models import ClassRoom, Subject
 from students.models import Student
 
+
 class Exam(models.Model):
     EXAM_TYPE_CHOICES = (
         ('MIDTERM', 'Midterm'),
@@ -12,11 +13,12 @@ class Exam(models.Model):
 
     name = models.CharField(max_length=100)
     classroom = models.ForeignKey(ClassRoom, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()  # Make sure this is DateField, not DateTimeField
     exam_type = models.CharField(max_length=20, choices=EXAM_TYPE_CHOICES, default='MONTHLY')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=True, blank=True)  # Add this
 
     def __str__(self):
-        return f"{self.name} - {self.classroom}"
+        return f"{self.name} - {self.classroom} - {self.date}"
 
 
 class Result(models.Model):

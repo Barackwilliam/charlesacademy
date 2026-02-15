@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block page_title %}Edit Student{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- Header -->
@@ -15,67 +16,175 @@
         </div>
     </div>
 
+    <!-- Show messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <!-- Student Info Card -->
     <div class="row">
-        <div class="col-lg-6 mx-auto">
+        <div class="col-lg-8 mx-auto">
             <div class="card border-0 shadow">
                 <div class="card-body p-4">
                     <!-- Student Preview -->
                     <div class="text-center mb-4">
-                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                             style="width: 80px; height: 80px;">
-                            <span class="fs-3 fw-bold">{{ student.full_name|slice:":1"|upper }}</span>
-                        </div>
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" 
+                                 alt="{{ student.full_name }}"
+                                 class="rounded-circle mb-3"
+                                 style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        {% else %}
+                            <div class="avatar-placeholder bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style="width: 100px; height: 100px; font-size: 2.5rem; border: 3px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                {{ student.full_name|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
                         <h5 class="fw-bold">{{ student.full_name }}</h5>
-                        <p class="text-muted">{{ student.registration_number }}</p>
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-person-badge me-1"></i> {{ student.registration_number }}
+                        </p>
+                        {% if student.email %}
+                            <p class="text-muted small">
+                                <i class="bi bi-envelope me-1"></i> {{ student.email }}
+                            </p>
+                        {% endif %}
                     </div>
 
                     <!-- Edit Form -->
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
-                        <!-- Full Name -->
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Full Name</label>
-                            <input type="text" 
-                                   name="full_name" 
-                                   value="{{ student.full_name }}"
-                                   class="form-control" 
-                                   placeholder="Student's full name"
-                                   required>
+                        <div class="row">
+                            <!-- Full Name -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">
+                                    <i class="bi bi-person me-1"></i> Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       name="full_name" 
+                                       value="{{ student.full_name }}"
+                                       class="form-control" 
+                                       placeholder="Enter full name"
+                                       required>
+                                <div class="invalid-feedback">
+                                    Please provide a name.
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">
+                                    <i class="bi bi-envelope me-1"></i> Email Address
+                                </label>
+                                <input type="email" 
+                                       name="email" 
+                                       value="{{ student.email|default:'' }}"
+                                       class="form-control" 
+                                       placeholder="student@example.com">
+                                <small class="text-muted">
+                                    {% if student.user %}
+                                        <i class="bi bi-info-circle"></i> Changing email will send new login credentials
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <!-- Classroom -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">
+                                    <i class="bi bi-building me-1"></i> Class
+                                </label>
+                                <select name="classroom" class="form-select">
+                                    <option value="">-- Select Class --</option>
+                                    {% for c in classes %}
+                                        <option value="{{ c.id }}"
+                                            {% if c.id == student.classroom.id %}selected{% endif %}>
+                                            {{ c.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">
+                                    <i class="bi bi-flag me-1"></i> Status
+                                </label>
+                                <select name="status" class="form-select" required>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}" 
+                                            {% if student.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Photo Upload -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">
+                                    <i class="bi bi-camera me-1"></i> Profile Photo
+                                </label>
+                                <input type="file" 
+                                       name="photo" 
+                                       class="form-control" 
+                                       accept="image/*">
+                                {% if student.photo %}
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="bi bi-check-circle text-success"></i> 
+                                        Current photo exists. Upload new to replace.
+                                    </small>
+                                {% endif %}
+                            </div>
+
+                            <!-- Documents Upload -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-medium">
+                                    <i class="bi bi-file-earmark me-1"></i> Documents
+                                </label>
+                                <input type="file" 
+                                       name="documents" 
+                                       class="form-control">
+                                {% if student.documents %}
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="bi bi-file-earmark-check"></i> 
+                                        Current document: {{ student.documents.name|truncatechars:30 }}
+                                    </small>
+                                {% endif %}
+                            </div>
                         </div>
 
-                        <!-- Classroom -->
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Class</label>
-                            <select name="classroom" class="form-select">
-                                {% for c in classes %}
-                                    <option value="{{ c.id }}"
-                                        {% if c == student.classroom %}selected{% endif %}>
-                                        {{ c.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+                        <!-- Important Notes -->
+                        {% if student.user %}
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                                <div>
+                                    <strong>User Account Information:</strong><br>
+                                    • Username: <code>{{ student.user.username }}</code><br>
+                                    • Email notifications will be sent if email changes
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Status -->
-                        <div class="mb-4">
-                            <label class="form-label fw-medium">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="ACTIVE" {% if student.status == 'ACTIVE' %}selected{% endif %}>Active</option>
-                                <option value="GRADUATED" {% if student.status == 'GRADUATED' %}selected{% endif %}>Graduated</option>
-                                <option value="TRANSFERRED" {% if student.status == 'TRANSFERRED' %}selected{% endif %}>Transferred</option>
-                            </select>
-                        </div>
+                        {% endif %}
 
                         <!-- Form Actions -->
                         <div class="d-flex justify-content-between pt-3 border-top">
                             <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary">
-                                Cancel
+                                <i class="bi bi-x-circle me-1"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-circle me-1"></i> Update
-                            </button>
+                            <div>
+                                <button type="reset" class="btn btn-outline-warning me-2">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                                </button>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-circle me-1"></i> Update Student
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -85,17 +194,18 @@
 </div>
 
 <style>
-    .avatar {
+    .avatar-placeholder {
         transition: transform 0.3s ease;
     }
     
-    .avatar:hover {
+    .avatar-placeholder:hover {
         transform: scale(1.05);
     }
     
     .form-control, .form-select {
         border: 1px solid #dee2e6;
-        padding: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
     }
     
     .form-control:focus, .form-select:focus {
@@ -105,11 +215,37 @@
     
     .btn {
         padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .card {
+        border-radius: 16px;
+        overflow: hidden;
     }
     
     @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
         .card-body {
-            padding: 2rem !important;
+            padding: 1.5rem !important;
+        }
+        
+        .btn {
+            width: 100%;
+            margin: 0.25rem 0;
+        }
+        
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .d-flex.justify-content-between > div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
     }
 </style>
@@ -117,12 +253,60 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Form validation
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
+        const form = document.querySelector('.needs-validation');
+        
+        form.addEventListener('submit', function(event) {
             if (!form.checkValidity()) {
-                e.preventDefault();
-                form.classList.add('was-validated');
+                event.preventDefault();
+                event.stopPropagation();
             }
+            form.classList.add('was-validated');
+        });
+        
+        // Preview image before upload
+        const photoInput = document.querySelector('input[name="photo"]');
+        if (photoInput) {
+            photoInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // You can add image preview here if you want
+                        console.log('Image selected:', e.target.result.substring(0, 50) + '...');
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        
+        // Confirm before reset
+        const resetBtn = document.querySelector('button[type="reset"]');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to reset all changes?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        // Warn before leaving with unsaved changes
+        let formChanged = false;
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        
+        formInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                formChanged = true;
+            });
+        });
+        
+        window.addEventListener('beforeunload', function(e) {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        
+        form.addEventListener('submit', () => {
+            formChanged = false;
         });
     });
 </script>
