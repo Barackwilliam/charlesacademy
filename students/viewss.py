@@ -1,32 +1,33 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponse
+from django.db.models import Q
+from django.utils import timezone
+from io import BytesIO
+import os
+
 from .models import Student
 from classes.models import ClassRoom
-from .utils import generate_registration_number
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from dashboard .models import SchoolSettings
-from .models import Student
-
-
-# students/views.py
-from django.contrib import messages
-from django.db.models import Q
+from dashboard.models import SchoolSettings
 from accounts.decorators import role_required
 
 # For PDF generation
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from io import BytesIO
-import os
 
-# students/views.py - Complete simple version
+# students/views.py - PDF Download Fix
 @login_required
 @role_required(['ADMIN', 'TEACHER'])
 def student_list(request):
-    """View and filter students"""
+    """View and filter students with PDF download option"""
+    # Check if this is a PDF download request
+    if request.GET.get('download') == 'pdf':
+        return download_students_pdf(request)
+    
     # Get school settings
     settings_obj = SchoolSettings.objects.first()
     
@@ -99,65 +100,40 @@ def student_list(request):
     return render(request, 'students/list.html', context)
 
 
-
-# students/views.py
 @login_required
-@role_required(['ADMIN', 'TEACHER', 'STUDENT'])
-def student_detail(request, student_id):
-    """View student details"""
-    student = get_object_or_404(Student, id=student_id)
-    school_settings = SchoolSettings.objects.first()
+@role_required(['ADMIN', 'TEACHER'])
+def download_students_pdf(request):
+    """Generate and download PDF of filtered students"""
+    # Get filter parameters from request
+    filter_class = request.GET.get('class', '')
+    filter_status = request.GET.get('status', '')
+    filter_year = request.GET.get('year', '')
+    search_query = request.GET.get('search', '')
     
-    # For students: ensure they can only view their own profile
-    if request.user.role == 'STUDENT' and request.user != student.user:
-        messages.error(request, "You can only view your own profile.")
-        return redirect('dashboard')
+    # Apply the same filters as student_list
+    students_queryset = Student.objects.all().select_related('classroom')
     
-    # For teachers: ensure they teach this student's class
-    if request.user.role == 'TEACHER':
-        if not student.classroom or student.classroom not in request.user.teacher_profile.classes.all():
-            messages.error(request, "You can only view students in your classes.")
-            return redirect('dashboard')
+    if filter_class:
+        students_queryset = students_queryset.filter(classroom__id=filter_class)
     
-    # Get attendance records
-    from attendance.models import StudentAttendance
-    attendance_records = StudentAttendance.objects.filter(student=student).order_by('-date')[:10]
+    if filter_status and filter_status != 'ALL':
+        students_queryset = students_queryset.filter(status=filter_status)
     
-    # Get exam results
-    from exams.models import Result
-    exam_results = Result.objects.filter(student=student).select_related('exam', 'subject').order_by('-exam__date')[:5]
+    if filter_year:
+        students_queryset = students_queryset.filter(admission_year=filter_year)
     
-    # Get fee payments
-    from fees.models import Payment
-    fee_payments = Payment.objects.filter(student=student).order_by('-date')[:5]
+    if search_query:
+        students_queryset = students_queryset.filter(
+            Q(full_name__icontains=search_query) |
+            Q(registration_number__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(classroom__name__icontains=search_query)
+        )
     
-    context = {
-        'student': student,
-        'school_settings': school_settings,
-        'attendance_records': attendance_records,
-        'exam_results': exam_results,
-        'fee_payments': fee_payments,
-        'today': timezone.now().date(),
-    }
-    
-    return render(request, 'students/detail.html', context)
-
-
-def generate_students_pdf(students, filter_class, filter_status, filter_year, request):
-    """Generate PDF report of students"""
     # Get school settings
     school_settings = SchoolSettings.objects.first()
     
-    # Get class name if filter applied
-    class_name = ""
-    if filter_class:
-        try:
-            classroom = ClassRoom.objects.get(id=filter_class)
-            class_name = classroom.name
-        except ClassRoom.DoesNotExist:
-            class_name = "Selected Class"
-    
-    # Create PDF
+    # Create PDF in memory
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -178,54 +154,40 @@ def generate_students_pdf(students, filter_class, filter_status, filter_year, re
         fontSize=18,
         textColor=colors.HexColor('#2c3e50'),
         spaceAfter=12,
-        alignment=1  # Center alignment
+        alignment=1
     )
     
-    header_style = ParagraphStyle(
-        'HeaderStyle',
-        parent=styles['Heading2'],
-        fontSize=12,
-        textColor=colors.HexColor('#34495e'),
-        spaceAfter=6
-    )
+    # School information
+    school_name = school_settings.name if school_settings else "School System"
+    # school_address = school_settings.address if school_settings else ""
     
-    # School header
-    if school_settings and school_settings.logo:
-        try:
-            logo_path = school_settings.logo.path
-            if os.path.exists(logo_path):
-                logo = Image(logo_path, width=1.5*inch, height=1.5*inch)
-                elements.append(logo)
-        except:
-            pass
-    
-    school_name = school_settings.name if school_settings else "Charles Academy"
-    school_address = school_settings.address if school_settings else ""
-    school_phone = school_settings.phone if school_settings else ""
-    
+    # Header
     header_text = f"""
     <b><font size="16">{school_name}</font></b><br/>
-    <font size="11">{school_address}</font><br/>
-    <font size="10">Phone: {school_phone}</font>
+    <font size="10">Student List Report</font>
     """
     elements.append(Paragraph(header_text, styles['Normal']))
     elements.append(Spacer(1, 0.2*inch))
     
     # Report title
-    title_text = "STUDENTS LIST REPORT"
-    if class_name:
-        title_text = f"STUDENTS LIST - {class_name.upper()}"
+    title_text = "STUDENTS LIST"
+    if filter_class:
+        try:
+            classroom = ClassRoom.objects.get(id=filter_class)
+            title_text = f"STUDENTS LIST - {classroom.name.upper()}"
+        except:
+            pass
     
     elements.append(Paragraph(title_text, title_style))
     elements.append(Spacer(1, 0.1*inch))
     
     # Filter information
     filter_info = []
-    filter_info.append(f"Total Students: {students.count()}")
+    filter_info.append(f"Total Students: {students_queryset.count()}")
     if filter_status and filter_status != 'ALL':
         filter_info.append(f"Status: {filter_status}")
     if filter_year:
-        filter_info.append(f"Admission Year: {filter_year}")
+        filter_info.append(f"Year: {filter_year}")
     if filter_info:
         filter_text = " | ".join(filter_info)
         elements.append(Paragraph(f"<i>{filter_text}</i>", styles['Normal']))
@@ -233,33 +195,31 @@ def generate_students_pdf(students, filter_class, filter_status, filter_year, re
     elements.append(Spacer(1, 0.2*inch))
     
     # Students table
-    if students.exists():
+    if students_queryset.exists():
         # Table header
         table_data = [
-            ['No.', 'Full Name', 'Reg. Number', 'Class', 'Status', 'Email']
+            ['No.', 'Name', 'Reg. No', 'Class', 'Status', 'Email']
         ]
         
         # Add student rows
-        for idx, student in enumerate(students, 1):
-            # Status badge colors
-            status = student.get_status_display()
-            status_color = ""
+        for idx, student in enumerate(students_queryset, 1):
+            status_display = student.get_status_display()
+            status_color = colors.black
+            
             if student.status == 'ACTIVE':
-                status_color = "color: #27ae60; font-weight: bold;"
+                status_color = colors.green
             elif student.status == 'GRADUATED':
-                status_color = "color: #3498db; font-weight: bold;"
+                status_color = colors.blue
             elif student.status == 'TRANSFERRED':
-                status_color = "color: #e67e22; font-weight: bold;"
-            else:
-                status_color = "color: #7f8c8d;"
+                status_color = colors.orange
             
             table_data.append([
                 str(idx),
-                student.full_name,
+                student.full_name[:30],  # Limit name length
                 student.registration_number,
-                student.classroom.name if student.classroom else "N/A",
-                f'<span style="{status_color}">{status}</span>',
-                student.email or "N/A"
+                student.classroom.name if student.classroom else "-",
+                status_display,
+                student.email or "-"
             ])
         
         # Create table
@@ -272,58 +232,20 @@ def generate_students_pdf(students, filter_class, filter_status, filter_year, re
             ('FONTSIZE', (0, 0), (-1, -1), 8),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
             ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#ddd')),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
         ]))
         
         elements.append(table)
-        elements.append(Spacer(1, 0.3*inch))
-        
-        # Statistics section
-        elements.append(Paragraph("STATISTICS SUMMARY", header_style))
-        
-        # Calculate statistics
-        active_count = students.filter(status='ACTIVE').count()
-        graduated_count = students.filter(status='GRADUATED').count()
-        transferred_count = students.filter(status='TRANSFERRED').count()
-        
-        stats_data = [
-            ['Total Students', str(students.count())],
-            ['Active Students', str(active_count)],
-            ['Graduated Students', str(graduated_count)],
-            ['Transferred Students', str(transferred_count)],
-        ]
-        
-        if class_name:
-            stats_data.insert(1, ['Class', class_name])
-        
-        stats_table = Table(stats_data, colWidths=[2*inch, 2*inch])
-        stats_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#ddd')),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8f9fa')),
-        ]))
-        
-        elements.append(stats_table)
     else:
-        elements.append(Paragraph("No students found matching the criteria.", styles['Normal']))
+        elements.append(Paragraph("No students found.", styles['Normal']))
     
     elements.append(Spacer(1, 0.3*inch))
     
     # Footer
     footer_text = f"""
     <font size="8">
-    <i>
-    Generated on: {timezone.now().strftime('%d %B, %Y %I:%M %p')}<br/>
-    Report ID: STU-{timezone.now().strftime('%Y%m%d%H%M')}<br/>
-    This is an official document of {school_name}
-    </i>
+    Generated: {timezone.now().strftime('%d/%m/%Y %H:%M')}<br/>
+    Report ID: STU-{timezone.now().strftime('%Y%m%d%H%M')}
     </font>
     """
     elements.append(Paragraph(footer_text, styles['Normal']))
@@ -331,75 +253,376 @@ def generate_students_pdf(students, filter_class, filter_status, filter_year, re
     # Build PDF
     doc.build(elements)
     
-    # Get PDF value from buffer
+    # Get PDF value
     pdf = buffer.getvalue()
     buffer.close()
     
-    # Create HTTP response with PDF
+    # Create response
     response = HttpResponse(pdf, content_type='application/pdf')
     
     # Create filename
-    filename = "students_list"
-    if class_name:
-        filename += f"_{class_name.replace(' ', '_')}"
-    if filter_year:
-        filename += f"_{filter_year}"
-    filename += f"_{timezone.now().strftime('%Y%m%d')}.pdf"
-    
+    filename = f"students_{timezone.now().strftime('%Y%m%d_%H%M')}.pdf"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
     return response
 
-  # students/views.py
-# students/views.py
+
 from .utils import generate_registration_number, create_student_user, send_student_credentials  # <-- Add send_student_credentials
 
+# def add_student(request):
+#     settings_obj = SchoolSettings.objects.first()
+
+#     if request.method == 'POST':
+#         classroom = ClassRoom.objects.get(id=request.POST.get('classroom'))
+#         year = int(request.POST.get('admission_year', timezone.now().year))
+        
+#         # Generate registration number
+#         reg = generate_registration_number(classroom.code, year)
+        
+#         # Create student
+#         student = Student.objects.create(
+#             full_name=request.POST.get('full_name'),
+#             email=request.POST.get('email'),
+#             classroom=classroom,
+#             admission_year=year,
+#             registration_number=reg,
+#             status=request.POST.get('status')
+#         )
+        
+#         # Handle file uploads
+#         if 'photo' in request.FILES:
+#             student.photo = request.FILES['photo']
+#         if 'documents' in request.FILES:
+#             student.documents = request.FILES['documents']
+#         student.save()
+
+#         # Create linked user
+#         user = create_student_user(student)
+        
+#         # Send credentials to student's email if provided
+#         if student.email:
+#             send_student_credentials(student, user, request)  # <-- Pass request object
+        
+#         messages.success(request, f"Student {student.full_name} added successfully!")
+#         if student.email:
+#             messages.info(request, f"Credentials sent to {student.email}")
+        
+#         return redirect('students:student_list')
+
+#     return render(request, 'students/add.html', {
+#         'school_settings': settings_obj,
+#         'classes': ClassRoom.objects.all(),
+#         'current_year': timezone.now().year,
+#     })
+
+# # students/views.py - Kurekebishwa tu
+# from django.shortcuts import render, redirect
+# from django.contrib import messages
+# from django.utils import timezone
+# from django.contrib.auth.decorators import login_required
+# from django.core.exceptions import ValidationError
+# from django.db import IntegrityError
+# from classes.models import ClassRoom
+# from .models import Student
+# from .utils import create_student_user, send_student_credentials
+# import logging
+
+# logger = logging.getLogger(__name__)
+
+# def add_student(request):
+#     # Hii ni ya kuseti settings za shule - ukiwa huna SchoolSettings model, tumia default
+#     try:
+#         from school.models import SchoolSettings
+#         settings_obj = SchoolSettings.objects.first()
+#     except:
+#         settings_obj = None
+    
+#     if request.method == 'POST':
+#         try:
+#             # Get classroom
+#             classroom_id = request.POST.get('classroom')
+#             if not classroom_id:
+#                 messages.error(request, "Please select a classroom")
+#                 return redirect('students:add_student')
+            
+#             classroom = ClassRoom.objects.get(id=classroom_id)
+#             year = int(request.POST.get('admission_year', timezone.now().year))
+            
+#             # Generate registration number
+#             from .utils import generate_registration_number
+#             reg = generate_registration_number(classroom.code, year)
+            
+#             # Create student
+#             student = Student.objects.create(
+#                 full_name=request.POST.get('full_name').strip(),
+#                 email=request.POST.get('email').strip().lower(),
+#                 classroom=classroom,
+#                 admission_year=year,
+#                 registration_number=reg,
+#                 status=request.POST.get('status', 'ACTIVE')
+#             )
+            
+#             # Handle file uploads
+#             if 'photo' in request.FILES:
+#                 student.photo = request.FILES['photo']
+#             if 'documents' in request.FILES:
+#                 student.documents = request.FILES['documents']
+#             student.save()
+
+#             # Create linked user
+#             user = create_student_user(student)
+            
+#             if user:
+#                 # Send credentials to student's email if provided
+#                 if student.email:
+#                     try:
+#                         send_student_credentials(student, user, request)
+#                         messages.info(request, f"Credentials sent to {student.email}")
+#                     except Exception as e:
+#                         logger.error(f"Email sending failed: {e}")
+#                         messages.warning(request, f"Student registered but email not sent. Username: {user.username}")
+                
+#                 messages.success(request, f"Student {student.full_name} added successfully!")
+#             else:
+#                 messages.warning(request, f"Student {student.full_name} added but user account creation failed!")
+            
+#             return redirect('students:student_list')
+            
+#         except ClassRoom.DoesNotExist:
+#             messages.error(request, "Selected class does not exist")
+#         except ValidationError as e:
+#             messages.error(request, str(e))
+#         except IntegrityError as e:
+#             if 'email' in str(e):
+#                 messages.error(request, "This email is already registered")
+#             elif 'registration_number' in str(e):
+#                 messages.error(request, "Registration number conflict. Please try again")
+#             else:
+#                 messages.error(request, "Database error occurred")
+#         except Exception as e:
+#             messages.error(request, f"An error occurred: {str(e)}")
+#             logger.error(f"Error in add_student: {e}")
+    
+#     # GET request
+#     context = {
+#         'school_settings': settings_obj,
+#         'classes': ClassRoom.objects.all(),
+#         'current_year': timezone.now().year,
+#         'years': range(timezone.now().year - 5, timezone.now().year + 3)
+#     }
+#     return render(request, 'students/add.html', context)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction, IntegrityError
+from django.core.exceptions import ValidationError
+from classes.models import ClassRoom
+from .models import Student
+from .utils import (
+    create_student_user, 
+    send_student_credentials,
+    get_next_registration_sequence,
+    generate_registration_number
+)
+import logging
+import re
+
+logger = logging.getLogger(__name__)
+
+@login_required
+@permission_required('students.add_student', raise_exception=True)
 def add_student(request):
-    settings_obj = SchoolSettings.objects.first()
-
+    """Add new student with automatic user creation"""
     if request.method == 'POST':
-        classroom = ClassRoom.objects.get(id=request.POST.get('classroom'))
-        year = int(request.POST.get('admission_year', timezone.now().year))
-        
-        # Generate registration number
-        reg = generate_registration_number(classroom.code, year)
-        
-        # Create student
-        student = Student.objects.create(
-            full_name=request.POST.get('full_name'),
-            email=request.POST.get('email'),
-            classroom=classroom,
-            admission_year=year,
-            registration_number=reg,
-            status=request.POST.get('status')
-        )
-        
-        # Handle file uploads
-        if 'photo' in request.FILES:
-            student.photo = request.FILES['photo']
-        if 'documents' in request.FILES:
-            student.documents = request.FILES['documents']
-        student.save()
-
-        # Create linked user
-        user = create_student_user(student)
-        
-        # Send credentials to student's email if provided
-        if student.email:
-            send_student_credentials(student, user, request)  # <-- Pass request object
-        
-        messages.success(request, f"Student {student.full_name} added successfully!")
-        if student.email:
-            messages.info(request, f"Credentials sent to {student.email}")
-        
-        return redirect('students:student_list')
-
-    return render(request, 'students/add.html', {
-        'school_settings': settings_obj,
-        'classes': ClassRoom.objects.all(),
+        try:
+            with transaction.atomic():
+                # Get form data
+                full_name = request.POST.get('full_name', '').strip()
+                email = request.POST.get('email', '').strip().lower()
+                classroom_id = request.POST.get('classroom')
+                admission_year = request.POST.get('admission_year', timezone.now().year)
+                status = request.POST.get('status', 'ACTIVE')
+                
+                # Validate required fields
+                if not all([full_name, email, classroom_id]):
+                    messages.error(request, "All fields are required")
+                    return redirect('students:add_student')
+                
+                # Get classroom
+                try:
+                    classroom = ClassRoom.objects.get(id=classroom_id)
+                except ClassRoom.DoesNotExist:
+                    messages.error(request, "Invalid class selected")
+                    return redirect('students:add_student')
+                
+                # Validate email format
+                if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+                    messages.error(request, "Invalid email format")
+                    return redirect('students:add_student')
+                
+                # Check if email exists
+                if Student.objects.filter(email__iexact=email).exists():
+                    messages.error(request, "Email already registered")
+                    return redirect('students:add_student')
+                
+                # Handle registration number
+                reg_number = request.POST.get('registration_number', '').strip().upper()
+                
+                if reg_number:
+                    # Validate custom registration number
+                    if not re.match(r'^CA/[A-Z]+/\d{4}/\d{4}$', reg_number):
+                        messages.error(request, 
+                            "Invalid registration number format. Use: CA/CLASS/YEAR/NUMBER (e.g., CA/CS1/2024/0001)")
+                        return redirect('students:add_student')
+                    
+                    # Check if registration number exists
+                    if Student.objects.filter(registration_number__iexact=reg_number).exists():
+                        messages.error(request, "Registration number already exists")
+                        return redirect('students:add_student')
+                else:
+                    # Generate registration number
+                    try:
+                        admission_year = int(admission_year)
+                        sequence = get_next_registration_sequence(classroom.code, admission_year)
+                        reg_number = generate_registration_number(
+                            classroom.code, 
+                            admission_year, 
+                            sequence
+                        )
+                    except Exception as e:
+                        logger.error(f"Error generating reg number: {e}")
+                        messages.error(request, "Error generating registration number")
+                        return redirect('students:add_student')
+                
+                # Create student object
+                student = Student(
+                    full_name=full_name,
+                    email=email,
+                    classroom=classroom,
+                    admission_year=admission_year,
+                    registration_number=reg_number,
+                    status=status
+                )
+                
+                # Handle file uploads
+                if 'photo' in request.FILES:
+                    student.photo = request.FILES['photo']
+                
+                if 'documents' in request.FILES:
+                    student.documents = request.FILES['documents']
+                
+                # Save student
+                student.save()
+                
+                # Create user account
+                user = create_student_user(student)
+                
+                if user:
+                    # Send credentials email
+                    password = f"{student.get_first_name()}@123"
+                    email_sent = send_student_credentials(student, user, password, request)
+                    
+                    if email_sent:
+                        messages.success(request, 
+                            f"Student '{student.full_name}' registered successfully! "
+                            f"Credentials sent to {student.email}")
+                    else:
+                        messages.success(request, 
+                            f"Student '{student.full_name}' registered successfully! "
+                            f"Username: {user.username}, Password: {password}")
+                else:
+                    messages.warning(request, 
+                        f"Student '{student.full_name}' registered but user account creation failed. "
+                        "Please contact administrator.")
+                
+                return redirect('students:student_list')
+                
+        except IntegrityError as e:
+            if 'unique' in str(e).lower():
+                messages.error(request, "Registration number or email already exists")
+            else:
+                messages.error(request, "Database error occurred")
+            logger.error(f"Integrity error: {e}")
+            
+        except ValidationError as e:
+            messages.error(request, str(e))
+            
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            logger.error(f"Add student error: {e}", exc_info=True)
+    
+    # GET request - show form
+    context = {
+        'classes': ClassRoom.objects.all().order_by('name'),
         'current_year': timezone.now().year,
-    })
+        'years': range(timezone.now().year - 5, timezone.now().year + 3)
+    }
+    return render(request, 'students/add.html', context)
 
+@login_required
+@permission_required('students.change_student', raise_exception=True)
+def reset_student_password(request, student_id):
+    """Reset student password"""
+    try:
+        student = get_object_or_404(Student, id=student_id)
+        
+        if not student.user:
+            messages.error(request, "Student does not have a user account")
+            return redirect('students:student_list')
+        
+        # Generate new password
+        new_password = f"{student.get_first_name()}@123"
+        
+        # Update password
+        student.user.set_password(new_password)
+        student.user.save()
+        
+        # Send new credentials
+        send_student_credentials(student, student.user, new_password, request)
+        
+        messages.success(request, 
+            f"Password reset for {student.full_name}. "
+            f"New password: {new_password}")
+            
+    except Exception as e:
+        messages.error(request, f"Error resetting password: {str(e)}")
+        logger.error(f"Password reset error: {e}")
+    
+    return redirect('students:student_list')
 
+@login_required
+@permission_required('students.add_student', raise_exception=True)
+def bulk_create_users(request):
+    """Create user accounts for students without users"""
+    if request.method == 'POST':
+        try:
+            students_without_users = Student.objects.filter(user__isnull=True)
+            
+            if not students_without_users.exists():
+                messages.info(request, "All students already have user accounts")
+                return redirect('students:student_list')
+            
+            success_count = 0
+            failed_count = 0
+            
+            for student in students_without_users:
+                try:
+                    create_student_user(student)
+                    success_count += 1
+                except Exception as e:
+                    logger.error(f"Failed to create user for {student.registration_number}: {e}")
+                    failed_count += 1
+            
+            messages.success(request, 
+                f"Created {success_count} user accounts. "
+                f"{failed_count} failed.")
+                
+        except Exception as e:
+            messages.error(request, f"Bulk operation failed: {str(e)}")
+    
+    return redirect('students:student_list')
 
 
 def delete_student(request, id):
@@ -408,67 +631,101 @@ def delete_student(request, id):
     Student.objects.filter(id=id).delete()
     return redirect('students:student_list')
 
-
-
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from .models import Student
-# students/views.py - FIXED
-def edit_student(request, id):  # CHANGED: student_id → id
+from classes.models import ClassRoom  # ← Hii imekosekana!
+from dashboard.models import SchoolSettings  # ← Na hii pia!
+
+@login_required  # ← Usisahau kuongeza decorator
+def edit_student(request, id):
     """Edit student information"""
-    student = get_object_or_404(Student, id=id)  # CHANGED: student_id → id
-    settings_obj = SchoolSettings.objects.first()
+    student = get_object_or_404(Student, id=id)
+    
+    # Handle case where SchoolSettings doesn't exist
+    try:
+        settings_obj = SchoolSettings.objects.first()
+    except:
+        settings_obj = None
     
     if request.method == 'POST':
-        # Check if email is being added for the first time
-        old_email = student.email
-        new_email = request.POST.get('email')
-        
-        # Update student info
-        student.full_name = request.POST.get('full_name')
-        student.email = new_email
-        
-        # Handle classroom
-        classroom_id = request.POST.get('classroom')
-        if classroom_id:
-            try:
-                student.classroom = ClassRoom.objects.get(id=classroom_id)
-            except ClassRoom.DoesNotExist:
-                messages.error(request, "Selected class does not exist.")
-                return render(request, 'students/edit.html', {
-                    'student': student,
-                    'school_settings': settings_obj,
-                    'classes': ClassRoom.objects.all()
-                })
-        
-        student.status = request.POST.get('status')
-        
-        # Handle file uploads
-        if 'photo' in request.FILES:
-            student.photo = request.FILES['photo']
-        if 'documents' in request.FILES:
-            student.documents = request.FILES['documents']
-        
-        student.save()
-        
-        # Send credentials if email changed
-        if new_email and (not old_email or old_email != new_email) and student.user:
-            try:
-                # Import function here
-                from .utils import send_student_credentials
-                send_student_credentials(student, student.user, request)
-                messages.info(request, f"New credentials sent to {new_email}")
-            except Exception as e:
-                messages.warning(request, f"Student updated but failed to send email: {str(e)}")
-        
-        messages.success(request, "Student updated successfully!")
-        return redirect('students:student_list')
+        try:
+            # Get form data
+            full_name = request.POST.get('full_name', '').strip()
+            classroom_id = request.POST.get('classroom')
+            status = request.POST.get('status', 'ACTIVE')
+            email = request.POST.get('email', '').strip()
+            
+            # Validate required fields
+            if not full_name:
+                messages.error(request, "Full name is required")
+                return redirect('students:edit_student', id=id)
+            
+            # Update student info
+            student.full_name = full_name
+            student.email = email
+            student.status = status
+            
+            # Update classroom if provided
+            if classroom_id:
+                try:
+                    classroom = ClassRoom.objects.get(id=classroom_id)
+                    student.classroom = classroom
+                except ClassRoom.DoesNotExist:
+                    messages.warning(request, "Selected class not found, keeping previous class")
+            
+            # Handle file uploads (if any in form)
+            if 'photo' in request.FILES:
+                # Delete old photo if exists
+                if student.photo:
+                    student.photo.delete(save=False)
+                student.photo = request.FILES['photo']
+                
+            if 'documents' in request.FILES:
+                if student.documents:
+                    student.documents.delete(save=False)
+                student.documents = request.FILES['documents']
+            
+            # Save the student
+            student.save()
+            
+            # Check if email changed and send notification
+            old_email = student.email
+            if email and email != old_email and student.user:
+                try:
+                    from .utils import send_student_credentials
+                    # Generate new password or use existing
+                    new_password = f"{student.get_first_name()}@123"
+                    student.user.set_password(new_password)
+                    student.user.save()
+                    send_student_credentials(student, student.user, new_password, request)
+                    messages.info(request, f"New credentials sent to {email}")
+                except Exception as e:
+                    messages.warning(request, f"Student updated but email notification failed: {str(e)}")
+            
+            messages.success(request, f"Student '{student.full_name}' updated successfully!")
+            return redirect('students:student_list')
+            
+        except Exception as e:
+            messages.error(request, f"Error updating student: {str(e)}")
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Edit student error: {e}", exc_info=True)
     
-    return render(request, 'students/edit.html', {
+    # GET request - show form with current data
+    context = {
         'student': student,
         'school_settings': settings_obj,
-        'classes': ClassRoom.objects.all()
-    })
+        'classes': ClassRoom.objects.all().order_by('name'),
+        'status_choices': Student.STATUS_CHOICES,
+    }
+    
+    return render(request, 'students/edit.html', context)
 
+
+    
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -498,7 +755,6 @@ def student_portal(request):
     
     # Get student results from exams app
     results = Result.objects.filter(student=student).select_related('exam', 'subject')
-    
     # Calculate average marks if results exist
     average_marks = 0
     if results.exists():
@@ -522,7 +778,6 @@ def student_portal(request):
     })
 
 
-@login_required
 def download_results_pdf(request):
     """Download student results as PDF"""
     user = request.user
@@ -1030,7 +1285,6 @@ def generate_simple_results_pdf(student, results, school_settings):
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
-@login_required
 def change_password(request):
     settings_obj = SchoolSettings.objects.first()
 
@@ -1045,3 +1299,48 @@ def change_password(request):
 
     return render(request, 'students/change_password.html', {'form': form, 'school_settings': settings_obj,
 })
+
+
+
+
+
+# students/views.py
+@role_required(['ADMIN', 'TEACHER', 'STUDENT'])
+def student_detail(request, student_id):
+    """View student details"""
+    student = get_object_or_404(Student, id=student_id)
+    school_settings = SchoolSettings.objects.first()
+    
+    # For students: ensure they can only view their own profile
+    if request.user.role == 'STUDENT' and request.user != student.user:
+        messages.error(request, "You can only view your own profile.")
+        return redirect('dashboard')
+    
+    # For teachers: ensure they teach this student's class
+    if request.user.role == 'TEACHER':
+        if not student.classroom or student.classroom not in request.user.teacher_profile.classes.all():
+            messages.error(request, "You can only view students in your classes.")
+            return redirect('dashboard')
+    
+    # Get attendance records
+    from attendance.models import StudentAttendance
+    attendance_records = StudentAttendance.objects.filter(student=student).order_by('-date')[:10]
+    
+    # Get exam results
+    from exams.models import Result
+    exam_results = Result.objects.filter(student=student).select_related('exam', 'subject').order_by('-exam__date')[:5]
+    
+    # Get fee payments
+    from fees.models import Payment
+    fee_payments = Payment.objects.filter(student=student).order_by('-date')[:5]
+    
+    context = {
+        'student': student,
+        'school_settings': school_settings,
+        'attendance_records': attendance_records,
+        'exam_results': exam_results,
+        'fee_payments': fee_payments,
+        'today': timezone.now().date(),
+    }
+    
+    return render(request, 'students/detail.html', context)

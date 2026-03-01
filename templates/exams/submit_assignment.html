@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Submit — {{ assignment.title }}{% endblock %}
+
+{% block extra_css %}
+<script>
+  UPLOADCARE_PUBLIC_KEY = '{{ UPLOADCARE_PUBLIC_KEY|default:"ee464abf9f28b434744d" }}';
+</script>
+<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js" charset="utf-8"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:680px;">
+
+  <!-- Assignment Info Card -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div style="height:5px;background:linear-gradient(90deg,#4361ee,#7c3aed);"></div>
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h3 class="fw-bold mb-2">{{ assignment.title }}</h3>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-primary">{{ assignment.classroom.name }}</span>
+            {% if assignment.subject %}
+              <span class="badge bg-info">{{ assignment.subject.name }}</span>
+            {% endif %}
+            {% if assignment.is_overdue %}
+              <span class="badge bg-danger">⏰ Overdue</span>
+            {% else %}
+              <span class="badge bg-success">Open</span>
+            {% endif %}
+          </div>
+        </div>
+        {# ✅ FIX: Tumia download URL badala ya get_file_url #}
+        {% if assignment.file %}
+          <a href="{% url 'exams:download_assignment_file' assignment.id %}"
+             class="btn btn-outline-primary">
+            <i class="bi bi-download me-1"></i>Download
+          </a>
+        {% endif %}
+      </div>
+
+      {% if assignment.description %}
+        <hr class="my-3">
+        <p class="text-muted mb-0">{{ assignment.description }}</p>
+      {% endif %}
+
+      <hr class="my-3">
+      <small class="text-muted">
+        <i class="bi bi-calendar-event me-1"></i>
+        Due: <strong>{{ assignment.due_date|date:"d M Y — H:i" }}</strong>
+        {% if assignment.is_overdue %}
+          <span class="text-danger ms-2">⚠ Deadline imepita</span>
+        {% endif %}
+      </small>
+    </div>
+  </div>
+
+  <!-- Already Submitted View -->
+  {% if submission %}
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h5 class="fw-bold text-success mb-4">
+        <i class="bi bi-check-circle-fill me-2"></i>Submitted Successfully
+      </h5>
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <small class="text-muted d-block">Submitted At</small>
+          <strong>{{ submission.submitted_at|date:"d M Y H:i" }}</strong>
+        </div>
+        <div class="col-sm-6">
+          <small class="text-muted d-block">Status</small>
+          {% if submission.status == 'GRADED' %}
+            <span class="badge bg-success fs-6">Graded</span>
+          {% elif submission.status == 'LATE' %}
+            <span class="badge bg-danger fs-6">Late Submission</span>
+          {% elif submission.status == 'RETURNED' %}
+            <span class="badge bg-warning text-dark fs-6">Returned for Revision</span>
+          {% else %}
+            <span class="badge bg-info fs-6">Awaiting Review</span>
+          {% endif %}
+        </div>
+
+        {% if submission.marks is not None %}
+        <div class="col-sm-6">
+          <small class="text-muted d-block">Marks</small>
+          <span class="fw-bold fs-3 text-primary">{{ submission.marks }}</span>
+          <span class="text-muted">/100</span>
+        </div>
+        {% endif %}
+
+        {% if submission.feedback %}
+        <div class="col-12">
+          <small class="text-muted d-block mb-1">Teacher Feedback</small>
+          <div class="p-3 bg-light rounded border-start border-primary border-3">
+            {{ submission.feedback }}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if submission.comment %}
+        <div class="col-12">
+          <small class="text-muted d-block mb-1">Your Comment</small>
+          <p class="mb-0 text-muted">{{ submission.comment }}</p>
+        </div>
+        {% endif %}
+      </div>
+
+      {# ✅ FIX: Tumia download URL badala ya get_file_url #}
+      {% if submission.file %}
+        <div class="mt-4">
+          <a href="{% url 'exams:download_submission_file' submission.id %}"
+             class="btn btn-outline-success">
+            <i class="bi bi-file-earmark me-1"></i>View Submitted File
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+
+  {% if assignment.is_overdue %}
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+      <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+      <div>
+        Deadline imepita! Unaweza bado kusubmit lakini itaonekana kama
+        <strong>Late Submission</strong>.
+      </div>
+    </div>
+  {% endif %}
+
+  {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+      {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-4">
+        <i class="bi bi-upload text-primary me-2"></i>Submit Your Work
+      </h5>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">
+            Upload File <span class="text-danger">*</span>
+            <small class="text-muted fw-normal">(PDF, Word, Image)</small>
+          </label>
+          <br>
+          <input type="hidden" name="file" role="uploadcare-uploader" data-clearable="true" />
+          <div class="form-text mt-1">
+            <i class="bi bi-info-circle me-1"></i>
+            Upload faili yako — PDF, Word, au picha
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">
+            Comment <span class="text-muted fw-normal">(optional)</span>
+          </label>
+          <textarea name="comment" class="form-control" rows="3"
+                    placeholder="Maelezo yoyote kwa mwalimu..."></textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary btn-lg px-4">
+            <i class="bi bi-send me-2"></i>Submit Assignment
+          </button>
+          <a href="{% url 'exams:my_assignments' %}"
+             class="btn btn-outline-secondary btn-lg px-4">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="text-center mt-3">
+    <a href="{% url 'exams:my_assignments' %}" class="text-muted small">
+      <i class="bi bi-arrow-left me-1"></i>Back to Assignments
+    </a>
+  </div>
+bagorakurera@123
+</div>
+{% endblock %}

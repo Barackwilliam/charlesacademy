@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Certificates — {{ student.full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .cert-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+  }
+  .cert-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(67,97,238,0.15);
+  }
+  .cert-icon {
+    width: 60px; height: 60px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .cert-type-badge {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .empty-state {
+    padding: 80px 20px;
+    text-align: center;
+  }
+  .empty-state i { font-size: 80px; color: #dee2e6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">
+        <i class="bi bi-patch-check-fill text-warning me-2"></i>My Certificates
+      </h2>
+      <p class="text-muted mb-0">
+        {{ student.full_name }} &nbsp;·&nbsp;
+        <span class="badge bg-primary rounded-pill">{{ certificates|length }} certificate(s)</span>
+      </p>
+    </div>
+    <a href="{% url 'students:student_portal' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Back to Portal
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if certificates %}
+  <div class="row g-4">
+    {% for cert in certificates %}
+    <div class="col-md-6 col-xl-4">
+      <div class="cert-card card h-100">
+
+        <!-- Coloured top strip based on type -->
+        <div style="height:5px; background:
+          {% if cert.cert_type == 'EXCELLENCE' %}linear-gradient(90deg,#f59e0b,#fbbf24)
+          {% elif cert.cert_type == 'ACHIEVEMENT' %}linear-gradient(90deg,#4361ee,#7c3aed)
+          {% elif cert.cert_type == 'ATTENDANCE' %}linear-gradient(90deg,#10b981,#34d399)
+          {% elif cert.cert_type == 'PARTICIPATION' %}linear-gradient(90deg,#3b82f6,#06b6d4)
+          {% else %}linear-gradient(90deg,#6b7280,#9ca3af){% endif %};">
+        </div>
+
+        <div class="card-body p-4">
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <!-- Icon -->
+            <div class="cert-icon
+              {% if cert.cert_type == 'EXCELLENCE' %}bg-warning bg-opacity-15
+              {% elif cert.cert_type == 'ACHIEVEMENT' %}bg-primary bg-opacity-10
+              {% elif cert.cert_type == 'ATTENDANCE' %}bg-success bg-opacity-10
+              {% elif cert.cert_type == 'PARTICIPATION' %}bg-info bg-opacity-10
+              {% else %}bg-secondary bg-opacity-10{% endif %}">
+              {% if cert.cert_type == 'EXCELLENCE' %}🏆
+              {% elif cert.cert_type == 'ACHIEVEMENT' %}🎖️
+              {% elif cert.cert_type == 'ATTENDANCE' %}📅
+              {% elif cert.cert_type == 'PARTICIPATION' %}🤝
+              {% elif cert.cert_type == 'COMPLETION' %}🎓
+              {% else %}📄{% endif %}
+            </div>
+
+            <div class="flex-grow-1 min-w-0">
+              <h5 class="fw-bold mb-1 text-truncate" title="{{ cert.title }}">
+                {{ cert.title }}
+              </h5>
+              <span class="cert-type-badge
+                {% if cert.cert_type == 'EXCELLENCE' %}bg-warning text-dark
+                {% elif cert.cert_type == 'ACHIEVEMENT' %}bg-primary text-white
+                {% elif cert.cert_type == 'ATTENDANCE' %}bg-success text-white
+                {% elif cert.cert_type == 'PARTICIPATION' %}bg-info text-white
+                {% else %}bg-secondary text-white{% endif %}">
+                {{ cert.get_cert_type_display }}
+              </span>
+            </div>
+          </div>
+
+          {% if cert.description %}
+          <p class="text-muted small mb-3">{{ cert.description|truncatechars:100 }}</p>
+          {% endif %}
+
+          <div class="d-flex align-items-center justify-content-between">
+            <small class="text-muted">
+              <i class="bi bi-calendar3 me-1"></i>
+              {{ cert.issued_date|date:"d M Y" }}
+            </small>
+            <a href="{% url 'students:download_certificate' cert.id %}"
+               class="btn btn-sm btn-primary rounded-pill px-3">
+              <i class="bi bi-download me-1"></i> Download
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body empty-state">
+      <i class="bi bi-patch-check d-block mb-4"></i>
+      <h4 class="fw-bold mb-2">No Certificates Yet</h4>
+      <p class="text-muted">Your certificates will appear here once your school uploads them.</p>
+      <a href="{% url 'students:student_portal' %}" class="btn btn-outline-primary mt-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to Portal
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

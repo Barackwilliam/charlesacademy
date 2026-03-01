@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student ID Card — {{ student.full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --primary: {{ school_settings.theme_color|default:'#4361ee' }};
+  }
+
+  .idcard-page {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 48px 20px;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    border-radius: 20px;
+    margin: 24px 0;
+  }
+
+  .idcard-page h1 {
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  /* ── Card wrapper ── */
+  .id-card-wrapper {
+    perspective: 1200px;
+  }
+
+  .id-card {
+    width: 340px;
+    height: 214px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 25px 60px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(255,255,255,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.15);
+    background: #fff;
+    transition: transform 0.5s ease;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .id-card:hover {
+    transform: rotateY(-7deg) rotateX(3deg) scale(1.02);
+  }
+
+  /* Diagonal watermark */
+  .id-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -55deg,
+      transparent,
+      transparent 14px,
+      rgba(67,97,238,0.025) 14px,
+      rgba(67,97,238,0.025) 18px
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── HEADER ── */
+  .card-header {
+    background: var(--primary);
+    height: 72px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  /* Decorative circles */
+  .card-header::before,
+  .card-header::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .card-header::before { width: 90px; height: 90px; right: -20px; top: -30px; }
+  .card-header::after  { width: 55px; height: 55px; right:  40px; top: -20px; }
+
+  /* Logo */
+  .logo-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .logo-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .logo-badge .logo-initials {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+  }
+
+  .school-info {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .school-name {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .school-type {
+    color: rgba(255,255,255,0.70);
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .id-chip {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 20px;
+    padding: 3px 9px;
+    font-size: 7px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── BODY ── */
+  .card-body {
+    padding: 12px 14px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+  }
+
+  .info-field {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(67,97,238,0.08);
+  }
+
+  .info-field:last-child,
+  .info-field.no-border {
+    border-bottom: none;
+  }
+
+  .info-field.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .info-label {
+    font-size: 6.5px;
+    letter-spacing: 1px;
+    color: #aaa;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 1.5px;
+  }
+
+  .info-value {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #1a1a2e;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .info-value.name-value {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  .info-value.mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3px;
+    color: #333;
+  }
+
+  .info-value.subject-value {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 9px;
+  }
+
+  /* ── FOOTER ── */
+  .card-footer {
+    height: 30px;
+    background: rgba(67,97,238,0.06);
+    border-top: 1.5px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    margin-top: 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .valid-badge {
+    background: var(--primary);
+    color: #fff;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .dot-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0.3;
+  }
+  .dot.active {
+    width: 7px; height: 7px;
+    opacity: 1;
+  }
+
+  .card-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    color: #aaa;
+    font-weight: 600;
+  }
+
+  /* ── Action buttons ── */
+  .idcard-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-idcard {
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-idcard-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(67,97,238,0.4);
+  }
+
+  .btn-idcard-primary:hover {
+    filter: brightness(0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(67,97,238,0.5);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .btn-idcard-outline {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+
+  .btn-idcard-outline:hover {
+    background: rgba(255,255,255,0.16);
+    transform: translateY(-2px);
+    color: #fff;
+    text-decoration: none;
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="idcard-page">
+
+  <h1>🎓 Student Identity Card</h1>
+
+  <div class="id-card-wrapper">
+    <div class="id-card">
+
+      <!-- ── HEADER ── -->
+      <div class="card-header">
+
+        <!-- School logo -->
+        <div class="logo-badge">
+    <img src="{% static 'images/logo.jpeg' %}" alt="School Logo">    
+    </div>
+
+        <!-- School info -->
+        <div class="school-info">
+          <div class="school-name">{{ school_settings.name|default:"Charles Academy" }}</div>
+          <div class="school-type">School Identification Card</div>
+        </div>
+
+        <div class="id-chip">Student ID</div>
+      </div>
+
+      <!-- ── BODY ── -->
+      <div class="card-body">
+        <div class="info-grid">
+
+          <!-- Full Name (full width) -->
+          <div class="info-field full-width">
+            <div class="info-label">Full Name</div>
+            <div class="info-value name-value">{{ student.full_name|upper }}</div>
+          </div>
+
+          <!-- Registration Number -->
+          <div class="info-field">
+            <div class="info-label">Student ID</div>
+            <div class="info-value mono">{{ student.registration_number }}</div>
+          </div>
+
+          <!-- Admission Year -->
+          <div class="info-field">
+            <div class="info-label">Adm. Year</div>
+            <div class="info-value">{{ student.admission_year }}</div>
+          </div>
+
+          <!-- Subject(s) from classroom -->
+          <div class="info-field">
+            <div class="info-label">Subject</div>
+            <div class="info-value subject-value">
+              {% if student.classroom %}
+                {% with subjects=student.classroom.subject_set.all %}
+                  {% if subjects %}
+                    {{ subjects.0.name }}{% if subjects.count > 1 %} +{{ subjects.count|add:"-1" }}{% endif %}
+                  {% else %}
+                    {{ student.classroom.name }}
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="info-field no-border">
+            <div class="info-label">Status</div>
+            <div class="info-value">{{ student.status }}</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── FOOTER ── -->
+      <div class="card-footer">
+        <span class="valid-badge">VALID {{ school_settings.academic_year|default:"2025/2026" }}</span>
+        <div class="dot-row">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <span class="card-id">#{{ student.registration_number|slice:"-8:" }}</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ACTIONS ── -->
+  <div class="idcard-actions">
+    <a href="{% url 'students:download_id_card' student.id %}" class="btn-idcard btn-idcard-primary">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      Download PDF
+    </a>
+    <a href="{% url 'dashboard' %}" class="btn-idcard btn-idcard-outline">
+      ← Back to Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}

@@ -46,8 +46,19 @@ INSTALLED_APPS = [
     'exams',
     'fees',
     'dashboard',
-    'parents'
+    'parents',
+    'pyuploadcare.dj',   # <- ongeza hii
+
 ]
+
+UPLOADCARE = {
+    'pub_key': 'ee464abf9f28b434744d',  
+    'secret': '2031e741a2bd1059a653',   
+}
+
+# UPLOADCARE_PUBLIC_KEY  = 'your_public_key_here'   # <- badilisha
+# UPLOADCARE_SECRET_KEY  = 'your_secret_key_here'   # <- badilisha
+
 
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = '/accounts/login/'
@@ -90,6 +101,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'config.context_processors.uploadcare_key',   # ← ONGEZA HAPA
+
             ],
         },
     },
@@ -122,19 +135,6 @@ DATABASES = {
         'PORT': '5432',  
     }
 }
-
-## Charles new Db
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres', 
-#         'USER': 'postgres.lcprcweukbxuhrezgana',  
-#         'PASSWORD': 'NyumbaChap@123', 
-#         'HOST': 'aws-1-eu-west-1.pooler.supabase.com',  
-#         'PORT': '5432',  
-#     }
-# }
 
 
 

@@ -17,6 +17,8 @@ from io import BytesIO
 from django.utils import timezone
 import os
 
+from classes.models import ClassRoom 
+
 
 # =============================================
 # DEBUG VIEW - Check Database Records
@@ -356,149 +358,7 @@ def due_fee_list(request):
     })
 
 
-# =============================================
-# PDF GENERATION
-# =============================================
 
-# def generate_fee_pdf(request, student_id):
-#     """Generate PDF receipt for student fee summary"""
-#     student = get_object_or_404(Student, id=student_id)
-    
-#     # Check permission
-#     if not request.user.is_staff and student.user != request.user:
-#         messages.error(request, "You don't have permission to download this receipt.")
-#         return redirect('fees:my_fees')
-    
-#     # Get payment data directly
-#     if not student.classroom:
-#         messages.error(request, "Student has no classroom assigned.")
-#         return redirect('fees:my_fees')
-    
-#     try:
-#         fee_structure = FeeStructure.objects.get(classroom=student.classroom)
-#         total_fee = fee_structure.total_fee
-#     except FeeStructure.DoesNotExist:
-#         total_fee = 0
-#         messages.warning(request, "No fee structure found for student's class.")
-    
-#     payments = Payment.objects.filter(student=student).order_by('-date')
-#     total_paid = payments.aggregate(total=Sum('amount_paid'))['total'] or 0
-#     balance = total_fee - total_paid
-    
-#     # Create PDF
-#     buffer = BytesIO()
-#     doc = SimpleDocTemplate(buffer, pagesize=letter)
-#     elements = []
-    
-#     # Styles
-#     styles = getSampleStyleSheet()
-    
-#     # Title
-#     title_style = ParagraphStyle(
-#         'CustomTitle',
-#         parent=styles['Heading1'],
-#         fontSize=16,
-#         spaceAfter=30,
-#         alignment=1
-#     )
-    
-#     elements.append(Paragraph("FEE PAYMENT SUMMARY", title_style))
-#     elements.append(Spacer(1, 20))
-    
-#     # Student Information
-#     info_data = [
-#         ['STUDENT INFORMATION', ''],
-#         ['Full Name:', student.full_name],
-#         ['Admission/Reg No:', student.registration_number],
-#         ['Class:', str(student.classroom) if student.classroom else 'Not Assigned'],
-#         ['Date Generated:', timezone.now().strftime("%Y-%m-%d %H:%M")],
-#     ]
-    
-#     info_table = Table(info_data, colWidths=[150, 300])
-#     info_table.setStyle(TableStyle([
-#         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-#         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-#         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-#         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-#         ('FONTSIZE', (0, 0), (-1, 0), 12),
-#         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-#         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-#         ('GRID', (0, 0), (-1, -1), 1, colors.black),
-#     ]))
-    
-#     elements.append(info_table)
-#     elements.append(Spacer(1, 30))
-    
-#     # Fee Summary
-#     summary_data = [
-#         ['FEE SUMMARY', 'Amount (KES)'],
-#         ['Total Fee Due:', f"{total_fee:,.2f}"],
-#         ['Total Amount Paid:', f"{total_paid:,.2f}"],
-#         ['Remain:', f"{balance:,.2f}"],
-#     ]
-    
-#     summary_table = Table(summary_data, colWidths=[300, 150])
-#     summary_table.setStyle(TableStyle([
-#         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-#         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-#         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-#         ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
-#         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-#         ('FONTSIZE', (0, 0), (-1, 0), 12),
-#         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-#         ('GRID', (0, 0), (-1, -1), 1, colors.black),
-#         ('BACKGROUND', (0, 3), (-1, 3), colors.yellow if balance > 0 else colors.lightgreen),
-#         ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
-#     ]))
-    
-#     elements.append(summary_table)
-#     elements.append(Spacer(1, 30))
-    
-#     # Payment History
-#     if payments.exists():
-#         elements.append(Paragraph("PAYMENT HISTORY", styles['Heading2']))
-#         elements.append(Spacer(1, 10))
-        
-#         payment_data = [['Date', 'Receipt No', 'Amount (Tsh)']]
-#         for payment in payments:
-#             payment_data.append([
-#                 payment.date.strftime("%Y-%m-%d"),
-#                 payment.receipt_no,
-#                 f"{payment.amount_paid:,.2f}"
-#             ])
-        
-#         payment_table = Table(payment_data, colWidths=[100, 150, 100])
-#         payment_table.setStyle(TableStyle([
-#             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-#             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-#             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-#             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-#             ('FONTSIZE', (0, 0), (-1, 0), 10),
-#             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-#             ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
-#             ('GRID', (0, 0), (-1, -1), 1, colors.black),
-#         ]))
-        
-#         elements.append(payment_table)
-#     else:
-#         elements.append(Paragraph("No payment records found.", styles['Normal']))
-    
-#     # Footer
-#     elements.append(Spacer(1, 40))
-#     elements.append(Paragraph("This is a computer-generated receipt.", styles['Italic']))
-#     elements.append(Paragraph("Signature: ________________________", styles['Normal']))
-    
-#     # Build PDF
-#     doc.build(elements)
-    
-#     # Get PDF value from buffer
-#     pdf = buffer.getvalue()
-#     buffer.close()
-    
-#     # Create HTTP response with PDF
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="Fee_Summary_{student.registration_number}_{timezone.now().strftime("%Y%m%d")}.pdf"'
-#     response.write(pdf)
     
 #     return response
 def generate_fee_pdf(request, student_id):
@@ -701,32 +561,7 @@ def generate_fee_pdf(request, student_id):
     elements.append(Paragraph(doc_info, normal_style))
     elements.append(Spacer(1, 20))
     
-    # ========== STUDENT INFORMATION ==========
-    # elements.append(Paragraph("STUDENT INFORMATION", section_title_style))
-    
-    # Student info in a nice table
-    # student_data = [
-    #     ['FULL NAME:', student.full_name, 'ADMISSION NO:', student.registration_number],
-    #     ['CLASS:', str(student.classroom) if student.classroom else 'Not Assigned', 
-    #      'ADMISSION YEAR:', str(student.admission_year)],
-    #     ['STATUS:', student.status, 'GENERATED DATE:', timezone.now().strftime("%d/%m/%Y")],
-    # ]
-    
-    # student_table = Table(student_data, colWidths=[80, 150, 80, 130])
-    # student_table.setStyle(TableStyle([
-    #     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
-    #     ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-    #     ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-    #     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-    #     ('FONTSIZE', (0, 0), (-1, -1), 9),
-    #     ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-    #     ('TOPPADDING', (0, 0), (-1, -1), 8),
-    #     ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
-    # ]))
-    
-    # elements.append(student_table)
-    # elements.append(Spacer(1, 25))
-    
+   
     # ========== FEE SUMMARY ==========
     elements.append(Paragraph("FEE SUMMARY", section_title_style))
     
@@ -760,44 +595,6 @@ def generate_fee_pdf(request, student_id):
     elements.append(summary_table)
     elements.append(Spacer(1, 10))
     
-    # Payment Progress Bar (visual representation)
-    # progress_width = 400
-    # if total_fee > 0:
-    #     paid_width = (total_paid / total_fee) * progress_width
-    #     progress_data = [
-    #         ['Payment Progress:'],
-    #         [f"Paid: {payment_percentage:.1f}% ({total_paid:,.2f} / {total_fee:,.2f})"]
-    #     ]
-        
-    #     progress_table = Table(progress_data, colWidths=[progress_width])
-    #     progress_table.setStyle(TableStyle([
-    #         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-    #         ('FONTSIZE', (0, 0), (-1, 0), 9),
-    #         ('FONTSIZE', (0, 1), (-1, 1), 8),
-    #         ('TEXTCOLOR', (0, 1), (-1, 1), colors.HexColor('#475569')),
-    #         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-    #     ]))
-        
-    #     elements.append(progress_table)
-        
-    #     # Visual progress bar using theme color for paid portion
-    #     paid_blocks = int(paid_width // 10)
-    #     remaining_blocks = int((progress_width - paid_width) // 10)
-    #     bar_data = [[
-    #         Paragraph(f'<font color="{theme_color}">{"█" * paid_blocks}</font>'
-    #                  f'<font color="#e2e8f0">{"█" * remaining_blocks}</font>', 
-    #                  normal_style)
-    #     ]]
-    #     bar_table = Table(bar_data, colWidths=[progress_width])
-    #     bar_table.setStyle(TableStyle([
-    #         ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
-    #     ]))
-        
-    #     elements.append(bar_table)
-    
-    # elements.append(Spacer(1, 25))
-    
-    # ========== PAYMENT HISTORY ==========
     if payments.exists():
         elements.append(Paragraph("PAYMENT HISTORY", section_title_style))
         
@@ -978,4 +775,320 @@ def generate_simple_pdf(student, total_fee, total_paid, balance, payments, schoo
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     response.write(pdf)
     
+    return response
+
+
+
+
+def financial_report(request):
+    """
+    Admin: Financial report — per class + wote kwa jumla.
+    Filter: GET ?classroom=<id>
+    """
+    settings_obj   = SchoolSettings.objects.first()
+    all_classrooms = ClassRoom.objects.all().order_by('name')
+    class_filter   = request.GET.get('classroom', '')
+
+    # ── Per Class Summary ──────────────────────────────────────────
+    class_summaries = []
+    grand_expected = grand_paid = grand_balance = 0
+
+    for classroom in all_classrooms:
+        try:
+            structure  = FeeStructure.objects.get(classroom=classroom)
+            fee_each   = structure.total_fee
+        except FeeStructure.DoesNotExist:
+            fee_each = 0
+
+        n_students  = Student.objects.filter(classroom=classroom).count()
+        expected    = fee_each * n_students
+        paid        = Payment.objects.filter(
+            student__classroom=classroom
+        ).aggregate(total=Sum('amount_paid'))['total'] or 0
+        balance     = expected - paid
+        pct         = round(paid / expected * 100, 1) if expected > 0 else 0
+
+        grand_expected += expected
+        grand_paid     += paid
+        grand_balance  += balance
+
+        class_summaries.append({
+            'classroom':   classroom,
+            'fee_each':    fee_each,
+            'n_students':  n_students,
+            'expected':    expected,
+            'paid':        paid,
+            'balance':     balance,
+            'pct':         pct,
+        })
+
+    grand_rate = round(grand_paid / grand_expected * 100, 1) if grand_expected > 0 else 0
+
+    # ── Student Detail (filterable) ───────────────────────────────
+    selected_classroom = None
+    students_qs = Student.objects.select_related('classroom').all()
+
+    if class_filter:
+        try:
+            selected_classroom = ClassRoom.objects.get(id=class_filter)
+            students_qs = students_qs.filter(classroom=selected_classroom)
+        except ClassRoom.DoesNotExist:
+            pass
+
+    students_detail = []
+    for student in students_qs.order_by('classroom__name', 'full_name'):
+        if not student.classroom:
+            continue
+        try:
+            fee = FeeStructure.objects.get(classroom=student.classroom).total_fee
+        except FeeStructure.DoesNotExist:
+            fee = 0
+
+        paid    = Payment.objects.filter(student=student).aggregate(
+            total=Sum('amount_paid'))['total'] or 0
+        balance = fee - paid
+        pct     = round(paid / fee * 100, 1) if fee > 0 else 0
+        status  = 'PAID' if balance <= 0 else 'PARTIAL' if paid > 0 else 'UNPAID'
+
+        students_detail.append({
+            'student': student,
+            'fee':     fee,
+            'paid':    paid,
+            'balance': balance,
+            'pct':     pct,
+            'status':  status,
+        })
+
+    return render(request, 'fees/financial_report.html', {
+        'school_settings':    settings_obj,
+        'classrooms':         all_classrooms,
+        'class_filter':       class_filter,
+        'selected_classroom': selected_classroom,
+        'class_summaries':    class_summaries,
+        'students_detail':    students_detail,
+        'grand_expected':     grand_expected,
+        'grand_paid':         grand_paid,
+        'grand_balance':      grand_balance,
+        'grand_rate':         grand_rate,
+    })
+
+
+def download_financial_report_pdf(request):
+    """
+    PDF download ya financial report — wote au per class.
+    GET ?classroom=<id>  au bila filter = wote
+    """
+    settings_obj  = SchoolSettings.objects.first()
+    class_filter  = request.GET.get('classroom', '')
+    school_name   = settings_obj.name          if settings_obj else 'School'
+    phone         = settings_obj.phone         if settings_obj else ''
+    email         = settings_obj.contact_email if settings_obj else ''
+    theme_hex     = settings_obj.theme_color   if settings_obj else '#4361ee'
+    academic_year = settings_obj.academic_year if settings_obj else str(timezone.now().year)
+
+    # ── Colors ────────────────────────────────────────────────────
+    THEME   = colors.HexColor(theme_hex)
+    WHITE   = colors.white
+    LGRAY   = colors.HexColor('#f8fafc')
+    MGRAY   = colors.HexColor('#e2e8f0')
+    SUCCESS = colors.HexColor('#10b981')
+    DANGER  = colors.HexColor('#ef4444')
+    WARNING = colors.HexColor('#f59e0b')
+
+    buffer = BytesIO()
+    doc    = SimpleDocTemplate(
+        buffer, pagesize=letter,
+        leftMargin=36, rightMargin=36,
+        topMargin=36,  bottomMargin=36
+    )
+    styles   = getSampleStyleSheet()
+    elements = []
+
+    def PS(name, **kw):
+        return ParagraphStyle(name, parent=styles['Normal'], **kw)
+
+    title_s  = PS('T',  fontSize=18, textColor=THEME, alignment=1, fontName='Helvetica-Bold', spaceAfter=4)
+    sub_s    = PS('S',  fontSize=10, textColor=colors.HexColor('#475569'), alignment=1, spaceAfter=2)
+    meta_s   = PS('M',  fontSize=8,  textColor=colors.HexColor('#64748b'), alignment=1, spaceAfter=2)
+    sec_s    = PS('SC', fontSize=12, textColor=THEME, fontName='Helvetica-Bold', spaceBefore=14, spaceAfter=6)
+    footer_s = PS('F',  fontSize=7,  textColor=colors.grey, alignment=1)
+
+    # ── Scope label ───────────────────────────────────────────────
+    scope_label = 'All Classes'
+    filter_qs   = ClassRoom.objects.all().order_by('name')
+    if class_filter:
+        try:
+            sc          = ClassRoom.objects.get(id=class_filter)
+            scope_label = sc.name
+            filter_qs   = ClassRoom.objects.filter(id=class_filter)
+        except ClassRoom.DoesNotExist:
+            pass
+
+    # ── Header ────────────────────────────────────────────────────
+    elements.append(Paragraph(school_name.upper(), title_s))
+    elements.append(Paragraph('Financial Collection Report', sub_s))
+    elements.append(Paragraph(
+        f'Scope: {scope_label}  |  Academic Year: {academic_year}  |  '
+        f'Generated: {timezone.now().strftime("%d %b %Y, %I:%M %p")}',
+        meta_s
+    ))
+    elements.append(Spacer(1, 10))
+
+    # ── Grand Totals ──────────────────────────────────────────────
+    grand_expected = grand_paid = grand_balance = 0
+    class_rows = []
+
+    for cls in filter_qs:
+        try:
+            fee_each = FeeStructure.objects.get(classroom=cls).total_fee
+        except FeeStructure.DoesNotExist:
+            fee_each = 0
+
+        n  = Student.objects.filter(classroom=cls).count()
+        ex = fee_each * n
+        pd = Payment.objects.filter(student__classroom=cls).aggregate(
+            total=Sum('amount_paid'))['total'] or 0
+        bl = ex - pd
+        pc = round(pd / ex * 100, 1) if ex > 0 else 0
+
+        grand_expected += ex
+        grand_paid     += pd
+        grand_balance  += bl
+
+        class_rows.append([cls.name, str(n),
+                           f'Tsh {fee_each:,.0f}',
+                           f'Tsh {ex:,.0f}',
+                           f'Tsh {pd:,.0f}',
+                           f'Tsh {bl:,.0f}',
+                           f'{pc}%'])
+
+    grand_rate = round(grand_paid / grand_expected * 100, 1) if grand_expected > 0 else 0
+
+    # Grand totals box
+    g_data = [
+        ['JUMLA INAYOTARAJIWA', 'IMELIPWA', 'BADO HAIJALIPIWA', 'KIWANGO'],
+        [f'Tsh {grand_expected:,.0f}',
+         f'Tsh {grand_paid:,.0f}',
+         f'Tsh {grand_balance:,.0f}',
+         f'{grand_rate}%'],
+    ]
+    g_table = Table(g_data, colWidths=[127, 127, 127, 127])
+    g_table.setStyle(TableStyle([
+        ('BACKGROUND',    (0,0), (-1,0), THEME),
+        ('TEXTCOLOR',     (0,0), (-1,0), WHITE),
+        ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE',      (0,0), (-1,-1), 9),
+        ('ALIGN',         (0,0), (-1,-1), 'CENTER'),
+        ('TOPPADDING',    (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+        ('GRID',          (0,0), (-1,-1), 0.5, MGRAY),
+        ('BACKGROUND',    (0,1), (-1,1), LGRAY),
+        ('FONTNAME',      (0,1), (-1,1), 'Helvetica-Bold'),
+        ('FONTSIZE',      (0,1), (-1,1), 11),
+        ('TEXTCOLOR',     (1,1), (1,1), SUCCESS),
+        ('TEXTCOLOR',     (2,1), (2,1), DANGER if grand_balance > 0 else SUCCESS),
+        ('TEXTCOLOR',     (3,1), (3,1), SUCCESS if grand_rate >= 75 else WARNING if grand_rate >= 50 else DANGER),
+    ]))
+    elements.append(g_table)
+    elements.append(Spacer(1, 14))
+
+    # ── Class Breakdown Table ─────────────────────────────────────
+    elements.append(Paragraph('CLASS BREAKDOWN', sec_s))
+    hdr = [['CLASS', 'WANAFUNZI', 'FEE/MTU', 'INAYOTARAJIWA', 'IMELIPWA', 'BADO', 'KIWANGO']]
+    c_table = Table(hdr + class_rows, colWidths=[90, 52, 72, 82, 82, 82, 52])
+
+    c_style = [
+        ('BACKGROUND',    (0,0), (-1,0), THEME),
+        ('TEXTCOLOR',     (0,0), (-1,0), WHITE),
+        ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE',      (0,0), (-1,-1), 8),
+        ('ALIGN',         (0,0), (-1,-1), 'CENTER'),
+        ('ALIGN',         (0,1), (0,-1), 'LEFT'),
+        ('TOPPADDING',    (0,0), (-1,-1), 7),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 7),
+        ('GRID',          (0,0), (-1,-1), 0.4, MGRAY),
+        ('ROWBACKGROUNDS',(0,1), (-1,-1), [WHITE, LGRAY]),
+    ]
+    for i, row in enumerate(class_rows, 1):
+        v = float(row[6].replace('%','') or 0)
+        c = SUCCESS if v >= 75 else WARNING if v >= 50 else DANGER
+        c_style += [('TEXTCOLOR', (6,i), (6,i), c),
+                    ('FONTNAME',  (6,i), (6,i), 'Helvetica-Bold')]
+    c_table.setStyle(TableStyle(c_style))
+    elements.append(c_table)
+    elements.append(Spacer(1, 14))
+
+    # ── Student Detail Table ──────────────────────────────────────
+    elements.append(Paragraph('MAELEZO YA WANAFUNZI', sec_s))
+
+    qs = Student.objects.select_related('classroom').all()
+    if class_filter:
+        qs = qs.filter(classroom__id=class_filter)
+
+    s_hdr = [['#', 'MWANAFUNZI', 'CLASS', 'REG NO', 'FEE', 'IMELIPWA', 'BADO', 'HALI']]
+    s_rows = []
+
+    for i, student in enumerate(qs.order_by('classroom__name', 'full_name'), 1):
+        if not student.classroom:
+            continue
+        try:
+            fee = FeeStructure.objects.get(classroom=student.classroom).total_fee
+        except FeeStructure.DoesNotExist:
+            fee = 0
+
+        paid    = Payment.objects.filter(student=student).aggregate(
+            total=Sum('amount_paid'))['total'] or 0
+        balance = fee - paid
+        status  = 'PAID' if balance <= 0 else 'PARTIAL' if paid > 0 else 'UNPAID'
+
+        s_rows.append([
+            str(i),
+            student.full_name[:22],
+            student.classroom.name[:14],
+            student.registration_number,
+            f'{fee:,.0f}',
+            f'{paid:,.0f}',
+            f'{balance:,.0f}',
+            status,
+        ])
+
+    s_table = Table(s_hdr + s_rows, colWidths=[20, 108, 68, 65, 58, 58, 58, 50])
+    s_style = [
+        ('BACKGROUND',    (0,0), (-1,0), THEME),
+        ('TEXTCOLOR',     (0,0), (-1,0), WHITE),
+        ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE',      (0,0), (-1,-1), 7),
+        ('ALIGN',         (0,0), (-1,-1), 'CENTER'),
+        ('ALIGN',         (1,1), (2,-1), 'LEFT'),
+        ('TOPPADDING',    (0,0), (-1,-1), 5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('GRID',          (0,0), (-1,-1), 0.3, MGRAY),
+        ('ROWBACKGROUNDS',(0,1), (-1,-1), [WHITE, LGRAY]),
+    ]
+    for i, row in enumerate(s_rows, 1):
+        st = row[7]
+        c  = SUCCESS if st == 'PAID' else WARNING if st == 'PARTIAL' else DANGER
+        s_style += [('TEXTCOLOR', (7,i), (7,i), c),
+                    ('FONTNAME',  (7,i), (7,i), 'Helvetica-Bold')]
+    s_table.setStyle(TableStyle(s_style))
+    elements.append(s_table)
+
+    # ── Footer ────────────────────────────────────────────────────
+    elements.append(Spacer(1, 18))
+    elements.append(Paragraph(
+        f'{school_name}  •  {phone}  •  {email}<br/>'
+        f'Ripoti imetolewa kwa mfumo wa kompyuta — {timezone.now().strftime("%d %B %Y")}',
+        footer_s
+    ))
+
+    doc.build(elements)
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    scope = f'class_{class_filter}' if class_filter else 'all'
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = (
+        f'attachment; filename="Financial_Report_{scope}_{timezone.now().strftime("%Y%m%d")}.pdf"'
+    )
+    response.write(pdf)
     return response

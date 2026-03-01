@@ -6,8 +6,8 @@ from django.db.models import Q
 from django.utils import timezone
 from io import BytesIO
 import os
-
-from .models import Student
+import mimetypes
+from .models import Student, Certificate
 from classes.models import ClassRoom
 from dashboard.models import SchoolSettings
 from accounts.decorators import role_required
@@ -268,149 +268,6 @@ def download_students_pdf(request):
 
 
 from .utils import generate_registration_number, create_student_user, send_student_credentials  # <-- Add send_student_credentials
-
-# def add_student(request):
-#     settings_obj = SchoolSettings.objects.first()
-
-#     if request.method == 'POST':
-#         classroom = ClassRoom.objects.get(id=request.POST.get('classroom'))
-#         year = int(request.POST.get('admission_year', timezone.now().year))
-        
-#         # Generate registration number
-#         reg = generate_registration_number(classroom.code, year)
-        
-#         # Create student
-#         student = Student.objects.create(
-#             full_name=request.POST.get('full_name'),
-#             email=request.POST.get('email'),
-#             classroom=classroom,
-#             admission_year=year,
-#             registration_number=reg,
-#             status=request.POST.get('status')
-#         )
-        
-#         # Handle file uploads
-#         if 'photo' in request.FILES:
-#             student.photo = request.FILES['photo']
-#         if 'documents' in request.FILES:
-#             student.documents = request.FILES['documents']
-#         student.save()
-
-#         # Create linked user
-#         user = create_student_user(student)
-        
-#         # Send credentials to student's email if provided
-#         if student.email:
-#             send_student_credentials(student, user, request)  # <-- Pass request object
-        
-#         messages.success(request, f"Student {student.full_name} added successfully!")
-#         if student.email:
-#             messages.info(request, f"Credentials sent to {student.email}")
-        
-#         return redirect('students:student_list')
-
-#     return render(request, 'students/add.html', {
-#         'school_settings': settings_obj,
-#         'classes': ClassRoom.objects.all(),
-#         'current_year': timezone.now().year,
-#     })
-
-# # students/views.py - Kurekebishwa tu
-# from django.shortcuts import render, redirect
-# from django.contrib import messages
-# from django.utils import timezone
-# from django.contrib.auth.decorators import login_required
-# from django.core.exceptions import ValidationError
-# from django.db import IntegrityError
-# from classes.models import ClassRoom
-# from .models import Student
-# from .utils import create_student_user, send_student_credentials
-# import logging
-
-# logger = logging.getLogger(__name__)
-
-# def add_student(request):
-#     # Hii ni ya kuseti settings za shule - ukiwa huna SchoolSettings model, tumia default
-#     try:
-#         from school.models import SchoolSettings
-#         settings_obj = SchoolSettings.objects.first()
-#     except:
-#         settings_obj = None
-    
-#     if request.method == 'POST':
-#         try:
-#             # Get classroom
-#             classroom_id = request.POST.get('classroom')
-#             if not classroom_id:
-#                 messages.error(request, "Please select a classroom")
-#                 return redirect('students:add_student')
-            
-#             classroom = ClassRoom.objects.get(id=classroom_id)
-#             year = int(request.POST.get('admission_year', timezone.now().year))
-            
-#             # Generate registration number
-#             from .utils import generate_registration_number
-#             reg = generate_registration_number(classroom.code, year)
-            
-#             # Create student
-#             student = Student.objects.create(
-#                 full_name=request.POST.get('full_name').strip(),
-#                 email=request.POST.get('email').strip().lower(),
-#                 classroom=classroom,
-#                 admission_year=year,
-#                 registration_number=reg,
-#                 status=request.POST.get('status', 'ACTIVE')
-#             )
-            
-#             # Handle file uploads
-#             if 'photo' in request.FILES:
-#                 student.photo = request.FILES['photo']
-#             if 'documents' in request.FILES:
-#                 student.documents = request.FILES['documents']
-#             student.save()
-
-#             # Create linked user
-#             user = create_student_user(student)
-            
-#             if user:
-#                 # Send credentials to student's email if provided
-#                 if student.email:
-#                     try:
-#                         send_student_credentials(student, user, request)
-#                         messages.info(request, f"Credentials sent to {student.email}")
-#                     except Exception as e:
-#                         logger.error(f"Email sending failed: {e}")
-#                         messages.warning(request, f"Student registered but email not sent. Username: {user.username}")
-                
-#                 messages.success(request, f"Student {student.full_name} added successfully!")
-#             else:
-#                 messages.warning(request, f"Student {student.full_name} added but user account creation failed!")
-            
-#             return redirect('students:student_list')
-            
-#         except ClassRoom.DoesNotExist:
-#             messages.error(request, "Selected class does not exist")
-#         except ValidationError as e:
-#             messages.error(request, str(e))
-#         except IntegrityError as e:
-#             if 'email' in str(e):
-#                 messages.error(request, "This email is already registered")
-#             elif 'registration_number' in str(e):
-#                 messages.error(request, "Registration number conflict. Please try again")
-#             else:
-#                 messages.error(request, "Database error occurred")
-#         except Exception as e:
-#             messages.error(request, f"An error occurred: {str(e)}")
-#             logger.error(f"Error in add_student: {e}")
-    
-#     # GET request
-#     context = {
-#         'school_settings': settings_obj,
-#         'classes': ClassRoom.objects.all(),
-#         'current_year': timezone.now().year,
-#         'years': range(timezone.now().year - 5, timezone.now().year + 3)
-#     }
-#     return render(request, 'students/add.html', context)
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -723,8 +580,341 @@ def edit_student(request, id):
     }
     
     return render(request, 'students/edit.html', context)
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+from io import BytesIO
+import os
+
+from .models import Student
+from dashboard.models import SchoolSettings
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  Helpers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def hex_to_rgb(hex_color):
+    hex_color = hex_color.lstrip('#')
+    r = int(hex_color[0:2], 16) / 255
+    g = int(hex_color[2:4], 16) / 255
+    b = int(hex_color[4:6], 16) / 255
+    return (r, g, b)
+
+
+def draw_rounded_rect(cv, x, y, w, h, radius, fill=None, stroke=None, lw=0):
+    cv.saveState()
+    if fill:
+        cv.setFillColorRGB(*fill)
+    if stroke:
+        cv.setStrokeColorRGB(*stroke)
+        cv.setLineWidth(lw)
+    path = cv.beginPath()
+    path.moveTo(x + radius, y)
+    path.lineTo(x + w - radius, y)
+    path.arcTo(x + w - 2*radius, y,         x + w, y + 2*radius,         -90, 90)
+    path.lineTo(x + w, y + h - radius)
+    path.arcTo(x + w - 2*radius, y + h - 2*radius, x + w, y + h,           0, 90)
+    path.lineTo(x + radius, y + h)
+    path.arcTo(x, y + h - 2*radius, x + 2*radius, y + h,                  90, 90)
+    path.lineTo(x, y + radius)
+    path.arcTo(x, y, x + 2*radius, y + 2*radius,                         180, 90)
+    path.close()
+    cv.drawPath(path, fill=(1 if fill else 0), stroke=(1 if stroke else 0))
+    cv.restoreState()
+
+
+def draw_circle(cv, cx, cy, r, fill=None, stroke=None, lw=1):
+    cv.saveState()
+    if fill:
+        cv.setFillColorRGB(*fill)
+    if stroke:
+        cv.setStrokeColorRGB(*stroke)
+        cv.setLineWidth(lw)
+    cv.circle(cx, cy, r, fill=(1 if fill else 0), stroke=(1 if stroke else 0))
+    cv.restoreState()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Main view
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def download_id_card_pdf(request, student_id):
+    """Generate beautiful university-style student ID card (credit-card size 85.6x54mm)."""
+
+    # ── Fetch objects ─────────────────────────────────────────────────────────
+    if request.user.role == 'STUDENT':
+        student = get_object_or_404(Student, user=request.user, id=student_id)
+    else:
+        student = get_object_or_404(Student, id=student_id)
+
+    try:
+        school_settings = SchoolSettings.objects.first()
+    except Exception:
+        school_settings = None
+
+    # ── Color palette ─────────────────────────────────────────────────────────
+    theme_hex = (
+        school_settings.theme_color
+        if school_settings and school_settings.theme_color
+        else '#1a237e'
+    )
+    primary  = hex_to_rgb(theme_hex)
+    accent   = tuple(min(1.0, v * 0.55 + 0.45) for v in primary)
+    dark     = tuple(max(0.0, v * 0.68) for v in primary)
+    WHITE    = (1.0, 1.0, 1.0)
+    MID_GREY = (0.52, 0.52, 0.58)
+    GOLD     = (1.0, 0.80, 0.18)
+
+    # ── School meta ───────────────────────────────────────────────────────────
+    school_name   = school_settings.name          if school_settings else "CHARLES ACADEMY"
+    academic_year = school_settings.academic_year if school_settings else str(timezone.now().year)
+
+    # ── Student data ──────────────────────────────────────────────────────────
+    full_name  = student.full_name.upper()
+    reg_number = student.registration_number
+
+    # Subject: query Subject model linked to student classroom
+    subject = 'N/A'
+    if student.classroom:
+        from classes.models import Subject
+        subjects = Subject.objects.filter(classroom=student.classroom).values_list('name', flat=True)
+        if subjects.exists():
+            subject = ', '.join(subjects[:3])  # max 3 subjects
+        else:
+            subject = student.classroom.name   # fallback to class name
+    if len(subject) > 30:
+        subject = subject[:30] + '...' 
+
+    adm_year = str(student.admission_year) if student.admission_year else str(timezone.now().year)
+
+    # ── Canvas setup ──────────────────────────────────────────────────────────
+    W = 85.6 * mm
+    H = 54.0 * mm
+    buf = BytesIO()
+    cv = canvas.Canvas(buf, pagesize=(W, H))
+    cv.setTitle("Student ID Card")
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  BACKGROUND
+    # ══════════════════════════════════════════════════════════════════════════
+    cv.setFillColorRGB(*WHITE)
+    cv.rect(0, 0, W, H, fill=1, stroke=0)
+
+    HEADER_H = H * 0.42
+
+    # Header solid band
+    cv.setFillColorRGB(*primary)
+    cv.rect(0, H - HEADER_H, W, HEADER_H, fill=1, stroke=0)
+
+    # Decorative parallelograms on header
+    cv.saveState()
+    lighter = tuple(min(1.0, v + 0.10) for v in primary)
+    cv.setFillColorRGB(*lighter)
+    for i in range(7):
+        xs = -12 * mm + i * 17 * mm
+        p = cv.beginPath()
+        p.moveTo(xs,           H - HEADER_H)
+        p.lineTo(xs + 9 * mm,  H - HEADER_H)
+        p.lineTo(xs + 12 * mm, H)
+        p.lineTo(xs + 3 * mm,  H)
+        p.close()
+        cv.drawPath(p, fill=1, stroke=0)
+    cv.restoreState()
+
+    # Decorative circles top-right
+    cv.saveState()
+    cv.setFillColorRGB(*tuple(min(1.0, v + 0.18) for v in primary))
+    cv.circle(W - 7 * mm, H - 3 * mm, 11 * mm, fill=1, stroke=0)
+    cv.setFillColorRGB(*tuple(min(1.0, v + 0.26) for v in primary))
+    cv.circle(W - 1 * mm, H - 9 * mm,  7 * mm, fill=1, stroke=0)
+    cv.restoreState()
+
+    # Gold stripe below header
+    STRIPE_H = 2.2 * mm
+    cv.setFillColorRGB(*GOLD)
+    cv.rect(0, H - HEADER_H - STRIPE_H, W, STRIPE_H, fill=1, stroke=0)
+
+    # Footer band
+    FOOTER_H = 7 * mm
+    cv.setFillColorRGB(*dark)
+    cv.rect(0, 0, W, FOOTER_H, fill=1, stroke=0)
+
+    # Accent circle in footer-left
+    draw_circle(cv, 5 * mm, FOOTER_H / 2, 3.5 * mm, fill=accent)
+
+    # Info section boundaries
+    INFO_TOP    = H - HEADER_H - STRIPE_H
+    INFO_BOTTOM = FOOTER_H
+    INFO_H      = INFO_TOP - INFO_BOTTOM
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  HEADER: SCHOOL LOGO  +  SCHOOL NAME
+    # ══════════════════════════════════════════════════════════════════════════
+    LOGO_CX = 10 * mm
+    LOGO_CY = H - HEADER_H / 2
+    LOGO_R  = 8.5 * mm
+
+    # White halo behind logo
+    draw_circle(cv, LOGO_CX, LOGO_CY, LOGO_R + 1.4 * mm, fill=WHITE)
+
+    # Load logo from static/images/logo.jpeg
+    logo_drawn = False
+    from django.conf import settings as django_settings
+    from django.contrib.staticfiles import finders
+    logo_path = finders.find('images/logo.jpeg')
+
+    if logo_path and os.path.exists(logo_path):
+        try:
+            reader = ImageReader(logo_path)
+            cv.saveState()
+            clip = cv.beginPath()
+            clip.circle(LOGO_CX, LOGO_CY, LOGO_R)
+            cv.clipPath(clip, stroke=0)
+            side = LOGO_R * 2
+            cv.drawImage(reader,
+                         LOGO_CX - LOGO_R, LOGO_CY - LOGO_R,
+                         width=side, height=side,
+                         preserveAspectRatio=True, mask='auto')
+            cv.restoreState()
+            logo_drawn = True
+        except Exception:
+            pass
+
+    if not logo_drawn:
+        # Fallback: accent-colored circle with school initials
+        draw_circle(cv, LOGO_CX, LOGO_CY, LOGO_R, fill=accent)
+        initials = ''.join(word[0].upper() for word in school_name.split()[:3])
+        fs = 10 if len(initials) <= 2 else 7.5
+        cv.saveState()
+        cv.setFillColorRGB(*WHITE)
+        cv.setFont('Helvetica-Bold', fs)
+        cv.drawCentredString(LOGO_CX, LOGO_CY - fs * 0.36, initials)
+        cv.restoreState()
+
+    # School name + subtitle text (right of logo)
+    TEXT_X = LOGO_CX + LOGO_R + 3 * mm
+    cv.saveState()
+    cv.setFillColorRGB(*WHITE)
+    disp_name = school_name[:22] + ('...' if len(school_name) > 22 else '')
+    cv.setFont('Helvetica-Bold', 8.5)
+    cv.drawString(TEXT_X, H - 9 * mm, disp_name)
+
+    cv.setFillColorRGB(*tuple(min(1.0, v + 0.38) for v in primary))
+    cv.setFont('Helvetica', 5.5)
+    cv.drawString(TEXT_X, H - 13.5 * mm, "SCHOOL IDENTIFICATION CARD")
+
+    # Gold "STUDENT ID" badge pill
+    BX, BY, BW, BH = TEXT_X, H - 19 * mm, 20 * mm, 4.5 * mm
+    draw_rounded_rect(cv, BX, BY, BW, BH, radius=1 * mm, fill=GOLD)
+    cv.setFillColorRGB(*dark)
+    cv.setFont('Helvetica-Bold', 5.5)
+    cv.drawCentredString(BX + BW / 2, BY + 1.2 * mm, "STUDENT ID")
+    cv.restoreState()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  INFO ROWS  (full-width layout — no photo column)
+    # ══════════════════════════════════════════════════════════════════════════
+    LX      = 4 * mm
+    LABEL_W = 17 * mm
+    VAL_X   = LX + LABEL_W + 1.5 * mm
+
+    def draw_row(label, value, y, bold_val=False, val_color=None, tinted=False):
+        cv.saveState()
+        if tinted:
+            tint = tuple(min(1.0, v * 0.05 + 0.95) for v in primary)
+            cv.setFillColorRGB(*tint)
+            cv.rect(LX - 1 * mm, y - 1.6 * mm, W - LX - 2 * mm, 5 * mm, fill=1, stroke=0)
+
+        # Gold bullet dot
+        cv.setFillColorRGB(*GOLD)
+        cv.circle(LX - 0.8 * mm, y + 1.3 * mm, 0.75 * mm, fill=1, stroke=0)
+
+        # Label text
+        cv.setFillColorRGB(*MID_GREY)
+        cv.setFont('Helvetica', 5.5)
+        cv.drawString(LX + 0.8 * mm, y, label.upper())
+        cv.drawString(LX + LABEL_W, y, ':')
+
+        # Value text
+        vc = val_color if val_color else (0.08, 0.08, 0.08)
+        cv.setFillColorRGB(*vc)
+        cv.setFont('Helvetica-Bold' if bold_val else 'Helvetica', 6.5)
+        cv.drawString(VAL_X, y, str(value))
+        cv.restoreState()
+
+    BASE_Y  = INFO_BOTTOM + INFO_H - 3.5 * mm
+    ROW_GAP = INFO_H / 5.8
+
+    # Subtle horizontal dividers between rows
+    cv.saveState()
+    cv.setStrokeColorRGB(0.87, 0.87, 0.92)
+    cv.setLineWidth(0.35)
+    for i in range(1, 5):
+        ly = BASE_Y - i * ROW_GAP + 1.3 * mm
+        cv.line(LX, ly, W - 3 * mm, ly)
+    cv.restoreState()
+
+    name_disp = full_name[:28] + ('...' if len(full_name) > 28 else '')
+
+    draw_row("Full Name",  name_disp,      BASE_Y,               bold_val=True, val_color=primary, tinted=True)
+    draw_row("Reg No",     reg_number,     BASE_Y - ROW_GAP)
+    draw_row("Subject",    subject,        BASE_Y - 2 * ROW_GAP, val_color=dark,                   tinted=True)
+    draw_row("Adm. Year",  adm_year,       BASE_Y - 3 * ROW_GAP)
+    draw_row("Status",     student.status, BASE_Y - 4 * ROW_GAP, val_color=MID_GREY,               tinted=True)
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  FOOTER TEXT
+    # ══════════════════════════════════════════════════════════════════════════
+    cv.saveState()
+    cv.setFillColorRGB(*WHITE)
+    cv.setFont('Helvetica-Bold', 5.5)
+    cv.drawString(10 * mm, 2.2 * mm, f"VALID: {academic_year}")
+    cv.setFont('Helvetica', 5)
+    cv.setFillColorRGB(*tuple(min(1.0, v + 0.38) for v in dark))
+    cv.drawRightString(W - 3 * mm, 2.2 * mm, f"ID: {reg_number[-8:]}")
+    cv.restoreState()
+
+    # Outer card border
+    cv.saveState()
+    cv.setStrokeColorRGB(*primary)
+    cv.setLineWidth(1.0)
+    cv.rect(0.5, 0.5, W - 1, H - 1, fill=0, stroke=1)
+    cv.restoreState()
+
+    cv.save()
+
+    pdf = buf.getvalue()
+    buf.close()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    filename = f"ID_CARD_{reg_number}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def my_id_card(request):
+    """View student's own ID card in browser."""
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect('dashboard')
+
+    school_settings = SchoolSettings.objects.first()
+    return render(request, 'students/id_card_view.html', {
+        'student': student,
+        'school_settings': school_settings,
+    })
     
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -772,6 +962,7 @@ def student_portal(request):
         'school_settings': settings_obj,
         'results': results,
         'exams': exams,
+        'has_id_card': True,
         'attendance': attendance,
         'average_marks': round(average_marks, 2) if average_marks else 0,
         'has_results': results.exists(),
@@ -1344,3 +1535,173 @@ def student_detail(request, student_id):
     }
     
     return render(request, 'students/detail.html', context)
+
+
+
+
+# ── Ongeza hizi views ndani ya students/views.py ──────────────────────────
+# (Import hii pia juu: from .models import Student, Certificate)
+
+import mimetypes
+from django.http import FileResponse, Http404
+
+
+@login_required
+def my_certificates(request):
+    """Student anaona certificates zake zote."""
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect('dashboard')
+
+    certificates = student.certificates.all().order_by('-issued_date')
+    school_settings = SchoolSettings.objects.first()
+
+    return render(request, 'students/certificates.html', {
+        'student':        student,
+        'certificates':   certificates,
+        'school_settings': school_settings,
+    })
+
+
+import requests
+from django.http import HttpResponse, Http404, StreamingHttpResponse
+from django.conf import settings
+
+
+def _proxy_uploadcare_file(uuid, filename=None):
+    """
+    Pakia file kutoka Uploadcare REST API kwa kutumia secret key.
+    Rudisha (content, content_type, filename) au raise Http404.
+    """
+    uploadcare_config = getattr(settings, 'UPLOADCARE', {})
+    pub_key    = uploadcare_config.get('pub_key', '')
+    secret_key = uploadcare_config.get('secret', '')
+
+    if not uuid:
+        raise Http404("No file UUID.")
+
+    # Clean UUID — ondoa slashes/spaces
+    uuid = str(uuid).strip().strip('/')
+
+    # Uploadcare CDN URL — direct na UUID tu
+    cdn_url = f"https://ucarecdn.com/{uuid}/"
+    if filename:
+        cdn_url = f"https://ucarecdn.com/{uuid}/{filename}"
+
+    try:
+        response = requests.get(
+            cdn_url,
+            auth=(pub_key, secret_key),   # Basic auth na Uploadcare keys
+            timeout=30,
+            stream=True
+        )
+
+        if response.status_code == 200:
+            content_type = response.headers.get('Content-Type', 'application/octet-stream')
+            return response, content_type
+        
+        # Kama CDN imefail, jaribu REST API
+        api_url = f"https://api.uploadcare.com/files/{uuid}/"
+        api_response = requests.get(
+            api_url,
+            headers={
+                'Authorization': f'Uploadcare.Simple {pub_key}:{secret_key}',
+                'Accept': 'application/vnd.uploadcare-v0.7+json',
+            },
+            timeout=15
+        )
+
+        if api_response.status_code == 200:
+            file_info   = api_response.json()
+            direct_url  = file_info.get('original_file_url') or file_info.get('url')
+            if direct_url:
+                direct_resp = requests.get(direct_url, timeout=30, stream=True)
+                if direct_resp.status_code == 200:
+                    content_type = direct_resp.headers.get('Content-Type', 'application/octet-stream')
+                    return direct_resp, content_type
+
+    except requests.RequestException as e:
+        raise Http404(f"File fetch failed: {e}")
+
+    raise Http404("File not found on Uploadcare.")
+
+
+# ─────────────────────────────────────────────────────────────────
+#  1. students/views.py — badilisha download_certificate
+# ─────────────────────────────────────────────────────────────────
+
+@login_required
+def download_certificate(request, cert_id):
+    """Download certificate — proxy kupitia Uploadcare API."""
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        raise Http404
+
+    from .models import Certificate
+    certificate = get_object_or_404(Certificate, id=cert_id, student=student)
+
+    if not certificate.file:
+        messages.error(request, "Certificate file not available.")
+        return redirect('students:my_certificates')
+
+    try:
+        uuid     = str(certificate.file.uuid)
+        filename = f"Certificate_{certificate.title.replace(' ', '_')}.pdf"
+
+        response, content_type = _proxy_uploadcare_file(uuid, filename)
+
+        django_response = StreamingHttpResponse(
+            response.iter_content(chunk_size=8192),
+            content_type=content_type
+        )
+        django_response['Content-Disposition'] = f'inline; filename="{filename}"'
+        return django_response
+
+    except Http404:
+        messages.error(request, "Certificate file could not be retrieved.")
+        return redirect('students:my_certificates')
+    
+
+# ── Admin: upload certificate kwa student fulani (optional extra view) ──────
+@login_required
+@role_required(['ADMIN'])
+def admin_upload_certificate(request, student_id):
+    """Admin anaweza upload certificate kwa student fulani bila kwenda admin panel."""
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == 'POST':
+        title       = request.POST.get('title', '').strip()
+        cert_type   = request.POST.get('cert_type', 'COMPLETION')
+        issued_date = request.POST.get('issued_date')
+        description = request.POST.get('description', '')
+        cert_file   = request.FILES.get('file')
+
+        if not title or not cert_file:
+            messages.error(request, "Title and file are required.")
+        else:
+            from .models import Certificate
+            Certificate.objects.create(
+                student     = student,
+                title       = title,
+                cert_type   = cert_type,
+                issued_date = issued_date or timezone.now().date(),
+                description = description,
+                file        = cert_file,
+                uploaded_by = request.user,
+            )
+            messages.success(
+                request,
+                f"Certificate '{title}' uploaded for {student.full_name}."
+            )
+            return redirect('students:student_detail', student_id=student.id)
+
+    from .models import Certificate
+    context = {
+        'student':           student,
+        'cert_type_choices': Certificate.CERTIFICATE_TYPES,
+        'school_settings':   SchoolSettings.objects.first(),
+    }
+    return render(request, 'students/upload_certificate.html', context)

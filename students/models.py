@@ -1,97 +1,3 @@
-# from django.db import models
-# from django.conf import settings
-# from classes.models import ClassRoom
-# from django.utils import timezone
-# from django.core.validators import validate_email
-# from django.core.exceptions import ValidationError
-# import re
-
-# class Student(models.Model):
-#     STATUS_CHOICES = (
-#         ('ACTIVE', 'Active'),
-#         ('GRADUATED', 'Graduated'),
-#         ('TRANSFERRED', 'Transferred'),
-#     )
-    
-#     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-#     full_name = models.CharField(max_length=200)
-#     email = models.EmailField(unique=True, blank=True, null=True)
-#     photo = models.ImageField(upload_to='students/photos/', blank=True, null=True)
-#     classroom = models.ForeignKey(ClassRoom, on_delete=models.SET_NULL, null=True)
-#     admission_year = models.PositiveIntegerField(default=timezone.now().year)
-#     registration_number = models.CharField(max_length=50, unique=True)
-#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
-#     documents = models.FileField(upload_to='students/documents/', blank=True, null=True)
-#     date_created = models.DateTimeField(auto_now_add=True)
-#     date_updated = models.DateTimeField(auto_now=True)
-
-#     class Meta:
-#         verbose_name = "Student"
-#         verbose_name_plural = "Students"
-#         ordering = ['-date_created', 'full_name']
-#         indexes = [
-#             models.Index(fields=['email']),
-#             models.Index(fields=['registration_number']),
-#             models.Index(fields=['classroom', 'admission_year']),
-#         ]
-
-#     def __str__(self):
-#         return f"{self.full_name} ({self.registration_number})"
-    
-#     def clean(self):
-#         """Validate student data"""
-#         errors = {}
-        
-#         # Validate email
-#         if self.email:
-#             self.email = self.email.strip().lower()
-            
-#             # Check email format
-#             try:
-#                 validate_email(self.email)
-#             except ValidationError:
-#                 errors['email'] = 'Please enter a valid email address'
-            
-#             # Check if email exists (excluding current instance)
-#             qs = Student.objects.filter(email=self.email)
-#             if self.pk:
-#                 qs = qs.exclude(pk=self.pk)
-            
-#             if qs.exists():
-#                 errors['email'] = 'This email is already registered'
-        
-#         # Validate full name
-#         if not self.full_name or len(self.full_name.strip()) < 3:
-#             errors['full_name'] = 'Full name must be at least 3 characters long'
-        
-#         if errors:
-#             raise ValidationError(errors)
-    
-#     def save(self, *args, **kwargs):
-#         # Clean data before saving
-#         self.full_name = self.full_name.strip() if self.full_name else ""
-#         if self.email:
-#             self.email = self.email.strip().lower()
-        
-#         # Validate before saving
-#         self.clean()
-        
-#         # Save the instance
-#         super().save(*args, **kwargs)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 from django.db import models
 from django.conf import settings
@@ -182,3 +88,61 @@ class Student(models.Model):
         
         # Call the real save() method
         super().save(*args, **kwargs)
+
+
+
+
+#
+from pyuploadcare.dj.models import FileField as UploadcareFileField
+
+class Certificate(models.Model):
+    CERTIFICATE_TYPES = (
+        ('COMPLETION',    'Certificate of Completion'),
+        ('ACHIEVEMENT',   'Certificate of Achievement'),
+        ('EXCELLENCE',    'Certificate of Excellence'),
+        ('ATTENDANCE',    'Certificate of Attendance'),
+        ('PARTICIPATION', 'Certificate of Participation'),
+        ('OTHER',         'Other'),
+    )
+
+    student     = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='certificates'
+    )
+    title       = models.CharField(max_length=200)
+    cert_type   = models.CharField(
+        max_length=20,
+        choices=CERTIFICATE_TYPES,
+        default='COMPLETION',
+        verbose_name='Certificate Type'
+    )
+    # ── Uploadcare field (stores UUID / CDN URL, not local file) ──
+    file        = UploadcareFileField(
+        blank=False,
+        null=False,
+        verbose_name='Certificate File'
+    )
+    description = models.TextField(blank=True, null=True)
+    issued_date = models.DateField(default=timezone.now)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='uploaded_certificates'
+    )
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name        = "Certificate"
+        verbose_name_plural = "Certificates"
+        ordering            = ['-issued_date']
+
+    def __str__(self):
+        return f"{self.title} — {self.student.full_name}"
+
+    def get_file_url(self):
+        """Rudisha CDN URL ya Uploadcare"""
+        if self.file:
+            return str(self.file.cdn_url)
+        return None

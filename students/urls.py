@@ -14,6 +14,17 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
     path('<int:student_id>/', views.student_detail, name='student_detail'),
     # Add this line - PDF download will be handled by the same view with ?download=pdf paramete
+    path('download-id/<int:student_id>/', views.download_id_card_pdf, name='download_id_card'),
+    path('my-id-card/', views.my_id_card, name='my_id_card'),  # Kwa ajili ya mwanafunzi kuona ID yake
+    path('certificates/',
+     views.my_certificates,
+     name='my_certificates'),
+     path('certificates/<int:cert_id>/download/',
+     views.download_certificate,
+     name='download_certificate'),
+    path('<int:student_id>/upload-certificate/',
+     views.admin_upload_certificate,
+     name='upload_certificate'),
 
     path('download-pdf/', views.download_students_pdf, name='download_pdf'),
     path('detail/<int:student_id>/', views.student_detail, name='student_detail'),
