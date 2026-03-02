@@ -1335,6 +1335,43 @@
                     {% elif request.user.role == 'STUDENT' %}
                         <!-- My Fees -->
                         <div class="nav-item">
+                            <a href="{% url 'exams:my_assignments' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">My Assignments</span>
+                            </a>
+                        </div><div class="nav-item">
+                            <a href="{% url 'students:download_id_card' student.id %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">Dwnload ID card</span>
+                            </a>
+                        </div><div class="nav-item">
+                            <a href="{% url 'students:my_id_card' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">My ID card</span>
+                            </a>
+                        </div><div class="nav-item">
+                            <a href="{% url 'students:my_certificates' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">My Certificate</span>
+                            </a>
+                        </div><div class="nav-item">
+                            {% if has_results %}
+                            <a href="{% url 'students:download_results_pdf' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">Download Results PDF</span>
+                            </a>
+                             {% else %}
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">No Results uploaded</span>
+                            {% endif %}
+
+                        </div>
+                        <div class="nav-item">
+                            <a href="{% url 'fees:download_pdf' student.id %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
+                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <span class="nav-text">Download Fee Statement</span>
+                            </a>
+                        </div><div class="nav-item">
                             <a href="{% url 'fees:my_fees' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
                                 <i class="bi bi-cash-stack nav-icon"></i>
                                 <span class="nav-text">My Fees</span>
