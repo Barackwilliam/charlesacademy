@@ -20,7 +20,7 @@
 }
 #chat-fab:hover  { transform: scale(1.08); }
 #chat-fab:active { transform: scale(0.95); }
-#chat-fab svg    { width: 26px; height: 26px; fill: white; }
+#chat-fab svg { width: 26px; height: 26px; fill: white; }
 
 #chat-badge {
   position: absolute; top: -3px; right: -3px;
@@ -33,7 +33,7 @@
 }
 
 /* ══════════════════════════════════════
-   CHAT WINDOW  — desktop default
+   CHAT WINDOW — desktop
 ══════════════════════════════════════ */
 #chat-window {
   position: fixed;
@@ -51,24 +51,17 @@
 }
 
 /* ══════════════════════════════════════
-   MOBILE  — full screen chat
+   MOBILE — full screen
 ══════════════════════════════════════ */
 @media (max-width: 480px) {
   #chat-window {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     max-height: 100%;
-    height: 100%;          /* full screen */
     border-radius: 0;
-    bottom: 0; right: 0;
+    bottom: unset; right: unset;
   }
-
-  /* push window up when keyboard opens — handled via JS */
-  #chat-window.keyboard-open {
-    height: var(--visible-height, 100%);
-  }
-
   #chat-fab {
     bottom: 20px; right: 16px;
     width: 54px; height: 54px;
@@ -86,10 +79,9 @@
 #chat-header {
   background: linear-gradient(135deg, #4361ee, #7c3aed);
   padding: 12px 14px;
+  padding-top: max(12px, env(safe-area-inset-top));
   display: flex; align-items: center; gap: 10px;
   color: white; flex-shrink: 0;
-  /* safe area for notch */
-  padding-top: max(12px, env(safe-area-inset-top));
 }
 #chat-header img {
   width: 40px; height: 40px; border-radius: 50%;
@@ -130,12 +122,11 @@
 #chat-messages {
   flex: 1;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;  /* smooth iOS scroll */
+  -webkit-overflow-scrolling: touch;
   padding: 12px 12px 6px;
   display: flex; flex-direction: column; gap: 2px;
   background: #ece5dd;
-  /* prevent content from hiding behind input on mobile */
-  scroll-padding-bottom: 8px;
+  min-height: 0; /* important — allows flex shrink */
 }
 
 .date-sep { text-align: center; margin: 8px 0; }
@@ -146,7 +137,7 @@
 }
 
 /* ══════════════════════════════════════
-   BUBBLES — WhatsApp style
+   BUBBLES
 ══════════════════════════════════════ */
 .bubble-row { display: flex; margin-bottom: 1px; }
 .bubble-row.student { justify-content: flex-end; }
@@ -161,12 +152,10 @@
   word-break: break-word;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
-
 @media (max-width: 480px) {
   .bubble { max-width: 85%; font-size: 14.5px; }
 }
-
-.bubble-row.admin  .bubble {
+.bubble-row.admin .bubble {
   background: #fff; color: #111;
   border-radius: 0 10px 10px 10px; margin-left: 4px;
 }
@@ -194,21 +183,19 @@
   display: none; flex-direction: column; gap: 10px;
   flex-shrink: 0;
 }
-#guest-form-area p {
-  font-size: 13.5px; color: #475569; margin: 0;
-}
+#guest-form-area p { font-size: 13.5px; color: #475569; margin: 0; }
 #guest-form-area input {
   width: 100%; padding: 11px 14px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 12px; font-size: 15px; /* 15px prevents iOS zoom */
+  border-radius: 12px;
+  font-size: 16px; /* 16px = no iOS zoom */
   outline: none; box-sizing: border-box;
+  -webkit-appearance: none; appearance: none;
   transition: border-color .2s;
-  -webkit-appearance: none;
 }
 #guest-form-area input:focus { border-color: #4361ee; }
 #guest-start-btn {
-  width: 100%; padding: 12px;
-  border: none; border-radius: 12px;
+  width: 100%; padding: 12px; border: none; border-radius: 12px;
   background: linear-gradient(135deg,#4361ee,#7c3aed);
   color: white; font-weight: 600; cursor: pointer; font-size: 15px;
   -webkit-tap-highlight-color: transparent;
@@ -216,55 +203,63 @@
 #guest-start-btn:active { opacity: .85; }
 
 /* ══════════════════════════════════════
-   INPUT AREA  — THE CRITICAL PART
+   INPUT AREA  ← THE FIXED PART
 ══════════════════════════════════════ */
 #chat-input-area {
-  /* flex-shrink:0 ensures it never collapses */
+  /* never collapse */
   flex-shrink: 0;
+  /* always stays at bottom */
+  position: -webkit-sticky;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
+
   padding: 8px 10px;
-  /* safe area bottom for iPhone home bar */
   padding-bottom: max(8px, env(safe-area-inset-bottom));
   background: #f0f2f5;
   border-top: 1px solid #e2e8f0;
+
+  /* JS changes display:none → display:flex */
   display: none;
   gap: 8px;
   align-items: flex-end;
-
-  /* stick to bottom */
-  position: sticky;
-  bottom: 0;
 }
 
 #chat-input {
   flex: 1;
+  min-height: 42px;       /* always visible */
+  max-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+
   border: none;
   border-radius: 22px;
   padding: 10px 14px;
-  font-size: 15px; /* MUST be 15px+ on iOS to prevent zoom */
+  font-size: 16px; /* 16px = no iOS zoom */
   outline: none;
   resize: none;
   font-family: inherit;
   line-height: 1.4;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
-  max-height: 120px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 #chat-send-btn {
   width: 42px; height: 42px;
-  border-radius: 50%; border: none;
-  flex-shrink: 0;
-  background: linear-gradient(135deg,#4361ee,#7c3aed);
-  color: white;
+  border-radius: 50%; border: none; flex-shrink: 0;
+  background: linear-gradient(135deg,#4361ee,#7c3aed); color: white;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(67,97,238,.4);
   transition: transform .15s;
   -webkit-tap-highlight-color: transparent;
-  /* keep button aligned to bottom with textarea */
   align-self: flex-end;
   margin-bottom: 1px;
 }
@@ -276,15 +271,15 @@
 ══════════════════════════════════════ */
 #chat-closed-banner {
   display: none;
+  flex-shrink: 0;
   padding: 10px 14px;
   background: #fef2f2; color: #dc2626;
   font-size: 13px; text-align: center;
   border-top: 1px solid #fecaca;
-  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════
-   CONFIRM DELETE DIALOG
+   CONFIRM DELETE
 ══════════════════════════════════════ */
 #chat-confirm {
   position: absolute;
@@ -293,7 +288,7 @@
   background: #fff; border-radius: 16px;
   padding: 18px 22px;
   box-shadow: 0 10px 40px rgba(0,0,0,.2);
-  z-index: 10; width: min(300px, 90%);
+  z-index: 20; width: min(300px, 90%);
   text-align: center; display: none;
 }
 #chat-confirm p { font-size: 13.5px; color: #1e293b; margin: 0 0 14px; }
@@ -308,7 +303,7 @@
 #chat-confirm .btn-delete { background: #ef4444; color: white; }
 
 /* ══════════════════════════════════════
-   TOOLTIP  (desktop only)
+   TOOLTIP — desktop only
 ══════════════════════════════════════ */
 #chat-tooltip {
   position: fixed; bottom: 34px; right: 88px; z-index: 9997;
@@ -328,7 +323,7 @@
 <!-- Tooltip -->
 <div id="chat-tooltip">💬 Need help? Chat with Charles Academy</div>
 
-<!-- ── Floating Button ── -->
+<!-- Floating Button -->
 <button id="chat-fab" onclick="chatToggle()" aria-label="Open chat">
   <svg viewBox="0 0 24 24">
     <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
@@ -336,7 +331,7 @@
   <span id="chat-badge"></span>
 </button>
 
-<!-- ── Chat Window ── -->
+<!-- Chat Window -->
 <div id="chat-window" role="dialog" aria-label="Chat support">
 
   <!-- Header -->
@@ -353,8 +348,8 @@
       </div>
     </div>
     <div class="header-actions">
-      <button class="header-btn" onclick="confirmDelete()" title="Delete chat" aria-label="Delete chat">🗑️</button>
-      <button class="header-btn" onclick="chatToggle()"    title="Close"       aria-label="Close chat">✕</button>
+      <button class="header-btn" onclick="confirmDelete()" title="Delete chat">🗑️</button>
+      <button class="header-btn" onclick="chatToggle()"    title="Close">✕</button>
     </div>
   </div>
 
@@ -390,7 +385,7 @@
       oninput="chatResize(this)"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}">
     </textarea>
-    <button id="chat-send-btn" onclick="chatSend()" aria-label="Send message">
+    <button id="chat-send-btn" onclick="chatSend()" aria-label="Send">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
       </svg>
@@ -413,62 +408,50 @@
 (function () {
   'use strict';
 
-  /* ── URLs ─────────────────────────────────────────── */
   const URLS = {
-    start  : "{% url 'chat:start_chat' %}",
-    send   : "{% url 'chat:send_message' %}",
-    poll   : "{% url 'chat:poll_messages' '00000000-0000-0000-0000-000000000000' %}"
-               .replace('00000000-0000-0000-0000-000000000000/', ''),
-    del    : "{% url 'chat:delete_session' %}",
+    start : "{% url 'chat:start_chat' %}",
+    send  : "{% url 'chat:send_message' %}",
+    poll  : "{% url 'chat:poll_messages' '00000000-0000-0000-0000-000000000000' %}"
+              .replace('00000000-0000-0000-0000-000000000000/', ''),
+    del   : "{% url 'chat:delete_session' %}",
   };
   const IS_AUTH = {{ request.user.is_authenticated|yesno:"true,false" }};
   const CSRF    = "{{ csrf_token }}";
 
-  /* ── State ────────────────────────────────────────── */
-  let sessionId   = localStorage.getItem('ca_chat_sid') || null;
-  let lastId      = 0;
-  let pollTimer   = null;
-  let isOpen      = false;
-  let unread      = 0;
-  let isClosed    = false;
-  let lastSender  = null;
-  let seenIds     = new Set();
+  let sessionId  = localStorage.getItem('ca_chat_sid') || null;
+  let lastId     = 0;
+  let pollTimer  = null;
+  let isOpen     = false;
+  let unread     = 0;
+  let isClosed   = false;
+  let lastSender = null;
+  let seenIds    = new Set();
 
-  /* ── DOM shortcuts ────────────────────────────────── */
   const $  = id => document.getElementById(id);
-  const $m = () => $('chat-messages');
+  const $m = ()  => $('chat-messages');
 
-  /* ── Escape HTML ──────────────────────────────────── */
   function esc(s) {
     return String(s)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
       .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
-  /* ── Textarea auto-resize ─────────────────────────── */
+  /* ── Textarea resize ───────────────────────────────── */
   window.chatResize = function(ta) {
     ta.style.height = 'auto';
     ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
   };
 
-  /* ── Mobile: handle virtual keyboard ─────────────── */
-  // When keyboard opens on mobile, the viewport shrinks.
-  // We listen to visualViewport to keep input visible.
+  /* ── Mobile: shrink window when keyboard opens ─────── */
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', () => {
-      const win = $('chat-window');
-      if (!win || !isOpen) return;
-      const vh = window.visualViewport.height;
-      if (window.innerWidth <= 480) {
-        // Full-screen mode on mobile: shrink window to visible area
-        win.style.height = vh + 'px';
-        // Scroll messages to bottom after keyboard opens
-        setTimeout(() => { $m().scrollTop = $m().scrollHeight; }, 80);
-      }
+      if (!isOpen || window.innerWidth > 480) return;
+      $('chat-window').style.height = window.visualViewport.height + 'px';
+      setTimeout(() => { $m().scrollTop = $m().scrollHeight; }, 60);
     });
   }
 
-  /* ── Badge ────────────────────────────────────────── */
+  /* ── Badge ─────────────────────────────────────────── */
   function setBadge(n) {
     unread = n;
     const b = $('chat-badge');
@@ -482,7 +465,7 @@
     }
   }
 
-  /* ── Render bubble ────────────────────────────────── */
+  /* ── Render bubble ─────────────────────────────────── */
   function addBubble(msg) {
     const isCont = (lastSender === msg.sender);
     const row    = document.createElement('div');
@@ -503,14 +486,14 @@
 
   function addSystem(text) {
     const d = document.createElement('div');
-    d.className   = 'date-sep';
-    d.innerHTML   = `<span>${esc(text)}</span>`;
+    d.className = 'date-sep';
+    d.innerHTML = `<span>${esc(text)}</span>`;
     $m().appendChild(d);
     $m().scrollTop = $m().scrollHeight;
     lastSender = null;
   }
 
-  /* ── Show / hide panels ───────────────────────────── */
+  /* ── Show/hide panels ──────────────────────────────── */
   function showGuest() {
     $('guest-form-area').style.display  = 'flex';
     $('chat-messages').style.display    = 'none';
@@ -520,8 +503,10 @@
   function showChat() {
     $('guest-form-area').style.display  = 'none';
     $('chat-messages').style.display    = 'flex';
-    if (!isClosed) $('chat-input-area').style.display = 'flex';
-    setTimeout(() => { $m().scrollTop = $m().scrollHeight; }, 50);
+    if (!isClosed) {
+      $('chat-input-area').style.display = 'flex'; /* must be flex not block */
+    }
+    setTimeout(() => { $m().scrollTop = $m().scrollHeight; }, 60);
   }
 
   function markClosed() {
@@ -531,23 +516,20 @@
     stopPoll();
   }
 
-  /* ── Toggle window ────────────────────────────────── */
+  /* ── Toggle ────────────────────────────────────────── */
   window.chatToggle = function () {
     isOpen = !isOpen;
     const win = $('chat-window');
     win.style.display = isOpen ? 'flex' : 'none';
     $('chat-confirm').style.display = 'none';
 
-    // On mobile reset height when opening
-    if (isOpen && window.innerWidth <= 480) {
-      win.style.height = (window.visualViewport
-        ? window.visualViewport.height
-        : window.innerHeight) + 'px';
-    } else {
-      win.style.height = '';
-    }
-
     if (isOpen) {
+      // mobile: set initial height
+      if (window.innerWidth <= 480) {
+        win.style.height = (window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight) + 'px';
+      }
       setBadge(0);
       if (!sessionId) {
         IS_AUTH ? initAuth() : showGuest();
@@ -558,19 +540,17 @@
       }
     } else {
       stopPoll();
-      // Blur input so keyboard closes on mobile
       const inp = $('chat-input');
-      if (inp) inp.blur();
+      if (inp) inp.blur(); // close keyboard on mobile
     }
   };
 
-  /* ── Guest start ──────────────────────────────────── */
+  /* ── Guest start ───────────────────────────────────── */
   window.guestStart = async function () {
     const name  = $('guest-name').value.trim();
     const email = $('guest-email').value.trim();
     if (!name) { $('guest-name').style.borderColor = '#ef4444'; return; }
     $('guest-name').style.borderColor = '#e2e8f0';
-
     const data = await post(URLS.start, { name, email });
     if (!data) return;
     sessionId = data.session_id;
@@ -578,7 +558,7 @@
     showChat(); loadAll(); startPoll();
   };
 
-  /* ── Auth init ────────────────────────────────────── */
+  /* ── Auth init ─────────────────────────────────────── */
   async function initAuth() {
     const data = await post(URLS.start, {});
     if (!data) return;
@@ -587,14 +567,14 @@
     showChat(); loadAll(); startPoll();
   }
 
-  /* ── Load all messages ────────────────────────────── */
+  /* ── Load all ──────────────────────────────────────── */
   async function loadAll() {
     lastId = 0; lastSender = null;
     $m().innerHTML = '';
     await pollOnce();
   }
 
-  /* ── Send message ─────────────────────────────────── */
+  /* ── Send ──────────────────────────────────────────── */
   window.chatSend = async function () {
     const inp  = $('chat-input');
     const text = inp.value.trim();
@@ -609,7 +589,7 @@
     }
   };
 
-  /* ── Polling ──────────────────────────────────────── */
+  /* ── Polling ───────────────────────────────────────── */
   function startPoll() {
     if (pollTimer) return;
     pollTimer = setInterval(pollOnce, 3000);
@@ -633,9 +613,7 @@
       if (msg.id > lastId) lastId = msg.id;
       if (seenIds.has(msg.id)) return;
       seenIds.add(msg.id);
-
       addBubble(msg);
-
       if (msg.sender === 'admin' && !isOpen) {
         setBadge(unread + 1);
         playBeep();
@@ -648,26 +626,25 @@
     }
   }
 
-  /* ── Delete ───────────────────────────────────────── */
+  /* ── Delete ────────────────────────────────────────── */
   window.confirmDelete = function () { $('chat-confirm').style.display = 'block'; };
   window.cancelDelete  = function () { $('chat-confirm').style.display = 'none'; };
 
   window.doDelete = async function () {
     if (sessionId) await post(URLS.del, { session_id: sessionId });
-    sessionId = null;
-    lastId    = 0; lastSender = null;
-    isClosed  = false; unread = 0;
+    sessionId = null; lastId = 0; lastSender = null;
+    isClosed = false; unread = 0;
     seenIds.clear();
     localStorage.removeItem('ca_chat_sid');
     stopPoll();
     $('chat-confirm').style.display       = 'none';
     $('chat-closed-banner').style.display = 'none';
-    $m().innerHTML                        = '';
+    $m().innerHTML = '';
     setBadge(0);
     IS_AUTH ? initAuth() : showGuest();
   };
 
-  /* ── HTTP helper ──────────────────────────────────── */
+  /* ── HTTP ──────────────────────────────────────────── */
   async function post(url, body) {
     try {
       const r = await fetch(url, {
@@ -679,7 +656,7 @@
     } catch (e) { return null; }
   }
 
-  /* ── Sound ────────────────────────────────────────── */
+  /* ── Sound ─────────────────────────────────────────── */
   function playBeep() {
     try {
       const ctx  = new (window.AudioContext || window.webkitAudioContext)();
@@ -693,7 +670,7 @@
     } catch (e) {}
   }
 
-  /* ── Page load: silent unread check ──────────────── */
+  /* ── Page load: silent unread check ───────────────── */
   if (sessionId) {
     fetch(`${URLS.poll}${sessionId}/?after=0`)
       .then(r => r.ok ? r.json() : null)
