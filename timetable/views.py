@@ -133,6 +133,15 @@ def admin_save_entry(request):
             entry.save()
             action = 'updated'
         else:
+            # Check for duplicate before creating
+            existing = TimetableEntry.objects.filter(
+                classroom=classroom, day=day, start_time=start_time
+            ).first()
+            if existing:
+                return JsonResponse({
+                    'error': f'Slot {start_time} on {day} already has "{existing.subject}" assigned. Edit it instead.'
+                }, status=400)
+
             entry = TimetableEntry.objects.create(
                 classroom=classroom, subject=subject, teacher=teacher,
                 day=day, start_time=start_time, end_time=end_time, room=room
@@ -167,12 +176,17 @@ def admin_delete_entry(request):
 def get_entry(request, entry_id):
     """Return entry data as JSON for the edit modal."""
     entry = get_object_or_404(TimetableEntry, pk=entry_id)
+
+    # Handle both time object and string
+    start = entry.start_time
+    end   = entry.end_time
+
     return JsonResponse({
         'id':         entry.id,
         'subject_id': entry.subject_id,
         'teacher_id': entry.teacher_id or '',
         'day':        entry.day,
-        'start_time': entry.start_time.strftime('%H:%M'),
-        'end_time':   entry.end_time.strftime('%H:%M'),
+        'start_time': start.strftime('%H:%M') if hasattr(start, 'strftime') else str(start)[:5],
+        'end_time':   end.strftime('%H:%M') if hasattr(end, 'strftime') else str(end)[:5],
         'room':       entry.room,
     })

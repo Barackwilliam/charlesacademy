@@ -53,3 +53,21 @@ class TimetableEntry(models.Model):
     def colour(self):
         """Deterministic colour based on subject id."""
         return SUBJECT_COLOURS[self.subject_id % len(SUBJECT_COLOURS)]
+        
+    @property
+    def time_label(self):
+        # Handle both time object and string
+        start = self.start_time
+        end   = self.end_time
+        
+        if hasattr(start, 'strftime'):
+            s = start.strftime('%H:%M')
+        else:
+            s = str(start)[:5]
+            
+        if hasattr(end, 'strftime'):
+            e = end.strftime('%H:%M')
+        else:
+            e = str(end)[:5]
+            
+        return f"{s} – {e}"
