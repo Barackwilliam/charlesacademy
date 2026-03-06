@@ -1,276 +1,375 @@
 {% load static %}
 
 <style>
-/* ── Floating Button ── */
+/* ══════════════════════════════════════
+   FLOATING BUTTON
+══════════════════════════════════════ */
 #chat-fab {
-  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
-  width: 60px; height: 60px; border-radius: 50%;
-  background: linear-gradient(135deg,#4361ee,#7c3aed);
-  border: none; box-shadow: 0 6px 24px rgba(67,97,238,.45);
+  position: fixed;
+  bottom: 24px; right: 20px;
+  z-index: 9999;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4361ee, #7c3aed);
+  border: none;
+  box-shadow: 0 6px 24px rgba(67,97,238,.45);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: transform .25s, box-shadow .25s;
+  cursor: pointer;
+  transition: transform .25s, box-shadow .25s;
+  -webkit-tap-highlight-color: transparent;
 }
-#chat-fab:hover { transform: scale(1.1); }
-#chat-fab svg { width:28px; height:28px; fill:white; }
+#chat-fab:hover  { transform: scale(1.08); }
+#chat-fab:active { transform: scale(0.95); }
+#chat-fab svg    { width: 26px; height: 26px; fill: white; }
+
 #chat-badge {
-  position: absolute; top:-4px; right:-4px;
-  background:#ef4444; color:white; font-size:11px; font-weight:700;
-  width:20px; height:20px; border-radius:50%;
-  display:none; align-items:center; justify-content:center;
-  border:2px solid white;
+  position: absolute; top: -3px; right: -3px;
+  background: #ef4444; color: white;
+  font-size: 11px; font-weight: 700;
+  min-width: 20px; height: 20px;
+  border-radius: 10px; padding: 0 4px;
+  display: none; align-items: center; justify-content: center;
+  border: 2px solid white;
 }
 
-/* ── Chat Window ── */
+/* ══════════════════════════════════════
+   CHAT WINDOW  — desktop default
+══════════════════════════════════════ */
 #chat-window {
-  position: fixed; bottom: 100px; right: 28px; z-index: 9998;
+  position: fixed;
+  bottom: 94px; right: 20px;
+  z-index: 9998;
   width: 370px;
-  background: #fff; border-radius: 20px;
+  max-height: 580px;
+  background: #fff;
+  border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,.18);
-  display: none; flex-direction: column; overflow: hidden;
-  animation: slideUp .3s ease;
-}
-@keyframes slideUp {
-  from { opacity:0; transform:translateY(20px); }
-  to   { opacity:1; transform:translateY(0); }
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp .28s ease;
 }
 
-/* ── Header ── */
+/* ══════════════════════════════════════
+   MOBILE  — full screen chat
+══════════════════════════════════════ */
+@media (max-width: 480px) {
+  #chat-window {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%;
+    max-height: 100%;
+    height: 100%;          /* full screen */
+    border-radius: 0;
+    bottom: 0; right: 0;
+  }
+
+  /* push window up when keyboard opens — handled via JS */
+  #chat-window.keyboard-open {
+    height: var(--visible-height, 100%);
+  }
+
+  #chat-fab {
+    bottom: 20px; right: 16px;
+    width: 54px; height: 54px;
+  }
+}
+
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(18px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
 #chat-header {
-  background: linear-gradient(135deg,#4361ee,#7c3aed);
+  background: linear-gradient(135deg, #4361ee, #7c3aed);
   padding: 12px 14px;
-  display: flex; align-items: center; gap: 10px; color: white;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  color: white; flex-shrink: 0;
+  /* safe area for notch */
+  padding-top: max(12px, env(safe-area-inset-top));
 }
 #chat-header img {
-  width:40px; height:40px; border-radius:50%;
-  border:2px solid rgba(255,255,255,.4); object-fit:cover; flex-shrink:0;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.4);
+  object-fit: cover; flex-shrink: 0;
 }
 #chat-logo-initials {
-  width:40px; height:40px; border-radius:50%;
-  border:2px solid rgba(255,255,255,.4);
-  background:rgba(255,255,255,.2);
-  display:none; align-items:center; justify-content:center;
-  font-weight:700; font-size:15px; flex-shrink:0;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.4);
+  background: rgba(255,255,255,.2);
+  display: none; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; flex-shrink: 0;
 }
-.chat-header-info { flex:1; min-width:0; }
-.chat-header-info .name { font-weight:700; font-size:15px; }
-.chat-header-info .status {
-  font-size:11px; opacity:.85;
-  display:flex; align-items:center; gap:5px; margin-top:1px;
+.chat-header-info { flex: 1; min-width: 0; }
+.chat-header-info .hdr-name  { font-weight: 700; font-size: 15px; line-height: 1.2; }
+.chat-header-info .hdr-status {
+  font-size: 11px; opacity: .85;
+  display: flex; align-items: center; gap: 5px; margin-top: 2px;
 }
 #online-dot {
-  width:8px; height:8px; border-radius:50%;
-  background:#22c55e; border:1.5px solid white; display:inline-block;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e; border: 1.5px solid white; display: inline-block;
 }
-.header-actions { display:flex; gap:6px; align-items:center; }
+.header-actions { display: flex; gap: 6px; align-items: center; }
 .header-btn {
-  background:rgba(255,255,255,.2); border:none; color:white;
-  width:30px; height:30px; border-radius:50%; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:14px; transition: background .2s;
+  background: rgba(255,255,255,.2); border: none; color: white;
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; transition: background .2s;
+  -webkit-tap-highlight-color: transparent;
 }
-.header-btn:hover { background:rgba(255,255,255,.35); }
-.header-btn.danger:hover { background:rgba(239,68,68,.6); }
+.header-btn:hover  { background: rgba(255,255,255,.35); }
+.header-btn:active { background: rgba(255,255,255,.5); }
 
-/* ── Messages Area ── */
+/* ══════════════════════════════════════
+   MESSAGES AREA
+══════════════════════════════════════ */
 #chat-messages {
-  overflow-y: auto; padding: 12px 14px;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;  /* smooth iOS scroll */
+  padding: 12px 12px 6px;
   display: flex; flex-direction: column; gap: 2px;
-  background: #ece5dd; /* WhatsApp-style bg */
-  min-height: 240px; max-height: 340px;
+  background: #ece5dd;
+  /* prevent content from hiding behind input on mobile */
+  scroll-padding-bottom: 8px;
 }
 
-/* Date separator */
-.date-sep {
-  text-align:center; margin: 8px 0;
-}
+.date-sep { text-align: center; margin: 8px 0; }
 .date-sep span {
-  background:rgba(255,255,255,.85); color:#667781;
-  font-size:11px; padding:3px 10px; border-radius:8px;
-  box-shadow:0 1px 2px rgba(0,0,0,.1);
+  background: rgba(255,255,255,.85); color: #667781;
+  font-size: 11px; padding: 3px 10px; border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
 
-/* ── Bubbles — WhatsApp style ── */
-.bubble-row {
-  display:flex; margin-bottom:1px;
-}
+/* ══════════════════════════════════════
+   BUBBLES — WhatsApp style
+══════════════════════════════════════ */
+.bubble-row { display: flex; margin-bottom: 1px; }
 .bubble-row.student { justify-content: flex-end; }
 .bubble-row.admin   { justify-content: flex-start; }
-
-/* Group consecutive messages — reduce gap */
 .bubble-row.student + .bubble-row.student,
-.bubble-row.admin   + .bubble-row.admin {
-  margin-top: -4px;
-}
+.bubble-row.admin   + .bubble-row.admin { margin-top: -4px; }
 
 .bubble {
-  max-width: 75%; padding: 7px 10px 4px 10px;
-  font-size: 13.5px; line-height: 1.45;
-  word-break: break-word; position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,.12);
+  max-width: 78%;
+  padding: 7px 10px 4px 10px;
+  font-size: 14px; line-height: 1.45;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
 
-/* Admin bubble — left, white */
-.bubble-row.admin .bubble {
-  background: #fff;
-  color: #111;
-  border-radius: 0px 10px 10px 10px;
-  margin-left: 4px;
-}
-/* First in a group gets the tail */
-.bubble-row.admin:not(.cont) .bubble {
-  border-radius: 0px 10px 10px 10px;
-}
-.bubble-row.admin.cont .bubble {
-  border-radius: 10px 10px 10px 10px;
+@media (max-width: 480px) {
+  .bubble { max-width: 85%; font-size: 14.5px; }
 }
 
-/* Student bubble — right, green */
+.bubble-row.admin  .bubble {
+  background: #fff; color: #111;
+  border-radius: 0 10px 10px 10px; margin-left: 4px;
+}
+.bubble-row.admin.cont .bubble  { border-radius: 10px; }
 .bubble-row.student .bubble {
-  background: #dcf8c6;
-  color: #111;
-  border-radius: 10px 0px 10px 10px;
-  margin-right: 4px;
+  background: #dcf8c6; color: #111;
+  border-radius: 10px 0 10px 10px; margin-right: 4px;
 }
-.bubble-row.student.cont .bubble {
-  border-radius: 10px 10px 10px 10px;
-}
+.bubble-row.student.cont .bubble { border-radius: 10px; }
 
-/* Message meta (time + ticks) */
 .bubble-meta {
   display: flex; align-items: center; justify-content: flex-end;
-  gap: 3px; margin-top: 2px;
+  gap: 3px; margin-top: 3px;
 }
-.bubble-time {
-  font-size: 10px; color: #667781; white-space: nowrap;
-}
+.bubble-time { font-size: 10.5px; color: #667781; white-space: nowrap; }
 .bubble-row.student .bubble-time { color: #5a9a52; }
-.tick {
-  font-size: 12px; color: #53bdeb; line-height:1;
-}
+.tick { font-size: 12px; color: #53bdeb; }
 
-/* ── Guest Form ── */
+/* ══════════════════════════════════════
+   GUEST FORM
+══════════════════════════════════════ */
 #guest-form-area {
-  padding: 16px; background: #f8fafc;
-  display: none; flex-direction: column; gap: 8px;
-}
-#guest-form-area p { font-size:13px; color:#475569; margin:0 0 4px 0; }
-#guest-form-area input {
-  width:100%; padding:9px 14px; border:1px solid #e2e8f0;
-  border-radius:10px; font-size:13px; outline:none; box-sizing:border-box;
-  transition: border-color .2s;
-}
-#guest-form-area input:focus { border-color:#4361ee; }
-#guest-start-btn {
-  width:100%; padding:10px; border:none; border-radius:10px;
-  background:linear-gradient(135deg,#4361ee,#7c3aed); color:white;
-  font-weight:600; cursor:pointer; font-size:14px; margin-top:4px;
-}
-#guest-start-btn:hover { opacity:.9; }
-
-/* ── Input Area ── */
-#chat-input-area {
-  padding: 8px 10px; border-top:1px solid #e2e8f0;
-  display: none; gap: 8px; background: #f0f2f5; align-items: flex-end;
+  padding: 18px 16px;
+  background: #f8fafc;
+  display: none; flex-direction: column; gap: 10px;
   flex-shrink: 0;
 }
+#guest-form-area p {
+  font-size: 13.5px; color: #475569; margin: 0;
+}
+#guest-form-area input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px; font-size: 15px; /* 15px prevents iOS zoom */
+  outline: none; box-sizing: border-box;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+#guest-form-area input:focus { border-color: #4361ee; }
+#guest-start-btn {
+  width: 100%; padding: 12px;
+  border: none; border-radius: 12px;
+  background: linear-gradient(135deg,#4361ee,#7c3aed);
+  color: white; font-weight: 600; cursor: pointer; font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+#guest-start-btn:active { opacity: .85; }
+
+/* ══════════════════════════════════════
+   INPUT AREA  — THE CRITICAL PART
+══════════════════════════════════════ */
+#chat-input-area {
+  /* flex-shrink:0 ensures it never collapses */
+  flex-shrink: 0;
+  padding: 8px 10px;
+  /* safe area bottom for iPhone home bar */
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  background: #f0f2f5;
+  border-top: 1px solid #e2e8f0;
+  display: none;
+  gap: 8px;
+  align-items: flex-end;
+
+  /* stick to bottom */
+  position: sticky;
+  bottom: 0;
+}
+
 #chat-input {
-  flex:1; border:none; border-radius:20px;
-  padding:9px 14px; font-size:13.5px; outline:none; resize:none;
-  font-family:inherit; max-height:100px; line-height:1.4;
-  background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08);
+  flex: 1;
+  border: none;
+  border-radius: 22px;
+  padding: 10px 14px;
+  font-size: 15px; /* MUST be 15px+ on iOS to prevent zoom */
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.4;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  max-height: 120px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-appearance: none;
 }
+
 #chat-send-btn {
-  width:40px; height:40px; border-radius:50%; border:none; flex-shrink:0;
-  background:linear-gradient(135deg,#4361ee,#7c3aed); color:white;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:transform .15s, background .2s;
-  box-shadow:0 2px 8px rgba(67,97,238,.4);
+  width: 42px; height: 42px;
+  border-radius: 50%; border: none;
+  flex-shrink: 0;
+  background: linear-gradient(135deg,#4361ee,#7c3aed);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(67,97,238,.4);
+  transition: transform .15s;
+  -webkit-tap-highlight-color: transparent;
+  /* keep button aligned to bottom with textarea */
+  align-self: flex-end;
+  margin-bottom: 1px;
 }
-#chat-send-btn:hover { transform:scale(1.08); }
+#chat-send-btn:hover  { transform: scale(1.08); }
+#chat-send-btn:active { transform: scale(0.93); }
 
-/* ── Closed Banner ── */
+/* ══════════════════════════════════════
+   CLOSED BANNER
+══════════════════════════════════════ */
 #chat-closed-banner {
-  display:none; padding:10px 14px; background:#fef2f2;
-  color:#dc2626; font-size:12px; text-align:center;
-  border-top:1px solid #fecaca; flex-shrink:0;
+  display: none;
+  padding: 10px 14px;
+  background: #fef2f2; color: #dc2626;
+  font-size: 13px; text-align: center;
+  border-top: 1px solid #fecaca;
+  flex-shrink: 0;
 }
 
-/* ── Tooltip ── */
+/* ══════════════════════════════════════
+   CONFIRM DELETE DIALOG
+══════════════════════════════════════ */
+#chat-confirm {
+  position: absolute;
+  bottom: 70px; left: 50%;
+  transform: translateX(-50%);
+  background: #fff; border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+  z-index: 10; width: min(300px, 90%);
+  text-align: center; display: none;
+}
+#chat-confirm p { font-size: 13.5px; color: #1e293b; margin: 0 0 14px; }
+#chat-confirm .btn-row { display: flex; gap: 10px; justify-content: center; }
+#chat-confirm button {
+  padding: 9px 22px; border-radius: 10px;
+  border: none; cursor: pointer;
+  font-size: 13.5px; font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+}
+#chat-confirm .btn-cancel { background: #f1f5f9; color: #475569; }
+#chat-confirm .btn-delete { background: #ef4444; color: white; }
+
+/* ══════════════════════════════════════
+   TOOLTIP  (desktop only)
+══════════════════════════════════════ */
 #chat-tooltip {
-  position:fixed; bottom:36px; right:100px; z-index:9997;
-  background:#1e293b; color:white; padding:7px 12px;
-  border-radius:8px; font-size:12px; white-space:nowrap;
-  pointer-events:none; opacity:0; transition:opacity .3s;
+  position: fixed; bottom: 34px; right: 88px; z-index: 9997;
+  background: #1e293b; color: white; padding: 7px 12px;
+  border-radius: 8px; font-size: 12px; white-space: nowrap;
+  pointer-events: none; opacity: 0; transition: opacity .3s;
 }
 #chat-tooltip::after {
-  content:''; position:absolute; right:-6px; top:50%;
-  transform:translateY(-50%);
-  border:6px solid transparent; border-left-color:#1e293b; border-right:0;
+  content: ''; position: absolute; right: -6px; top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent; border-left-color: #1e293b; border-right: 0;
 }
-#chat-fab:hover + #chat-tooltip { opacity:1; }
-
-/* ── Confirm dialog ── */
-#chat-confirm {
-  position:absolute; bottom:60px; left:50%; transform:translateX(-50%);
-  background:#fff; border-radius:14px; padding:16px 20px;
-  box-shadow:0 8px 30px rgba(0,0,0,.18); z-index:10; width:280px;
-  text-align:center; display:none;
-}
-#chat-confirm p { font-size:13px; color:#1e293b; margin:0 0 12px; }
-#chat-confirm .btn-row { display:flex; gap:8px; justify-content:center; }
-#chat-confirm button { padding:7px 20px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:600; }
-#chat-confirm .btn-cancel { background:#f1f5f9; color:#475569; }
-#chat-confirm .btn-delete { background:#ef4444; color:white; }
+#chat-fab:hover + #chat-tooltip { opacity: 1; }
+@media (max-width: 480px) { #chat-tooltip { display: none; } }
 </style>
 
 <!-- Tooltip -->
 <div id="chat-tooltip">💬 Need help? Chat with Charles Academy</div>
 
-<!-- Floating Button -->
-<button id="chat-fab" onclick="chatToggle()">
+<!-- ── Floating Button ── -->
+<button id="chat-fab" onclick="chatToggle()" aria-label="Open chat">
   <svg viewBox="0 0 24 24">
     <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
   </svg>
   <span id="chat-badge"></span>
 </button>
 
-<!-- Chat Window -->
-<div id="chat-window">
+<!-- ── Chat Window ── -->
+<div id="chat-window" role="dialog" aria-label="Chat support">
 
   <!-- Header -->
   <div id="chat-header">
     <img src="{% static 'images/logo.jpeg' %}"
-         onerror="this.style.display='none'; document.getElementById('chat-logo-initials').style.display='flex';"
+         onerror="this.style.display='none';document.getElementById('chat-logo-initials').style.display='flex';"
          alt="logo">
     <div id="chat-logo-initials">CA</div>
     <div class="chat-header-info">
-      <div class="name">Support Team</div>
-      <div class="status">
+      <div class="hdr-name">Support Team</div>
+      <div class="hdr-status">
         <span id="online-dot"></span>
         <span id="status-text">Online</span>
       </div>
     </div>
     <div class="header-actions">
-      <!-- Delete chat button -->
-      <button class="header-btn danger" onclick="confirmDelete()" title="Delete chat">
-        🗑️
-      </button>
-      <!-- Close button -->
-      <button class="header-btn" onclick="chatToggle()" title="Close">✕</button>
+      <button class="header-btn" onclick="confirmDelete()" title="Delete chat" aria-label="Delete chat">🗑️</button>
+      <button class="header-btn" onclick="chatToggle()"    title="Close"       aria-label="Close chat">✕</button>
     </div>
   </div>
 
   <!-- Guest Form -->
   <div id="guest-form-area">
     <p>👋 Hi! Please tell us your name to start chatting.</p>
-    <input type="text"  id="guest-name"  placeholder="Your name *">
-    <input type="email" id="guest-email" placeholder="Email (optional)">
+    <input type="text"  id="guest-name"  placeholder="Your name *"
+           autocomplete="name" inputmode="text">
+    <input type="email" id="guest-email" placeholder="Email (optional)"
+           autocomplete="email" inputmode="email">
     <button id="guest-start-btn" onclick="guestStart()">Start Chat →</button>
   </div>
 
   <!-- Messages -->
-  <div id="chat-messages"></div>
+  <div id="chat-messages" role="log" aria-live="polite"></div>
 
   <!-- Closed Banner -->
   <div id="chat-closed-banner">
@@ -279,21 +378,29 @@
 
   <!-- Input -->
   <div id="chat-input-area">
-    <textarea id="chat-input" rows="1"
+    <textarea
+      id="chat-input"
+      rows="1"
       placeholder="Type a message…"
-      oninput="autoResize(this)"
+      autocomplete="off"
+      autocorrect="on"
+      spellcheck="true"
+      inputmode="text"
+      enterkeyhint="send"
+      oninput="chatResize(this)"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}">
     </textarea>
-    <button id="chat-send-btn" onclick="chatSend()">
+    <button id="chat-send-btn" onclick="chatSend()" aria-label="Send message">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
       </svg>
     </button>
   </div>
 
-  <!-- Confirm delete dialog -->
-  <div id="chat-confirm">
-    <p>Delete this entire conversation?<br><small style="color:#94a3b8;">This cannot be undone.</small></p>
+  <!-- Confirm Delete -->
+  <div id="chat-confirm" role="alertdialog">
+    <p>Delete this entire conversation?<br>
+       <small style="color:#94a3b8;">This cannot be undone.</small></p>
     <div class="btn-row">
       <button class="btn-cancel" onclick="cancelDelete()">Cancel</button>
       <button class="btn-delete" onclick="doDelete()">Delete</button>
@@ -304,66 +411,83 @@
 
 <script>
 (function () {
+  'use strict';
 
+  /* ── URLs ─────────────────────────────────────────── */
   const URLS = {
     start  : "{% url 'chat:start_chat' %}",
     send   : "{% url 'chat:send_message' %}",
     poll   : "{% url 'chat:poll_messages' '00000000-0000-0000-0000-000000000000' %}"
                .replace('00000000-0000-0000-0000-000000000000/', ''),
-    delete : "{% url 'chat:delete_session' %}",
+    del    : "{% url 'chat:delete_session' %}",
   };
   const IS_AUTH = {{ request.user.is_authenticated|yesno:"true,false" }};
   const CSRF    = "{{ csrf_token }}";
 
-  let sessionId    = localStorage.getItem('ca_chat_sid') || null;
-  let lastId       = 0;
-  let pollTimer    = null;
-  let isOpen       = false;
-  let unread       = 0;
-  let isClosed     = false;
-  let lastSender   = null;   // track consecutive messages for grouping
-  let notifiedIds  = new Set(); // ✅ track which message IDs we already notified
+  /* ── State ────────────────────────────────────────── */
+  let sessionId   = localStorage.getItem('ca_chat_sid') || null;
+  let lastId      = 0;
+  let pollTimer   = null;
+  let isOpen      = false;
+  let unread      = 0;
+  let isClosed    = false;
+  let lastSender  = null;
+  let seenIds     = new Set();
 
-  const el   = id => document.getElementById(id);
-  const msgs = ()  => el('chat-messages');
+  /* ── DOM shortcuts ────────────────────────────────── */
+  const $  = id => document.getElementById(id);
+  const $m = () => $('chat-messages');
 
-  function esc(str) {
-    return String(str)
+  /* ── Escape HTML ──────────────────────────────────── */
+  function esc(s) {
+    return String(s)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
       .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
-  window.autoResize = function(ta) {
+  /* ── Textarea auto-resize ─────────────────────────── */
+  window.chatResize = function(ta) {
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 100) + 'px';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
   };
 
-  // ── Badge ────────────────────────────────────────────────
+  /* ── Mobile: handle virtual keyboard ─────────────── */
+  // When keyboard opens on mobile, the viewport shrinks.
+  // We listen to visualViewport to keep input visible.
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const win = $('chat-window');
+      if (!win || !isOpen) return;
+      const vh = window.visualViewport.height;
+      if (window.innerWidth <= 480) {
+        // Full-screen mode on mobile: shrink window to visible area
+        win.style.height = vh + 'px';
+        // Scroll messages to bottom after keyboard opens
+        setTimeout(() => { $m().scrollTop = $m().scrollHeight; }, 80);
+      }
+    });
+  }
+
+  /* ── Badge ────────────────────────────────────────── */
   function setBadge(n) {
-    const b = el('chat-badge');
     unread = n;
+    const b = $('chat-badge');
     if (n > 0) {
-      b.textContent   = n > 9 ? '9+' : n;
+      b.textContent   = n > 9 ? '9+' : String(n);
       b.style.display = 'flex';
-      el('chat-fab').style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+      $('chat-fab').style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
     } else {
       b.style.display = 'none';
-      el('chat-fab').style.background = 'linear-gradient(135deg,#4361ee,#7c3aed)';
+      $('chat-fab').style.background = 'linear-gradient(135deg,#4361ee,#7c3aed)';
     }
   }
 
-  // ── Render bubble (WhatsApp style) ───────────────────────
+  /* ── Render bubble ────────────────────────────────── */
   function addBubble(msg) {
-    const container = msgs();
-    const isCont = (lastSender === msg.sender); // consecutive same sender
-
-    const row = document.createElement('div');
+    const isCont = (lastSender === msg.sender);
+    const row    = document.createElement('div');
     row.className = `bubble-row ${msg.sender}${isCont ? ' cont' : ''}`;
-
-    const ticks = msg.sender === 'student'
-      ? `<span class="tick">✓✓</span>`
-      : '';
-
+    const ticks   = msg.sender === 'student' ? '<span class="tick">✓✓</span>' : '';
     row.innerHTML = `
       <div class="bubble">
         ${esc(msg.message)}
@@ -372,51 +496,61 @@
           ${ticks}
         </div>
       </div>`;
-
-    container.appendChild(row);
-    container.scrollTop = container.scrollHeight;
+    $m().appendChild(row);
+    $m().scrollTop = $m().scrollHeight;
     lastSender = msg.sender;
   }
 
   function addSystem(text) {
-    const div = document.createElement('div');
-    div.className = 'date-sep';
-    div.innerHTML = `<span>${esc(text)}</span>`;
-    msgs().appendChild(div);
-    msgs().scrollTop = msgs().scrollHeight;
+    const d = document.createElement('div');
+    d.className   = 'date-sep';
+    d.innerHTML   = `<span>${esc(text)}</span>`;
+    $m().appendChild(d);
+    $m().scrollTop = $m().scrollHeight;
     lastSender = null;
   }
 
-  // ── Show / hide sections ─────────────────────────────────
-  function showGuestForm() {
-    el('guest-form-area').style.display  = 'flex';
-    el('chat-messages').style.display    = 'none';
-    el('chat-input-area').style.display  = 'none';
+  /* ── Show / hide panels ───────────────────────────── */
+  function showGuest() {
+    $('guest-form-area').style.display  = 'flex';
+    $('chat-messages').style.display    = 'none';
+    $('chat-input-area').style.display  = 'none';
   }
 
   function showChat() {
-    el('guest-form-area').style.display  = 'none';
-    el('chat-messages').style.display    = 'flex';
-    if (!isClosed) el('chat-input-area').style.display = 'flex';
+    $('guest-form-area').style.display  = 'none';
+    $('chat-messages').style.display    = 'flex';
+    if (!isClosed) $('chat-input-area').style.display = 'flex';
+    setTimeout(() => { $m().scrollTop = $m().scrollHeight; }, 50);
   }
 
   function markClosed() {
     isClosed = true;
-    el('chat-input-area').style.display    = 'none';
-    el('chat-closed-banner').style.display = 'block';
+    $('chat-input-area').style.display    = 'none';
+    $('chat-closed-banner').style.display = 'block';
     stopPoll();
   }
 
-  // ── Toggle window ────────────────────────────────────────
+  /* ── Toggle window ────────────────────────────────── */
   window.chatToggle = function () {
     isOpen = !isOpen;
-    el('chat-window').style.display = isOpen ? 'flex' : 'none';
-    el('chat-confirm').style.display = 'none';
+    const win = $('chat-window');
+    win.style.display = isOpen ? 'flex' : 'none';
+    $('chat-confirm').style.display = 'none';
+
+    // On mobile reset height when opening
+    if (isOpen && window.innerWidth <= 480) {
+      win.style.height = (window.visualViewport
+        ? window.visualViewport.height
+        : window.innerHeight) + 'px';
+    } else {
+      win.style.height = '';
+    }
 
     if (isOpen) {
       setBadge(0);
       if (!sessionId) {
-        IS_AUTH ? initAuth() : showGuestForm();
+        IS_AUTH ? initAuth() : showGuest();
       } else {
         showChat();
         loadAll();
@@ -424,15 +558,18 @@
       }
     } else {
       stopPoll();
+      // Blur input so keyboard closes on mobile
+      const inp = $('chat-input');
+      if (inp) inp.blur();
     }
   };
 
-  // ── Guest start ──────────────────────────────────────────
+  /* ── Guest start ──────────────────────────────────── */
   window.guestStart = async function () {
-    const name  = el('guest-name').value.trim();
-    const email = el('guest-email').value.trim();
-    if (!name) { el('guest-name').style.borderColor = '#ef4444'; return; }
-    el('guest-name').style.borderColor = '#e2e8f0';
+    const name  = $('guest-name').value.trim();
+    const email = $('guest-email').value.trim();
+    if (!name) { $('guest-name').style.borderColor = '#ef4444'; return; }
+    $('guest-name').style.borderColor = '#e2e8f0';
 
     const data = await post(URLS.start, { name, email });
     if (!data) return;
@@ -441,7 +578,7 @@
     showChat(); loadAll(); startPoll();
   };
 
-  // ── Logged-in init ───────────────────────────────────────
+  /* ── Auth init ────────────────────────────────────── */
   async function initAuth() {
     const data = await post(URLS.start, {});
     if (!data) return;
@@ -450,34 +587,33 @@
     showChat(); loadAll(); startPoll();
   }
 
-  // ── Load all messages ────────────────────────────────────
+  /* ── Load all messages ────────────────────────────── */
   async function loadAll() {
     lastId = 0; lastSender = null;
-    msgs().innerHTML = '';
+    $m().innerHTML = '';
     await pollOnce();
   }
 
-  // ── Send ─────────────────────────────────────────────────
+  /* ── Send message ─────────────────────────────────── */
   window.chatSend = async function () {
-    const input = el('chat-input');
-    const text  = input.value.trim();
+    const inp  = $('chat-input');
+    const text = inp.value.trim();
     if (!text || !sessionId || isClosed) return;
-    input.value = ''; input.style.height = 'auto';
+    inp.value = ''; inp.style.height = 'auto';
 
     const data = await post(URLS.send, { session_id: sessionId, message: text });
-    if (data && data.message && data.message.id > lastId) {
-      lastId = data.message.id;
-      notifiedIds.add(data.message.id); // mark as seen — no notification for own msg
+    if (data && data.message && !seenIds.has(data.message.id)) {
+      seenIds.add(data.message.id);
+      if (data.message.id > lastId) lastId = data.message.id;
       addBubble(data.message);
     }
   };
 
-  // ── Polling ──────────────────────────────────────────────
+  /* ── Polling ──────────────────────────────────────── */
   function startPoll() {
     if (pollTimer) return;
     pollTimer = setInterval(pollOnce, 3000);
   }
-
   function stopPoll() {
     clearInterval(pollTimer);
     pollTimer = null;
@@ -495,21 +631,14 @@
 
     data.messages.forEach(msg => {
       if (msg.id > lastId) lastId = msg.id;
+      if (seenIds.has(msg.id)) return;
+      seenIds.add(msg.id);
 
-      // ✅ Only render + notify if we haven't seen this message before
-      if (!notifiedIds.has(msg.id)) {
-        notifiedIds.add(msg.id);
+      addBubble(msg);
 
-        if (msg.sender === 'admin') {
-          addBubble(msg);
-          if (!isOpen) {
-            setBadge(unread + 1);
-            playBeep();
-          }
-        } else {
-          // Student messages from loadAll (initial fetch) — render them
-          addBubble(msg);
-        }
+      if (msg.sender === 'admin' && !isOpen) {
+        setBadge(unread + 1);
+        playBeep();
       }
     });
 
@@ -519,54 +648,38 @@
     }
   }
 
-  // ── Delete chat ──────────────────────────────────────────
-  window.confirmDelete = function () {
-    el('chat-confirm').style.display = 'block';
-  };
-  window.cancelDelete = function () {
-    el('chat-confirm').style.display = 'none';
-  };
-  window.doDelete = async function () {
-    if (!sessionId) { resetChat(); return; }
-    await post(URLS.delete, { session_id: sessionId });
-    resetChat();
-  };
+  /* ── Delete ───────────────────────────────────────── */
+  window.confirmDelete = function () { $('chat-confirm').style.display = 'block'; };
+  window.cancelDelete  = function () { $('chat-confirm').style.display = 'none'; };
 
-  function resetChat() {
+  window.doDelete = async function () {
+    if (sessionId) await post(URLS.del, { session_id: sessionId });
     sessionId = null;
-    lastId    = 0;
-    lastSender = null;
-    isClosed  = false;
-    unread    = 0;
-    notifiedIds.clear();
+    lastId    = 0; lastSender = null;
+    isClosed  = false; unread = 0;
+    seenIds.clear();
     localStorage.removeItem('ca_chat_sid');
     stopPoll();
-
-    el('chat-confirm').style.display       = 'none';
-    el('chat-closed-banner').style.display = 'none';
-    el('chat-messages').innerHTML          = '';
-    el('chat-messages').style.display      = 'none';
-    el('chat-input-area').style.display    = 'none';
+    $('chat-confirm').style.display       = 'none';
+    $('chat-closed-banner').style.display = 'none';
+    $m().innerHTML                        = '';
     setBadge(0);
+    IS_AUTH ? initAuth() : showGuest();
+  };
 
-    // Show guest form or re-init
-    IS_AUTH ? initAuth() : showGuestForm();
-  }
-
-  // ── HTTP helper ──────────────────────────────────────────
+  /* ── HTTP helper ──────────────────────────────────── */
   async function post(url, body) {
     try {
-      const res = await fetch(url, {
+      const r = await fetch(url, {
         method : 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
         body   : JSON.stringify(body),
       });
-      if (!res.ok) return null;
-      return await res.json();
+      return r.ok ? r.json() : null;
     } catch (e) { return null; }
   }
 
-  // ── Sound ────────────────────────────────────────────────
+  /* ── Sound ────────────────────────────────────────── */
   function playBeep() {
     try {
       const ctx  = new (window.AudioContext || window.webkitAudioContext)();
@@ -574,25 +687,25 @@
       const gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
       osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       osc.start(); osc.stop(ctx.currentTime + 0.3);
     } catch (e) {}
   }
 
-  // ── Page load: silent unread check ───────────────────────
+  /* ── Page load: silent unread check ──────────────── */
   if (sessionId) {
     fetch(`${URLS.poll}${sessionId}/?after=0`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) { sessionId = null; localStorage.removeItem('ca_chat_sid'); return; }
-        let newUnread = 0;
+        let nu = 0;
         data.messages.forEach(m => {
+          seenIds.add(m.id);
           if (m.id > lastId) lastId = m.id;
-          notifiedIds.add(m.id); // mark all existing msgs as seen
-          if (m.sender === 'admin' && !m.is_read) newUnread++;
+          if (m.sender === 'admin' && !m.is_read) nu++;
         });
-        if (newUnread > 0) setBadge(newUnread);
+        if (nu > 0) setBadge(nu);
         if (data.session_status === 'closed') isClosed = true;
       })
       .catch(() => { sessionId = null; localStorage.removeItem('ca_chat_sid'); });
