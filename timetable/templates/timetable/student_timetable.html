@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static timetable_extras %}
+
+{% block title %}My Weekly Timetable{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.tt-wrap {
+  padding: 0 0 60px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── header ── */
+.tt-page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.tt-page-header h2 {
+  font-size: 22px; font-weight: 800; color: #1e293b; margin: 0;
+  letter-spacing: -0.01em;
+}
+.tt-class-badge {
+  background: linear-gradient(135deg, #4361ee, #7c3aed);
+  color: white; padding: 6px 18px; border-radius: 20px;
+  font-size: 13px; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+}
+
+/* ── table wrapper ── */
+.tt-table-wrap {
+  border-radius: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0,0,0,.06);
+}
+
+/* ── table ── */
+.tt-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+  background: #fff;
+}
+
+/* Header */
+.tt-table thead th {
+  background: #1e293b;
+  color: #fff;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 14px 12px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.tt-table thead th:first-child {
+  text-align: center;
+  width: 120px;
+  background: #0f172a;
+  border-right: 2px solid rgba(255,255,255,0.15);
+}
+.tt-table thead th:last-child { border-right: none; }
+
+/* Body */
+.tt-table tbody tr:nth-child(even) td { background: #f8fafc; }
+.tt-table tbody tr:nth-child(even) td:first-child { background: #f1f5f9; }
+
+.tt-table td {
+  padding: 8px;
+  vertical-align: middle;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+}
+.tt-table tbody tr:last-child td { border-bottom: none; }
+.tt-table td:last-child { border-right: none; }
+
+/* Time column */
+.tt-table td:first-child {
+  font-size: 11.5px; color: #475569; font-weight: 700;
+  white-space: nowrap; text-align: center;
+  background: #f8fafc;
+  border-right: 2px solid #e2e8f0;
+  padding: 8px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── subject card ── */
+.subj-card {
+  border-radius: 8px;
+  padding: 10px 10px;
+  color: #fff;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+}
+.subj-card .s-name    { font-weight: 800; font-size: 13px; line-height: 1.2; }
+.subj-card .s-teacher { font-size: 11px; opacity: 0.88; margin-top: 3px; font-weight: 500; }
+.subj-card .s-room    { font-size: 10.5px; opacity: 0.75; margin-top: 5px; font-weight: 600; }
+
+/* ── empty cell ── */
+.tt-empty { min-height: 72px; }
+
+/* ── no timetable ── */
+.tt-empty-state {
+  text-align: center; padding: 80px 20px; color: #94a3b8;
+}
+.tt-empty-state i { font-size: 56px; display: block; margin-bottom: 16px; }
+.tt-empty-state h5 { color: #64748b; font-weight: 700; }
+
+/* ── legend ── */
+.tt-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #475569; font-weight: 600;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px 4px 8px;
+  border-radius: 20px;
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+/* ── responsive ── */
+@media (max-width: 640px) {
+  .tt-page-header h2 { font-size: 18px; }
+  .subj-card { min-height: 60px; padding: 8px; }
+  .subj-card .s-name { font-size: 12px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tt-wrap">
+
+  <!-- Page Header -->
+  <div class="tt-page-header">
+    <h2><i class="bi bi-calendar-week text-primary me-2"></i>My Weekly Timetable</h2>
+    <span class="tt-class-badge">{{ classroom.name }}</span>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if time_slots %}
+  <div class="tt-table-wrap">
+    <table class="tt-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          {% for day_key, day_name in days %}
+          <th>{{ day_name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for slot in time_slots %}
+        <tr>
+          <td>{{ slot }}</td>
+          {% for day_key, day_name in days %}
+          {% with entry=grid|get_item:slot|get_item:day_key %}
+          <td>
+            {% if entry %}
+            <div class="subj-card" style="background: {{ entry.colour }};">
+              <div>
+                <div class="s-name">{{ entry.subject.name }}</div>
+                {% if entry.teacher %}
+                <div class="s-teacher">{{ entry.teacher.full_name }}</div>
+                {% endif %}
+              </div>
+              {% if entry.room %}
+              <div class="s-room">{{ entry.room }}</div>
+              {% endif %}
+            </div>
+            {% else %}
+            <div class="tt-empty"></div>
+            {% endif %}
+          </td>
+          {% endwith %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Legend -->
+  <div class="tt-legend mt-3">
+    {% for slot in time_slots %}
+      {% for day_key, day_name in days %}
+        {% with entry=grid|get_item:slot|get_item:day_key %}
+          {% if entry %}
+          <div class="legend-item">
+            <span class="legend-dot" style="background:{{ entry.colour }};"></span>
+            {{ entry.subject.name }}
+          </div>
+          {% endif %}
+        {% endwith %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="card border-0 shadow-sm">
+    <div class="tt-empty-state">
+      <i class="bi bi-calendar-x d-block"></i>
+      <h5 class="fw-bold mb-2">No Timetable Yet</h5>
+      <p class="mb-0">Your timetable will appear here once it has been set up.</p>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

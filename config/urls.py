@@ -12,14 +12,10 @@ urlpatterns = [
     path('exams/', include('exams.urls')),
     path('attendance/', include('attendance.urls')),
     path('fees/', include('fees.urls')),
-    path('accounts/', include('accounts.urls')),
     path('parents/', include('parents.urls', namespace='parents')),
-    path('chat/', include('chat.urls', namespace='chat')),  
-
-
-    ]
-
-
+    path('chat/', include('chat.urls', namespace='chat')),
+    path('timetable/', include('timetable.urls', namespace='timetable')),  # ← prefix ya timetable
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

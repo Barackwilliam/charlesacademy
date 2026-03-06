@@ -7,6 +7,9 @@ class ClassRoom(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=10)
     fee = models.PositiveIntegerField(default=30000)
+    def __str__(self):
+        return self.name
+
 
 
 class Subject(models.Model):

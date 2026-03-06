@@ -27,9 +27,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
-
+#tumukunde@123
 # Application definition arakaza@123
-#bizimana@123
+#tuhabonyimana@123
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'dashboard',
     'parents',
     'pyuploadcare.dj',   # <- ongeza hii
-    'chat',  
+    'chat', 
+    'timetable', 
 
 
 ]
@@ -104,6 +105,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'config.context_processors.uploadcare_key',   # ← ONGEZA HAPA
+                'students.context_processors.student_context',  # ← ongeza hii
+
 
             ],
         },

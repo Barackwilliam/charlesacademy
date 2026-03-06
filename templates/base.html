@@ -1238,6 +1238,12 @@
                                 <span class="nav-text">Announcements</span>
                             </a>
                         </div>
+                        <div class="nav-item">
+                            <a href="{% url 'timetable:admin_timetable' %}" class="nav-link {% if 'announcements' in request.path %}active{% endif %}">
+                                <i class="bi bi-calendar-week nav-icon"></i>
+                                <span class="nav-text">Timetable Management</span>
+                            </a>
+                        </div>
                         
                         <!-- Settings -->
                         <div class="nav-item">
@@ -1348,7 +1354,17 @@
                                 <i class="bi bi-eye nav-icon"></i>
                                 <span class="nav-text">My ID card</span>
                             </a>
-                        </div><div class="nav-item">
+                        </div>
+
+                        <div class="nav-item">
+                            <a href="{% url 'timetable:student_timetable' %}" class="nav-link">
+                                <i class="bi bi-calendar-week nav-icon"></i>
+                                <span class="nav-text">My Timetable</span>
+                            </a>
+                        </div>
+                        
+                        
+                        <div class="nav-item">
                             <a href="{% url 'students:my_certificates' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
                                 <i class="bi bi-patch-check nav-icon"></i>
                                 <span class="nav-text">My Certificate</span>

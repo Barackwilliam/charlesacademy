@@ -1,15 +1,6 @@
 from django.contrib import admin
 from .models import Student
 
-# @admin.register(Student)
-# class StudentAdmin(admin.ModelAdmin):
-#     list_display = ('full_name', 'registration_number', 'classroom', 'admission_year', 'status')
-#     list_filter = ('classroom', 'status', 'admission_year')
-#     search_fields = ('full_name', 'registration_number')
-#     ordering = ('-admission_year',)
-
-
-
 # students/admin.py
 
 from django.contrib import admin
@@ -123,7 +114,7 @@ class StudentAdmin(admin.ModelAdmin):
                 'border-radius:12px;font-size:12px;">{} cert(s)</span>',
                 count
             )
-        return format_html(
-            '<span style="color:#aaa;font-size:12px;">None</span>'
-        )
+        # ✅ tumia mark_safe badala ya format_html bila arguments akimana@123
+        from django.utils.safestring import mark_safe
+        return mark_safe('<span style="color:#aaa;font-size:12px;">None</span>')
     certificate_count.short_description = 'Certificates'
