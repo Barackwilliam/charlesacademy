@@ -147,7 +147,6 @@
               {{ cert.issued_date|date:"d M Y" }}
             </small>
 
-            {{!-- ✅ Download link — triggers browser download directly --}}
             <a href="{% url 'students:download_certificate' cert.id %}"
                class="btn-download"
                download="Certificate_{{ cert.title|slugify }}.pdf">
