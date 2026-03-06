@@ -1,663 +1,464 @@
 {% load static %}
 
 <style>
-/* ══════════════════════════════════════
-   FLOATING BUTTON
-══════════════════════════════════════ */
-#chat-fab {
-  position: fixed;
-  bottom: 24px; right: 20px;
-  z-index: 9999;
-  width: 58px; height: 58px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4361ee, #7c3aed);
-  border: none;
-  box-shadow: 0 6px 24px rgba(67,97,238,.45);
+/* ─── FAB ─── */
+#xfab {
+  position: fixed; bottom: 22px; right: 18px; z-index: 9999;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg,#4361ee,#7c3aed);
+  border: none; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(67,97,238,.5);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
-#chat-fab:active { transform: scale(0.93); }
-#chat-fab svg { width: 26px; height: 26px; fill: white; }
-
-#chat-badge {
-  position: absolute; top: -3px; right: -3px;
-  background: #ef4444; color: white;
-  font-size: 11px; font-weight: 700;
-  min-width: 20px; height: 20px;
-  border-radius: 10px; padding: 0 4px;
+#xfab svg { width: 24px; height: 24px; fill: #fff; pointer-events: none; }
+#xbadge {
+  position: absolute; top: -4px; right: -4px;
+  background: #ef4444; color: #fff; font-size: 11px; font-weight: 700;
+  min-width: 20px; height: 20px; border-radius: 10px; padding: 0 4px;
   display: none; align-items: center; justify-content: center;
-  border: 2px solid white;
+  border: 2px solid #fff; pointer-events: none;
 }
 
-/* ══════════════════════════════════════
-   CHAT WINDOW — DESKTOP
-══════════════════════════════════════ */
-#chat-window {
+/* ─── CHAT BOX ───
+   Desktop: fixed popup
+   Mobile: uses JS to set exact pixel height so input is always visible
+─── */
+#xbox {
+  display: none;                 /* opened by JS → flex */
+  flex-direction: column;        /* stack header / body / input */
   position: fixed;
-  bottom: 94px; right: 20px;
   z-index: 9998;
-  width: 370px;
-  height: 520px;
-  display: none;
-  flex-direction: column;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.18);
   overflow: hidden;
-  animation: slideUp .28s ease;
+  background: #ece5dd;
+
+  /* DESKTOP */
+  bottom: 88px; right: 18px;
+  width: 360px; height: 520px;
+  border-radius: 18px;
+  box-shadow: 0 16px 50px rgba(0,0,0,.22);
 }
 
-@keyframes slideUp {
-  from { opacity:0; transform: translateY(18px); }
-  to   { opacity:1; transform: translateY(0); }
-}
-
-/* ══════════════════════════════════════
-   MOBILE — KEY FIX
-   Use top/left/right/bottom = 0
-   instead of height: 100%
-   This correctly fills the browser viewport
-   including when keyboard is open
-══════════════════════════════════════ */
-@media (max-width: 480px) {
-  #chat-window {
-    /* fill exact visible area */
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100%;
-    height: auto;        /* let inset define height */
+/* MOBILE: JS sets top/left/width/height explicitly via setMobileSize() */
+@media (max-width: 500px) {
+  #xbox {
     border-radius: 0;
     box-shadow: none;
-    animation: none;
   }
-  #chat-fab {
-    bottom: 20px; right: 16px;
-    width: 54px; height: 54px;
-  }
-  /* hide fab when chat is open on mobile */
-  #chat-window[style*="flex"] ~ #chat-tooltip { display: none; }
 }
 
-/* ══════════════════════════════════════
-   HEADER — never shrinks
-══════════════════════════════════════ */
-#chat-header {
+/* ─── HEADER ─── */
+#xhead {
   flex: 0 0 auto;
-  background: linear-gradient(135deg, #4361ee, #7c3aed);
-  padding: 12px 14px;
-  padding-top: max(12px, env(safe-area-inset-top));
-  display: flex; align-items: center; gap: 10px;
-  color: white;
-}
-#chat-header img {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.4);
-  object-fit: cover; flex-shrink: 0;
-}
-#chat-logo-initials {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.4);
-  background: rgba(255,255,255,.2);
-  display: none; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 15px; flex-shrink: 0;
-}
-.chat-header-info { flex: 1; min-width: 0; }
-.hdr-name   { font-weight: 700; font-size: 15px; }
-.hdr-status {
-  font-size: 11px; opacity:.85;
-  display: flex; align-items: center; gap: 5px; margin-top: 2px;
-}
-#online-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #22c55e; border: 1.5px solid white; display: inline-block;
-}
-.header-actions { display: flex; gap: 6px; }
-.header-btn {
-  background: rgba(255,255,255,.2); border: none; color: white;
-  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px;
-  -webkit-tap-highlight-color: transparent;
-}
-.header-btn:active { background: rgba(255,255,255,.45); }
-
-/* ══════════════════════════════════════
-   GUEST FORM
-══════════════════════════════════════ */
-#guest-form-area {
-  flex: 0 0 auto;
-  padding: 18px 16px;
-  background: #f8fafc;
-  display: none; flex-direction: column; gap: 10px;
-}
-#guest-form-area p { font-size: 13.5px; color: #475569; margin: 0; }
-#guest-form-area input {
-  width: 100%; padding: 11px 14px;
-  border: 1.5px solid #e2e8f0; border-radius: 12px;
-  font-size: 16px; outline: none; box-sizing: border-box;
-  -webkit-appearance: none; appearance: none;
-}
-#guest-form-area input:focus { border-color: #4361ee; }
-#guest-start-btn {
-  padding: 12px; border: none; border-radius: 12px;
   background: linear-gradient(135deg,#4361ee,#7c3aed);
-  color: white; font-weight: 600; font-size: 15px; cursor: pointer;
+  padding: 0 14px;
+  height: 60px;
+  display: flex; align-items: center; gap: 10px;
+  color: #fff;
+}
+#xhead img {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.4); object-fit: cover; flex-shrink: 0;
+}
+#xhead-init {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  display: none; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.xhi { flex: 1; min-width: 0; }
+.xhi b { display: block; font-size: 14px; }
+.xhi small { font-size: 11px; opacity: .85; display: flex; align-items: center; gap: 4px; }
+.xdot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; display: inline-block; }
+.xhbtn {
+  background: rgba(255,255,255,.18); border: none; color: #fff;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer; margin-left: 4px;
   -webkit-tap-highlight-color: transparent;
 }
+.xhbtn:active { background: rgba(255,255,255,.4); }
 
-/* ══════════════════════════════════════
-   MESSAGES — takes all remaining space
-   min-height: 0 is CRITICAL for flex shrink
-══════════════════════════════════════ */
-#chat-messages {
-  flex: 1 1 0;
-  min-height: 0;
+/* ─── MESSAGES ─── */
+#xmsgs {
+  flex: 1 1 0;       /* fills all remaining space */
+  min-height: 0;     /* CRITICAL: lets flexbox shrink this */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 12px 12px 6px;
+  overscroll-behavior: contain;
+  padding: 10px;
   display: flex; flex-direction: column; gap: 2px;
-  background: #ece5dd;
 }
 
-.date-sep { text-align: center; margin: 8px 0; }
-.date-sep span {
-  background: rgba(255,255,255,.85); color: #667781;
-  font-size: 11px; padding: 3px 10px; border-radius: 8px;
+/* date separator */
+.xsep { text-align: center; margin: 6px 0; }
+.xsep span {
+  background: rgba(255,255,255,.8); color: #667781;
+  font-size: 11px; padding: 2px 10px; border-radius: 8px;
 }
 
-/* ══════════════════════════════════════
-   BUBBLES
-══════════════════════════════════════ */
-.bubble-row { display: flex; margin-bottom: 1px; }
-.bubble-row.student { justify-content: flex-end; }
-.bubble-row.admin   { justify-content: flex-start; }
-.bubble-row.student + .bubble-row.student,
-.bubble-row.admin   + .bubble-row.admin { margin-top: -4px; }
-
-.bubble {
-  max-width: 78%;
-  padding: 7px 10px 4px 10px;
-  font-size: 14px; line-height: 1.45;
-  word-break: break-word;
+/* ─── BUBBLES ─── */
+.xrow { display: flex; margin-bottom: 1px; }
+.xrow.student { justify-content: flex-end; }
+.xrow.admin   { justify-content: flex-start; }
+.xrow.student + .xrow.student,
+.xrow.admin   + .xrow.admin { margin-top: -4px; }
+.xbub {
+  max-width: 80%; padding: 7px 10px 4px;
+  font-size: 14px; line-height: 1.45; word-break: break-word;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
 }
-@media (max-width: 480px) {
-  .bubble { max-width: 85%; font-size: 14.5px; }
-}
-.bubble-row.admin .bubble {
+@media (max-width: 500px) { .xbub { font-size: 15px; max-width: 85%; } }
+.xrow.admin .xbub {
   background: #fff; color: #111;
-  border-radius: 0 10px 10px 10px; margin-left: 4px;
+  border-radius: 0 10px 10px 10px; margin-left: 3px;
 }
-.bubble-row.admin.cont .bubble { border-radius: 10px; }
-.bubble-row.student .bubble {
+.xrow.admin.xc .xbub  { border-radius: 10px; }
+.xrow.student .xbub {
   background: #dcf8c6; color: #111;
-  border-radius: 10px 0 10px 10px; margin-right: 4px;
+  border-radius: 10px 0 10px 10px; margin-right: 3px;
 }
-.bubble-row.student.cont .bubble { border-radius: 10px; }
-.bubble-meta {
-  display: flex; align-items: center; justify-content: flex-end;
-  gap: 3px; margin-top: 3px;
-}
-.bubble-time { font-size: 10.5px; color: #667781; white-space: nowrap; }
-.bubble-row.student .bubble-time { color: #5a9a52; }
-.tick { font-size: 12px; color: #53bdeb; }
+.xrow.student.xc .xbub { border-radius: 10px; }
+.xmeta { display: flex; align-items: center; justify-content: flex-end; gap: 3px; margin-top: 3px; }
+.xtime { font-size: 10px; color: #667781; }
+.xrow.student .xtime { color: #5a9a52; }
+.xtick { font-size: 11px; color: #53bdeb; }
 
-/* ══════════════════════════════════════
-   CLOSED BANNER
-══════════════════════════════════════ */
-#chat-closed-banner {
-  flex: 0 0 auto;
-  display: none;
-  padding: 10px 14px;
-  background: #fef2f2; color: #dc2626;
-  font-size: 13px; text-align: center;
-  border-top: 1px solid #fecaca;
+/* ─── GUEST FORM ─── */
+#xguest {
+  flex: 1 1 0; min-height: 0;
+  padding: 20px 16px;
+  background: #f8fafc;
+  display: none; flex-direction: column; gap: 12px;
+  overflow-y: auto;
+}
+#xguest p { font-size: 14px; color: #475569; margin: 0; }
+#xguest input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid #e2e8f0; border-radius: 12px;
+  font-size: 16px; outline: none; box-sizing: border-box;
+  background: #fff; -webkit-appearance: none;
+}
+#xguest input:focus { border-color: #4361ee; }
+#xgbtn {
+  padding: 13px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg,#4361ee,#7c3aed);
+  color: #fff; font-weight: 600; font-size: 15px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ══════════════════════════════════════
-   INPUT AREA — ALWAYS AT BOTTOM
-   flex: 0 0 auto = never shrink, never grow
-   Visible always as long as parent has space
-══════════════════════════════════════ */
-#chat-input-area {
-  flex: 0 0 auto;
-  display: none;          /* JS → flex */
-  gap: 8px;
+/* ─── INPUT BAR ─── */
+#xinput-bar {
+  flex: 0 0 auto;   /* never shrinks — always visible */
+  display: none;    /* JS → flex */
   align-items: flex-end;
+  gap: 8px;
   padding: 8px 10px;
-  padding-bottom: max(10px, env(safe-area-inset-bottom));
   background: #f0f2f5;
   border-top: 1px solid #dde1e7;
   box-sizing: border-box;
-  width: 100%;
+  /* safe area for iPhone home indicator */
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
-
-#chat-input {
+#xinput {
   flex: 1;
-  min-height: 44px;
-  max-height: 120px;
-  box-sizing: border-box;
-  border: none;
-  border-radius: 22px;
+  min-height: 42px; max-height: 108px;
   padding: 10px 14px;
-  font-size: 16px;        /* 16px = no iOS zoom */
-  outline: none;
-  resize: none;
-  font-family: inherit;
-  line-height: 1.4;
-  background: #fff;
+  border: none; border-radius: 21px;
+  font-size: 16px; /* 16px = NO iOS auto-zoom */
+  line-height: 1.4; outline: none; resize: none;
+  font-family: inherit; background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   -webkit-appearance: none; appearance: none;
+  overflow-y: hidden; box-sizing: border-box;
 }
-
-#chat-send-btn {
-  flex: 0 0 44px;
-  width: 44px; height: 44px;
+#xsend {
+  width: 42px; height: 42px; flex-shrink: 0;
   border-radius: 50%; border: none;
   background: linear-gradient(135deg,#4361ee,#7c3aed);
-  color: white;
+  color: #fff; cursor: pointer; align-self: flex-end;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
   box-shadow: 0 2px 8px rgba(67,97,238,.4);
-  align-self: flex-end;
-  margin-bottom: 1px;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
-#chat-send-btn:active { transform: scale(0.9); }
+#xsend:active { transform: scale(.9); }
+#xsend svg { pointer-events: none; }
 
-/* ══════════════════════════════════════
-   CONFIRM DELETE
-══════════════════════════════════════ */
-#chat-confirm {
-  position: absolute;
-  bottom: 80px; left: 50%;
+/* ─── CLOSED NOTICE ─── */
+#xclosed {
+  flex: 0 0 auto; display: none;
+  padding: 10px 14px; background: #fef2f2;
+  color: #dc2626; font-size: 13px; text-align: center;
+  border-top: 1px solid #fecaca;
+}
+
+/* ─── CONFIRM DELETE ─── */
+#xconfirm {
+  position: absolute; bottom: 80px; left: 50%;
   transform: translateX(-50%);
-  background: #fff; border-radius: 16px;
-  padding: 18px 22px;
-  box-shadow: 0 10px 40px rgba(0,0,0,.2);
-  z-index: 20; width: min(300px, 88%);
+  background: #fff; border-radius: 16px; padding: 18px 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.22);
+  z-index: 10; width: min(290px, 88%);
   text-align: center; display: none;
 }
-#chat-confirm p { font-size: 13.5px; color: #1e293b; margin: 0 0 14px; }
-#chat-confirm .btn-row { display: flex; gap: 10px; justify-content: center; }
-#chat-confirm button {
-  padding: 9px 22px; border-radius: 10px;
-  border: none; cursor: pointer; font-size: 13.5px; font-weight: 600;
+#xconfirm p { font-size: 13.5px; color: #1e293b; margin: 0 0 14px; }
+#xconfirm .xbtns { display: flex; gap: 10px; justify-content: center; }
+#xconfirm button {
+  padding: 9px 20px; border-radius: 10px; border: none;
+  font-size: 13.5px; font-weight: 600; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-#chat-confirm .btn-cancel { background: #f1f5f9; color: #475569; }
-#chat-confirm .btn-delete { background: #ef4444; color: white; }
-
-/* ══════════════════════════════════════
-   TOOLTIP — desktop only
-══════════════════════════════════════ */
-#chat-tooltip {
-  position: fixed; bottom: 34px; right: 88px; z-index: 9997;
-  background: #1e293b; color: white; padding: 7px 12px;
-  border-radius: 8px; font-size: 12px; white-space: nowrap;
-  pointer-events: none; opacity: 0; transition: opacity .3s;
-}
-#chat-tooltip::after {
-  content: ''; position: absolute; right: -6px; top: 50%;
-  transform: translateY(-50%);
-  border: 6px solid transparent; border-left-color: #1e293b; border-right: 0;
-}
-#chat-fab:hover + #chat-tooltip { opacity: 1; }
-@media (max-width: 480px) { #chat-tooltip { display: none; } }
+.xcanc { background: #f1f5f9; color: #475569; }
+.xdel  { background: #ef4444; color: #fff; }
 </style>
 
-<!-- Tooltip -->
-<div id="chat-tooltip">💬 Need help? Chat with Charles Academy</div>
-
-<!-- Floating Button -->
-<button id="chat-fab" onclick="chatToggle()" aria-label="Open chat">
-  <svg viewBox="0 0 24 24">
-    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-  </svg>
-  <span id="chat-badge"></span>
+<!-- FAB -->
+<button id="xfab" onclick="xchat.toggle()" aria-label="Open support chat">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+  <span id="xbadge"></span>
 </button>
 
-<!-- Chat Window -->
-<div id="chat-window">
+<!-- CHAT BOX -->
+<div id="xbox">
 
-  <!-- Header -->
-  <div id="chat-header">
+  <!-- header -->
+  <div id="xhead">
     <img src="{% static 'images/logo.jpeg' %}"
-         onerror="this.style.display='none';document.getElementById('chat-logo-initials').style.display='flex';"
-         alt="logo">
-    <div id="chat-logo-initials">CA</div>
-    <div class="chat-header-info">
-      <div class="hdr-name">Support Team</div>
-      <div class="hdr-status">
-        <span id="online-dot"></span>
-        <span id="status-text">Online</span>
-      </div>
+         onerror="this.style.display='none';document.getElementById('xhead-init').style.display='flex';" alt="">
+    <div id="xhead-init">CA</div>
+    <div class="xhi">
+      <b>Support Team</b>
+      <small><span class="xdot"></span> Online</small>
     </div>
-    <div class="header-actions">
-      <button class="header-btn" onclick="confirmDelete()" title="Delete">🗑️</button>
-      <button class="header-btn" onclick="chatToggle()"    title="Close">✕</button>
-    </div>
+    <button class="xhbtn" onclick="xchat.askDel()" title="Delete">🗑️</button>
+    <button class="xhbtn" onclick="xchat.toggle()" title="Close">✕</button>
   </div>
 
-  <!-- Guest Form -->
-  <div id="guest-form-area">
-    <p>👋 Hi! Please tell us your name to start chatting.</p>
-    <input type="text"  id="guest-name"  placeholder="Your name *"
-           autocomplete="name" inputmode="text">
-    <input type="email" id="guest-email" placeholder="Email (optional)"
-           autocomplete="email" inputmode="email">
-    <button id="guest-start-btn" onclick="guestStart()">Start Chat →</button>
+  <!-- guest form -->
+  <div id="xguest">
+    <p>👋 Hi! Enter your name to start chatting.</p>
+    <input id="xgname"  type="text"  placeholder="Your name *"      inputmode="text"  autocomplete="name">
+    <input id="xgemail" type="email" placeholder="Email (optional)" inputmode="email" autocomplete="email">
+    <button id="xgbtn" onclick="xchat.guestGo()">Start Chat →</button>
   </div>
 
-  <!-- Messages -->
-  <div id="chat-messages" role="log" aria-live="polite"></div>
+  <!-- messages -->
+  <div id="xmsgs" role="log" aria-live="polite"></div>
 
-  <!-- Closed Banner -->
-  <div id="chat-closed-banner">
-    This chat has been closed. Thank you for contacting us!
-  </div>
+  <!-- closed notice -->
+  <div id="xclosed">This chat has been closed. Thank you!</div>
 
-  <!-- Input Area -->
-  <div id="chat-input-area">
-    <textarea
-      id="chat-input"
-      rows="1"
+  <!-- input bar -->
+  <div id="xinput-bar">
+    <textarea id="xinput" rows="1"
       placeholder="Type a message…"
-      autocomplete="off"
-      inputmode="text"
-      enterkeyhint="send"
-      oninput="chatResize(this)"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}">
+      inputmode="text" enterkeyhint="send"
+      oninput="xchat.resize(this)"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();xchat.send();}">
     </textarea>
-    <button id="chat-send-btn" onclick="chatSend()" aria-label="Send">
+    <button id="xsend" onclick="xchat.send()" aria-label="Send">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
       </svg>
     </button>
   </div>
 
-  <!-- Confirm Delete -->
-  <div id="chat-confirm">
-    <p>Delete this entire conversation?<br>
-       <small style="color:#94a3b8;">This cannot be undone.</small></p>
-    <div class="btn-row">
-      <button class="btn-cancel" onclick="cancelDelete()">Cancel</button>
-      <button class="btn-delete" onclick="doDelete()">Delete</button>
+  <!-- confirm delete -->
+  <div id="xconfirm">
+    <p>Delete this conversation?<br><small style="color:#94a3b8">This cannot be undone.</small></p>
+    <div class="xbtns">
+      <button class="xcanc" onclick="xchat.noDel()">Cancel</button>
+      <button class="xdel"  onclick="xchat.yesDel()">Delete</button>
     </div>
   </div>
 
 </div>
 
 <script>
-(function () {
-  'use strict';
+const xchat = (function(){
+'use strict';
 
-  const URLS = {
-    start : "{% url 'chat:start_chat' %}",
-    send  : "{% url 'chat:send_message' %}",
-    poll  : "{% url 'chat:poll_messages' '00000000-0000-0000-0000-000000000000' %}"
-              .replace('00000000-0000-0000-0000-000000000000/', ''),
-    del   : "{% url 'chat:delete_session' %}",
-  };
-  const IS_AUTH = {{ request.user.is_authenticated|yesno:"true,false" }};
-  const CSRF    = "{{ csrf_token }}";
+const URLS = {
+  start : "{% url 'chat:start_chat' %}",
+  send  : "{% url 'chat:send_message' %}",
+  poll  : "{% url 'chat:poll_messages' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000/',''),
+  del   : "{% url 'chat:delete_session' %}",
+};
+const AUTH = {{ request.user.is_authenticated|yesno:"true,false" }};
+const CSRF = "{{ csrf_token }}";
 
-  let sessionId  = localStorage.getItem('ca_chat_sid') || null;
-  let lastId     = 0;
-  let pollTimer  = null;
-  let isOpen     = false;
-  let unread     = 0;
-  let isClosed   = false;
-  let lastSender = null;
-  let seenIds    = new Set();
+let sid=localStorage.getItem('xsid')||null, lastId=0, timer=null;
+let open=false, unread=0, done=false, prevSender=null, seen=new Set();
 
-  const $  = id => document.getElementById(id);
-  const $m = ()  => $('chat-messages');
+const g  = id => document.getElementById(id);
+const M  = ()  => g('xmsgs');
+const IB = ()  => g('xinput-bar');
 
-  function esc(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+/* helpers */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+/* ── set box size on mobile ──
+   This is the KEY fix: we calculate exact available height
+   in pixels so the layout never overflows off screen
+*/
+function setSize(){
+  const box = g('xbox');
+  if(window.innerWidth > 500){
+    // desktop: remove any inline size overrides
+    box.style.top=''; box.style.left=''; box.style.width=''; box.style.height='';
+    return;
   }
+  // mobile: use visualViewport if available (accounts for keyboard + browser chrome)
+  const vvh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const vvw = window.visualViewport ? window.visualViewport.width  : window.innerWidth;
+  const top  = window.visualViewport ? window.visualViewport.offsetTop : 0;
+  box.style.top    = top  + 'px';
+  box.style.left   = '0px';
+  box.style.width  = vvw  + 'px';
+  box.style.height = vvh  + 'px';
+  setTimeout(()=>{ M().scrollTop = M().scrollHeight; }, 60);
+}
 
-  /* ── Textarea resize ───────────────────────────────── */
-  window.chatResize = function(ta) {
-    ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
-    $m().scrollTop = $m().scrollHeight;
-  };
+/* listen for keyboard open/close on mobile */
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', ()=>{ if(open) setSize(); });
+  window.visualViewport.addEventListener('scroll', ()=>{ if(open) setSize(); });
+}
 
-  /* ── Badge ─────────────────────────────────────────── */
-  function setBadge(n) {
-    unread = n;
-    const b = $('chat-badge');
-    if (n > 0) {
-      b.textContent   = n > 9 ? '9+' : String(n);
-      b.style.display = 'flex';
-      $('chat-fab').style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
-    } else {
-      b.style.display = 'none';
-      $('chat-fab').style.background = 'linear-gradient(135deg,#4361ee,#7c3aed)';
-    }
-  }
+/* badge */
+function badge(n){
+  unread=n; const b=g('xbadge');
+  if(n>0){ b.textContent=n>9?'9+':String(n); b.style.display='flex'; g('xfab').style.background='linear-gradient(135deg,#ef4444,#dc2626)'; }
+  else   { b.style.display='none'; g('xfab').style.background='linear-gradient(135deg,#4361ee,#7c3aed)'; }
+}
 
-  /* ── Render bubble ─────────────────────────────────── */
-  function addBubble(msg) {
-    const isCont = (lastSender === msg.sender);
-    const row    = document.createElement('div');
-    row.className = `bubble-row ${msg.sender}${isCont ? ' cont' : ''}`;
-    const ticks   = msg.sender === 'student' ? '<span class="tick">✓✓</span>' : '';
-    row.innerHTML = `
-      <div class="bubble">
-        ${esc(msg.message)}
-        <div class="bubble-meta">
-          <span class="bubble-time">${msg.timestamp}</span>
-          ${ticks}
-        </div>
-      </div>`;
-    $m().appendChild(row);
-    $m().scrollTop = $m().scrollHeight;
-    lastSender = msg.sender;
-  }
+/* bubbles */
+function addBub(msg){
+  const cont = prevSender===msg.sender;
+  const row  = document.createElement('div');
+  row.className = 'xrow '+msg.sender+(cont?' xc':'');
+  const tick = msg.sender==='student'?'<span class="xtick">✓✓</span>':'';
+  row.innerHTML = `<div class="xbub">${esc(msg.message)}<div class="xmeta"><span class="xtime">${msg.timestamp}</span>${tick}</div></div>`;
+  M().appendChild(row); M().scrollTop=M().scrollHeight; prevSender=msg.sender;
+}
+function addSys(t){ const d=document.createElement('div'); d.className='xsep'; d.innerHTML=`<span>${esc(t)}</span>`; M().appendChild(d); M().scrollTop=M().scrollHeight; prevSender=null; }
 
-  function addSystem(text) {
-    const d = document.createElement('div');
-    d.className = 'date-sep';
-    d.innerHTML = `<span>${esc(text)}</span>`;
-    $m().appendChild(d);
-    $m().scrollTop = $m().scrollHeight;
-    lastSender = null;
-  }
+/* show states */
+function showGuest(){
+  g('xguest').style.display     = 'flex';
+  M().style.display              = 'none';
+  IB().style.display             = 'none';
+  g('xclosed').style.display    = 'none';
+}
+function showChat(){
+  g('xguest').style.display     = 'none';
+  M().style.display              = 'flex';
+  g('xclosed').style.display    = 'none';
+  if(!done) IB().style.display  = 'flex';
+  setTimeout(()=>{ M().scrollTop=M().scrollHeight; },80);
+}
+function markDone(){
+  done=true;
+  IB().style.display            = 'none';
+  g('xclosed').style.display   = 'block';
+  stopPoll();
+}
 
-  /* ── Show/hide panels ──────────────────────────────── */
-  function showGuest() {
-    $('guest-form-area').style.display  = 'flex';
-    $('chat-messages').style.display    = 'none';
-    $('chat-input-area').style.display  = 'none';
-  }
-
-  function showChat() {
-    $('guest-form-area').style.display  = 'none';
-    $('chat-messages').style.display    = 'flex';
-    if (!isClosed) {
-      $('chat-input-area').style.display = 'flex';
-    }
-    setTimeout(() => {
-      $m().scrollTop = $m().scrollHeight;
-      // focus input on desktop only
-      if (window.innerWidth > 480) $('chat-input').focus();
-    }, 100);
-  }
-
-  function markClosed() {
-    isClosed = true;
-    $('chat-input-area').style.display    = 'none';
-    $('chat-closed-banner').style.display = 'block';
+/* open / close */
+function toggle(){
+  open=!open;
+  g('xbox').style.display = open ? 'flex' : 'none';
+  g('xconfirm').style.display = 'none';
+  if(open){
+    setSize(); badge(0);
+    if(!sid){ AUTH ? initAuth() : showGuest(); }
+    else { showChat(); loadAll(); startPoll(); }
+  } else {
     stopPoll();
+    g('xinput').blur();
   }
+}
 
-  /* ── Toggle ────────────────────────────────────────── */
-  window.chatToggle = function () {
-    isOpen = !isOpen;
-    const win = $('chat-window');
-    win.style.display = isOpen ? 'flex' : 'none';
-    $('chat-confirm').style.display = 'none';
-
-    if (isOpen) {
-      setBadge(0);
-      if (!sessionId) {
-        IS_AUTH ? initAuth() : showGuest();
-      } else {
-        showChat();
-        loadAll();
-        startPoll();
-      }
-    } else {
-      stopPoll();
-      $('chat-input').blur(); // close keyboard on mobile
-    }
-  };
-
-  /* ── Guest start ───────────────────────────────────── */
-  window.guestStart = async function () {
-    const name  = $('guest-name').value.trim();
-    const email = $('guest-email').value.trim();
-    if (!name) { $('guest-name').style.borderColor = '#ef4444'; return; }
-    $('guest-name').style.borderColor = '#e2e8f0';
-    const data = await post(URLS.start, { name, email });
-    if (!data) return;
-    sessionId = data.session_id;
-    localStorage.setItem('ca_chat_sid', sessionId);
+/* guest */
+function guestGo(){
+  const name=g('xgname').value.trim(), email=g('xgemail').value.trim();
+  if(!name){ g('xgname').style.borderColor='#ef4444'; return; }
+  g('xgname').style.borderColor='#e2e8f0';
+  post(URLS.start,{name,email}).then(d=>{
+    if(!d) return; sid=d.session_id; localStorage.setItem('xsid',sid);
     showChat(); loadAll(); startPoll();
-  };
+  });
+}
 
-  /* ── Auth init ─────────────────────────────────────── */
-  async function initAuth() {
-    const data = await post(URLS.start, {});
-    if (!data) return;
-    sessionId = data.session_id;
-    localStorage.setItem('ca_chat_sid', sessionId);
+/* auth */
+function initAuth(){
+  post(URLS.start,{}).then(d=>{
+    if(!d) return; sid=d.session_id; localStorage.setItem('xsid',sid);
     showChat(); loadAll(); startPoll();
-  }
+  });
+}
 
-  /* ── Load all ──────────────────────────────────────── */
-  async function loadAll() {
-    lastId = 0; lastSender = null;
-    $m().innerHTML = '';
-    await pollOnce();
-  }
+/* load */
+async function loadAll(){ lastId=0; prevSender=null; M().innerHTML=''; await pollOnce(); }
 
-  /* ── Send ──────────────────────────────────────────── */
-  window.chatSend = async function () {
-    const inp  = $('chat-input');
-    const text = inp.value.trim();
-    if (!text || !sessionId || isClosed) return;
-    inp.value = ''; inp.style.height = 'auto';
-
-    const data = await post(URLS.send, { session_id: sessionId, message: text });
-    if (data && data.message && !seenIds.has(data.message.id)) {
-      seenIds.add(data.message.id);
-      if (data.message.id > lastId) lastId = data.message.id;
-      addBubble(data.message);
+/* send */
+function send(){
+  const inp=g('xinput'), text=inp.value.trim();
+  if(!text||!sid||done) return;
+  inp.value=''; inp.style.height='auto';
+  post(URLS.send,{session_id:sid,message:text}).then(d=>{
+    if(d&&d.message&&!seen.has(d.message.id)){
+      seen.add(d.message.id); if(d.message.id>lastId) lastId=d.message.id; addBub(d.message);
     }
-  };
+  });
+}
 
-  /* ── Polling ───────────────────────────────────────── */
-  function startPoll() {
-    if (pollTimer) return;
-    pollTimer = setInterval(pollOnce, 3000);
-  }
-  function stopPoll() {
-    clearInterval(pollTimer); pollTimer = null;
-  }
+/* textarea resize */
+function resize(ta){ ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,108)+'px'; M().scrollTop=M().scrollHeight; }
 
-  async function pollOnce() {
-    if (!sessionId) return;
-    let res;
-    try {
-      res = await fetch(`${URLS.poll}${sessionId}/?after=${lastId}`);
-      if (!res.ok) return;
-    } catch (e) { return; }
+/* poll */
+function startPoll(){ if(!timer) timer=setInterval(pollOnce,3000); }
+function stopPoll(){ clearInterval(timer); timer=null; }
+async function pollOnce(){
+  if(!sid) return;
+  try{
+    const r=await fetch(`${URLS.poll}${sid}/?after=${lastId}`); if(!r.ok) return;
+    const d=await r.json();
+    d.messages.forEach(m=>{ if(m.id>lastId) lastId=m.id; if(seen.has(m.id)) return; seen.add(m.id); addBub(m); if(m.sender==='admin'&&!open){badge(unread+1);beep();} });
+    if(d.session_status==='closed'&&!done){ markDone(); addSys('Chat closed by support. Thank you!'); }
+  }catch(e){}
+}
 
-    const data = await res.json();
-    data.messages.forEach(msg => {
-      if (msg.id > lastId) lastId = msg.id;
-      if (seenIds.has(msg.id)) return;
-      seenIds.add(msg.id);
-      addBubble(msg);
-      if (msg.sender === 'admin' && !isOpen) {
-        setBadge(unread + 1);
-        playBeep();
-      }
-    });
+/* delete */
+function askDel(){ g('xconfirm').style.display='block'; }
+function noDel(){ g('xconfirm').style.display='none'; }
+function yesDel(){
+  if(sid) post(URLS.del,{session_id:sid});
+  sid=null; lastId=0; prevSender=null; done=false; unread=0; seen.clear();
+  localStorage.removeItem('xsid'); stopPoll();
+  g('xconfirm').style.display='none'; g('xclosed').style.display='none';
+  M().innerHTML=''; badge(0);
+  AUTH?initAuth():showGuest();
+}
 
-    if (data.session_status === 'closed' && !isClosed) {
-      markClosed();
-      addSystem('Chat closed by support. Thank you!');
-    }
-  }
+/* http */
+async function post(url,body){
+  try{ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify(body)}); return r.ok?r.json():null; }catch(e){return null;}
+}
 
-  /* ── Delete ────────────────────────────────────────── */
-  window.confirmDelete = function () { $('chat-confirm').style.display = 'block'; };
-  window.cancelDelete  = function () { $('chat-confirm').style.display = 'none'; };
-  window.doDelete = async function () {
-    if (sessionId) await post(URLS.del, { session_id: sessionId });
-    sessionId = null; lastId = 0; lastSender = null;
-    isClosed = false; unread = 0; seenIds.clear();
-    localStorage.removeItem('ca_chat_sid');
-    stopPoll();
-    $('chat-confirm').style.display       = 'none';
-    $('chat-closed-banner').style.display = 'none';
-    $m().innerHTML = '';
-    setBadge(0);
-    IS_AUTH ? initAuth() : showGuest();
-  };
+/* beep */
+function beep(){ try{ const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g2=c.createGain(); o.connect(g2);g2.connect(c.destination);o.frequency.value=880;g2.gain.setValueAtTime(.2,c.currentTime);g2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.3);o.start();o.stop(c.currentTime+.3); }catch(e){} }
 
-  /* ── HTTP ──────────────────────────────────────────── */
-  async function post(url, body) {
-    try {
-      const r = await fetch(url, {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-        body   : JSON.stringify(body),
-      });
-      return r.ok ? r.json() : null;
-    } catch (e) { return null; }
-  }
+/* page load silent check */
+if(sid){
+  fetch(`${URLS.poll}${sid}/?after=0`).then(r=>r.ok?r.json():null).then(d=>{
+    if(!d){sid=null;localStorage.removeItem('xsid');return;}
+    let nu=0; d.messages.forEach(m=>{seen.add(m.id);if(m.id>lastId)lastId=m.id;if(m.sender==='admin'&&!m.is_read)nu++;});
+    if(nu>0)badge(nu); if(d.session_status==='closed')done=true;
+  }).catch(()=>{sid=null;localStorage.removeItem('xsid');});
+}
 
-  /* ── Sound ─────────────────────────────────────────── */
-  function playBeep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const g   = ctx.createGain();
-      osc.connect(g); g.connect(ctx.destination);
-      osc.frequency.value = 880;
-      g.gain.setValueAtTime(0.2, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc.start(); osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {}
-  }
-
-  /* ── Page load: silent unread check ───────────────── */
-  if (sessionId) {
-    fetch(`${URLS.poll}${sessionId}/?after=0`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (!data) { sessionId = null; localStorage.removeItem('ca_chat_sid'); return; }
-        let nu = 0;
-        data.messages.forEach(m => {
-          seenIds.add(m.id);
-          if (m.id > lastId) lastId = m.id;
-          if (m.sender === 'admin' && !m.is_read) nu++;
-        });
-        if (nu > 0) setBadge(nu);
-        if (data.session_status === 'closed') isClosed = true;
-      })
-      .catch(() => { sessionId = null; localStorage.removeItem('ca_chat_sid'); });
-  }
-
+return {toggle,guestGo,send,resize,askDel,noDel,yesDel};
 })();
 </script>
