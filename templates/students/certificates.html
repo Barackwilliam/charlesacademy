@@ -28,12 +28,36 @@
     letter-spacing: 0.5px;
     padding: 4px 10px;
     border-radius: 20px;
+    display: inline-block;
   }
   .empty-state {
     padding: 80px 20px;
     text-align: center;
   }
   .empty-state i { font-size: 80px; color: #dee2e6; }
+
+  /* Download button — make it feel native on mobile */
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    background: linear-gradient(135deg, #4361ee, #7c3aed);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: opacity .2s;
+    /* important for mobile: treat as button, not link */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .btn-download:hover  { opacity: .88; color: white; }
+  .btn-download:active { transform: scale(.96); }
 </style>
 {% endblock %}
 
@@ -59,7 +83,8 @@
   {% if messages %}
     {% for msg in messages %}
       <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
-        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     {% endfor %}
   {% endif %}
@@ -70,8 +95,8 @@
     <div class="col-md-6 col-xl-4">
       <div class="cert-card card h-100">
 
-        <!-- Coloured top strip based on type -->
-        <div style="height:5px; background:
+        <!-- Coloured top strip -->
+        <div style="height: 5px; background:
           {% if cert.cert_type == 'EXCELLENCE' %}linear-gradient(90deg,#f59e0b,#fbbf24)
           {% elif cert.cert_type == 'ACHIEVEMENT' %}linear-gradient(90deg,#4361ee,#7c3aed)
           {% elif cert.cert_type == 'ATTENDANCE' %}linear-gradient(90deg,#10b981,#34d399)
@@ -81,6 +106,7 @@
 
         <div class="card-body p-4">
           <div class="d-flex align-items-start gap-3 mb-3">
+
             <!-- Icon -->
             <div class="cert-icon
               {% if cert.cert_type == 'EXCELLENCE' %}bg-warning bg-opacity-15
@@ -120,12 +146,14 @@
               <i class="bi bi-calendar3 me-1"></i>
               {{ cert.issued_date|date:"d M Y" }}
             </small>
+
+            {{!-- ✅ Download link — triggers browser download directly --}}
             <a href="{% url 'students:download_certificate' cert.id %}"
-            class="btn btn-sm btn-primary rounded-pill px-3"
-            download>
-            <i class="bi bi-download me-1"></i> Download
-          </a>
-                    </div>
+               class="btn-download"
+               download="Certificate_{{ cert.title|slugify }}.pdf">
+              <i class="bi bi-download"></i> Download
+            </a>
+          </div>
         </div>
 
       </div>

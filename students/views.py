@@ -1631,7 +1631,6 @@ def _proxy_uploadcare_file(uuid, filename=None):
 # ─────────────────────────────────────────────────────────────────
 #  1. students/views.py — badilisha download_certificate
 # ─────────────────────────────────────────────────────────────────
-
 @login_required
 def download_certificate(request, cert_id):
     """Download certificate — proxy kupitia Uploadcare API."""
@@ -1655,15 +1654,22 @@ def download_certificate(request, cert_id):
 
         django_response = StreamingHttpResponse(
             response.iter_content(chunk_size=8192),
-            content_type=content_type
+            content_type=content_type,
         )
-        # django_response['Content-Disposition'] = f'inline; filename="{filename}"'
-        response['Content-Disposition'] = 'attachment; filename="..."'  # ← hii inadownload        
 
-    except Http404:
+        # ✅ FIX: set on django_response, NOT on requests response
+        django_response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        # ✅ Allow browsers to show download progress
+        content_length = response.headers.get('Content-Length')
+        if content_length:
+            django_response['Content-Length'] = content_length
+
+        return django_response
+
+    except Exception:
         messages.error(request, "Certificate file could not be retrieved.")
         return redirect('students:my_certificates')
-    
 
 # ── Admin: upload certificate kwa student fulani (optional extra view) ──────
 @login_required
