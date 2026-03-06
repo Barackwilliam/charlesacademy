@@ -14,6 +14,8 @@ urlpatterns = [
     path('fees/', include('fees.urls')),
     path('accounts/', include('accounts.urls')),
     path('parents/', include('parents.urls', namespace='parents')),
+    path('chat/', include('chat.urls', namespace='chat')),  
+
 
     ]
 

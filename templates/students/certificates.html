@@ -121,10 +121,11 @@
               {{ cert.issued_date|date:"d M Y" }}
             </small>
             <a href="{% url 'students:download_certificate' cert.id %}"
-               class="btn btn-sm btn-primary rounded-pill px-3">
-              <i class="bi bi-download me-1"></i> Download
-            </a>
-          </div>
+            class="btn btn-sm btn-primary rounded-pill px-3"
+            download>
+            <i class="bi bi-download me-1"></i> Download
+          </a>
+                    </div>
         </div>
 
       </div>

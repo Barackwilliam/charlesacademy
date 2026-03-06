@@ -15,19 +15,12 @@
             <div class="card-body text-center">
                 <!-- School Logo Display -->
                 <div class="logo-container mb-3">
-                    {% if school_settings.logo %}
-                    <img src="{{ school_settings.logo.url }}" 
+                    <img src="{% static 'images/logo.jpeg' %}" 
                          alt="{{ school_settings.name }} Logo" 
                          class="img-fluid rounded-circle border" 
                          style="width: 120px; height: 120px; object-fit: cover;"
                          id="logoPreview">
-                    {% else %}
-                    <div class="logo-placeholder rounded-circle border d-flex align-items-center justify-content-center mx-auto" 
-                         style="width: 120px; height: 120px; background-color: #e9ecef;"
-                         id="logoPreview">
-                        <i class="bi bi-building text-secondary" style="font-size: 3rem;"></i>
-                    </div>
-                    {% endif %}
+                  
                 </div>
                 
                 <h4 class="mb-2">{{ school_settings.name }}</h4>
@@ -230,7 +223,7 @@
                                 </div>
                                 {% endif %}
                                 <div class="form-text">
-                                    Format: "2025" or "2025-2026"
+                                    Format: "2026" or "2026-2027"
                                 </div>
                             </div>
                             

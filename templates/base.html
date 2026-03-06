@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1188,16 +1189,10 @@
                 <div class="logo-container">
                     <!-- School Logo - Dynamic from SchoolSettings -->
                     <div class="school-logo logo-glow">
-                        {% if school_settings and school_settings.logo %}
-                            <img src="{{ school_settings.logo.url }}" 
-                                 alt="{{ school_settings.name }} Logo" 
+                            <img src="{% static 'images/logo.jpeg' %}" 
+                                 alt="Logo" 
                                  title="{{ school_settings.name }}"
                                  loading="lazy">
-                        {% else %}
-                            <div class="logo-placeholder">
-                                <i class="bi bi-mortarboard-fill"></i>
-                            </div>
-                        {% endif %}
                     </div>
                     
                     <!-- School Name and Info -->
@@ -1250,8 +1245,12 @@
                                 <i class="bi bi-gear nav-icon"></i>
                                 <span class="nav-text">School Settings</span>
                             </a>
+                        </div><div class="nav-item">
+                            <a href="{% url 'chat:admin_panel' %}" class="nav-link">
+                            <i class="bi bi-headset me-2"></i>Live Chat
+                        </a>
                         </div>
-                        
+                                                
                         <!-- Students -->
                         <div class="nav-item">
                             <a href="{% url 'students:student_list' %}" class="nav-link {% if 'students' in request.path and 'student' not in request.path %}active{% endif %}">
@@ -1336,32 +1335,32 @@
                         <!-- My Fees -->
                         <div class="nav-item">
                             <a href="{% url 'exams:my_assignments' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
-                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <i class="bi bi-journal-text nav-icon"></i>
                                 <span class="nav-text">My Assignments</span>
                             </a>
                         </div><div class="nav-item">
                             <a href="{% url 'students:download_id_card' student.id %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
-                                <i class="bi bi-cash-stack nav-icon"></i>
-                                <span class="nav-text">Dwnload ID card</span>
+                                <i class="bi bi-person-badge nav-icon"></i>
+                                <span class="nav-text">Download ID card</span>
                             </a>
                         </div><div class="nav-item">
                             <a href="{% url 'students:my_id_card' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
-                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <i class="bi bi-eye nav-icon"></i>
                                 <span class="nav-text">My ID card</span>
                             </a>
                         </div><div class="nav-item">
                             <a href="{% url 'students:my_certificates' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
-                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <i class="bi bi-patch-check nav-icon"></i>
                                 <span class="nav-text">My Certificate</span>
                             </a>
                         </div><div class="nav-item">
                             {% if has_results %}
                             <a href="{% url 'students:download_results_pdf' %}" class="nav-link {% if 'my-fees' in request.path or 'fees/student' in request.path %}active{% endif %}">
-                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <i class="bi bi-file-earmark-pdf nav-icon"></i>
                                 <span class="nav-text">Download Results PDF</span>
                             </a>
                              {% else %}
-                                <i class="bi bi-cash-stack nav-icon"></i>
+                                <i class="bi bi-file-earmark-pdf nav-icon"></i>
                                 <span class="nav-text">No Results uploaded</span>
                             {% endif %}
 
@@ -1989,5 +1988,8 @@
     </script>
     
     {% block extra_js %}{% endblock %}
+
+    {% include 'chat/widget.html' %}
+
 </body>
 </html>

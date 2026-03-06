@@ -1657,8 +1657,8 @@ def download_certificate(request, cert_id):
             response.iter_content(chunk_size=8192),
             content_type=content_type
         )
-        django_response['Content-Disposition'] = f'inline; filename="{filename}"'
-        return django_response
+        # django_response['Content-Disposition'] = f'inline; filename="{filename}"'
+        response['Content-Disposition'] = 'attachment; filename="..."'  # ← hii inadownload        
 
     except Http404:
         messages.error(request, "Certificate file could not be retrieved.")
