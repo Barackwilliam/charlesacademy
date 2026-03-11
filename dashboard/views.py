@@ -46,7 +46,8 @@ from fees.models import FeePayment, FeeStructure
 
 
 def index(request):
-    return render(request, 'dashboard/home.html')
+    return render(request, 'dashboard/close.html')
+    # return render(request, 'dashboard/home.html')
 
 
 @login_required

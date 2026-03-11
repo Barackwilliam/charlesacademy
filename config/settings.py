@@ -28,7 +28,7 @@ DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
 #tumukunde@123
-# Application definition arakaza@123
+# CA/ENG/2025/0097
 #tuhabonyimana@123
 INSTALLED_APPS = [
     'django.contrib.admin',
