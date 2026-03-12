@@ -78,18 +78,23 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
+CKEDITOR_UPLOAD_PATH = 'uploads/' 
+JAMIITEK_API_KEY = "aUCcifkWO6gs_g4JwLVV7KjtC2Y3ppILL4YqTB3MFyongLcIEEEH5AImNYHGX76N"
+JAMIITEK_API_URL = "https://jamiitek.com/api/site-status/"
+
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'students.middleware.AutoLinkStudentMiddleware',
+    'jamiitek_middleware.JamiiTekStatusMiddleware',  # This one here
 
 ]
+
 
 ROOT_URLCONF = 'config.urls'
 
