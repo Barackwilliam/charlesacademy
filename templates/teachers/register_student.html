@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block page_title %}Register Student{% endblock %}
+{% block content %}
+
+<div class="container-fluid px-2">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-person-plus text-success me-2"></i>Register Student</h2>
+            <p class="text-muted mb-0 small">Add a new student to your assigned class</p>
+        </div>
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Form -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-person-fill text-success me-2"></i>Student Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Full Name *</label>
+                            <input type="text" name="full_name" class="form-control"
+                                   placeholder="e.g. John William Banda" required>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label fw-semibold small">Email *</label>
+                                <input type="email" name="email" class="form-control"
+                                       placeholder="student@example.com" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label fw-semibold small">Registration No *</label>
+                                <input type="text" name="registration_number" class="form-control"
+                                       placeholder="e.g. CA2025-001" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label fw-semibold small">Class *</label>
+                                <select name="classroom" class="form-select" required>
+                                    <option value="">-- Select Class --</option>
+                                    {% for c in assigned_classes %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label fw-semibold small">Admission Year</label>
+                                <input type="number" name="admission_year" class="form-control"
+                                       value="{{ current_year }}" min="2000" max="2100">
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-person-plus me-2"></i>Register Student
+                            </button>
+                            <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm bg-primary bg-opacity-5 border-start border-primary border-3">
+                <div class="card-body">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Your Assigned Classes
+                    </h6>
+                    {% for c in assigned_classes %}
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-building text-primary"></i>
+                        <span class="fw-semibold">{{ c.name }}</span>
+                        <span class="badge bg-primary ms-auto">
+                            {{ c.student_set.count }} students
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small">No classes assigned. Contact admin.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-lightbulb text-warning me-2"></i>Tips
+                    </h6>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Email must be unique</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Registration number must be unique</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>You can only register students into your assigned classes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

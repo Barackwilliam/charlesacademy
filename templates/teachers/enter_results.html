@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block page_title %}Enter Exam Results{% endblock %}
+{% block content %}
+
+<div class="container-fluid px-2">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-graph-up-arrow text-warning me-2"></i>Enter Exam Results
+            </h2>
+            <p class="text-muted mb-0 small">Ingiza matokeo ya mtihani</p>
+        </div>
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form method="GET" id="filterForm">
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label small fw-semibold mb-1">Class</label>
+                        <select name="class_id" class="form-select form-select-sm" id="classSelect">
+                            <option value="">-- Select Class --</option>
+                            {% for c in assigned_classes %}
+                            <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                                {{ c.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label small fw-semibold mb-1">Exam</label>
+                        <select name="exam_id" class="form-select form-select-sm">
+                            <option value="">-- Select Exam --</option>
+                            {% for e in exams %}
+                            <option value="{{ e.id }}" {% if selected_exam == e.id|stringformat:"s" %}selected{% endif %}>
+                                {{ e.name }} — {{ e.date|date:"d M Y" }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <label class="form-label small fw-semibold mb-1">Subject</label>
+                        <select name="subject_id" class="form-select form-select-sm">
+                            <option value="">-- Select Subject --</option>
+                            {% for s in assigned_subjects %}
+                            <option value="{{ s.id }}" {% if selected_subject == s.id|stringformat:"s" %}selected{% endif %}>
+                                {{ s.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-1">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if exam_obj and subject_obj and students %}
+    <!-- Results Entry Form -->
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="fw-bold mb-0">{{ exam_obj.name }} &nbsp;—&nbsp; {{ subject_obj.name }}</h6>
+                    <small class="text-muted">{{ exam_obj.classroom.name }} &nbsp;·&nbsp; {{ exam_obj.date|date:"F d, Y" }}</small>
+                </div>
+                <span class="badge bg-warning text-dark">{{ students|length }} students</span>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="class_id"    value="{{ selected_class }}">
+            <input type="hidden" name="exam_id"     value="{{ selected_exam }}">
+            <input type="hidden" name="subject_id"  value="{{ selected_subject }}">
+
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3" style="width:44px">#</th>
+                            <th>Student</th>
+                            <th class="d-none d-md-table-cell">Reg No</th>
+                            <th style="min-width:140px">Marks (0–100)</th>
+                            <th class="d-none d-sm-table-cell">Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td class="ps-3 text-muted">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-warning bg-opacity-20 text-warning d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                         style="width:34px;height:34px;font-size:.8rem">
+                                        {{ student.full_name|slice:":1"|upper }}
+                                    </div>
+                                    <span class="fw-semibold small">{{ student.full_name }}</span>
+                                </div>
+                            </td>
+                            <td class="d-none d-md-table-cell text-muted small">{{ student.registration_number }}</td>
+                            <td>
+                                <input type="number"
+                                       name="marks_{{ student.id }}"
+                                       class="form-control form-control-sm marks-input"
+                                       min="0" max="100"
+                                       placeholder="—"
+                                       value=""
+                                       data-id="{{ student.id }}"
+                                       style="max-width:100px">
+                            </td>
+                            <td class="d-none d-sm-table-cell">
+                                <span class="grade-badge badge bg-secondary" id="grade_{{ student.id }}">—</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <small class="text-muted">Enter marks for each student (leave blank to skip)</small>
+                <button type="submit" class="btn btn-warning fw-semibold px-4">
+                    <i class="bi bi-save me-1"></i>Save Results
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    // Pre-fill existing marks from server
+    const existingMarks = {{ existing_marks_json|safe }};
+    document.querySelectorAll('.marks-input').forEach(inp => {
+        const sid = inp.dataset.id;
+        if (existingMarks && existingMarks[sid] !== undefined) {
+            inp.value = existingMarks[sid];
+            updateGrade(sid, existingMarks[sid]);
+        }
+        inp.addEventListener('input', function() {
+            updateGrade(sid, parseInt(this.value));
+        });
+    });
+
+    function updateGrade(sid, marks) {
+        const badge = document.getElementById('grade_' + sid);
+        if (!badge) return;
+        if (isNaN(marks) || marks === '' || marks === null) { badge.textContent = '—'; badge.className = 'grade-badge badge bg-secondary'; return; }
+        let g, cls;
+        if (marks >= 80)      { g = 'A'; cls = 'bg-success'; }
+        else if (marks >= 70) { g = 'B'; cls = 'bg-primary'; }
+        else if (marks >= 60) { g = 'C'; cls = 'bg-info'; }
+        else if (marks >= 50) { g = 'D'; cls = 'bg-warning text-dark'; }
+        else if (marks >= 40) { g = 'E'; cls = 'bg-secondary'; }
+        else                  { g = 'F'; cls = 'bg-danger'; }
+        badge.textContent = g;
+        badge.className = 'grade-badge badge ' + cls;
+    }
+    </script>
+
+    {% elif selected_class %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="bi bi-clipboard2-x display-5 opacity-30 d-block mb-3"></i>
+            <h6>Select an exam and subject to enter results</h6>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="bi bi-funnel display-5 opacity-30 d-block mb-3"></i>
+            <h6>Select a class first to load exams and students</h6>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('classSelect')?.addEventListener('change', function() {
+    document.getElementById('filterForm').submit();
+});
+</script>
+
+{% endblock %}

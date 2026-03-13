@@ -1,35 +1,290 @@
-<!-- teachers/dashboard.html -->
 {% extends 'base.html' %}
+{% block page_title %}Teacher Dashboard{% endblock %}
 {% block content %}
 
-<h3>Welcome {{ teacher.first_name }}</h3>
+{% load static %}
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card p-3">
-            <h5>My Subjects</h5>
-            <ul>
-                {% for s in subjects %}
-                    <li>{{ s.name }}</li>
+<div class="container-fluid px-2">
+
+    <!-- Welcome Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                Hello, {{ teacher.first_name }} 👋
+            </h2>
+            <p class="text-muted mb-0 small">
+                <i class="bi bi-person-badge me-1"></i>
+                Teacher &nbsp;|&nbsp;
+                {% for c in assigned_classes %}
+                    <span class="badge bg-primary bg-opacity-75 me-1">{{ c.name }}</span>
                 {% empty %}
-                    <li>No subjects assigned</li>
+                    <span class="text-warning">No classes assigned yet</span>
                 {% endfor %}
-            </ul>
+            </p>
+        </div>
+        <div class="d-none d-md-block">
+            <span class="badge bg-light text-dark border fs-6 px-3 py-2">
+                <i class="bi bi-calendar3 me-1"></i>
+                <span id="tdDate"></span>
+            </span>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card p-3">
-            <h5>My Classes</h5>
-            <ul>
-                {% for c in classes %}
-                    <li>{{ c.name }}</li>
-                {% empty %}
-                    <li>No classes assigned</li>
-                {% endfor %}
-            </ul>
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-15 p-3 d-flex">
+                        <i class="bi bi-people-fill text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-3 lh-1">{{ total_students }}</div>
+                        <small class="text-muted">My Students</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-15 p-3 d-flex">
+                        <i class="bi bi-building text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-3 lh-1">{{ assigned_classes|length }}</div>
+                        <small class="text-muted">Classes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-15 p-3 d-flex">
+                        <i class="bi bi-book text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-3 lh-1">{{ assigned_subjects|length }}</div>
+                        <small class="text-muted">Subjects</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-info bg-opacity-15 p-3 d-flex">
+                        <i class="bi bi-calendar-check text-info fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-3 lh-1">{{ upcoming_exams|length }}</div>
+                        <small class="text-muted">Upcoming Exams</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h6 class="text-uppercase fw-bold text-muted small mb-3 letter-spacing-1">
+        <i class="bi bi-lightning-charge me-1"></i>Quick Actions
+    </h6>
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'attendance:teacher_mark_attendance' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 action-card border-start border-primary border-4">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-3 bg-primary bg-opacity-15 p-2 d-flex">
+                                <i class="bi bi-calendar-check-fill text-primary fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Mark Attendance</h6>
+                                <small class="text-muted">Weka mahudhurio ya wanafunzi</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'teacher_register_student' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 action-card border-start border-success border-4">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-3 bg-success bg-opacity-15 p-2 d-flex">
+                                <i class="bi bi-person-plus-fill text-success fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Register Student</h6>
+                                <small class="text-muted">Weka mwanafunzi mpya</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'teacher_enter_results' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 action-card border-start border-warning border-4">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-3 bg-warning bg-opacity-15 p-2 d-flex">
+                                <i class="bi bi-graph-up-arrow text-warning fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Enter Results</h6>
+                                <small class="text-muted">Ingiza matokeo ya mtihani</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'attendance:student_attendance_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 action-card border-start border-info border-4">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-3 bg-info bg-opacity-15 p-2 d-flex">
+                                <i class="bi bi-clipboard2-data-fill text-info fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">View Records</h6>
+                                <small class="text-muted">Tazama kumbukumbu zote</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Two column layout: Classes + Recent Results -->
+    <div class="row g-3">
+
+        <!-- My Classes & Subjects -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-2">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-building text-success me-2"></i>My Classes & Subjects
+                    </h6>
+                </div>
+                <div class="card-body pt-0">
+                    {% for cls in assigned_classes %}
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary px-3 py-1 fs-6">{{ cls.name }}</span>
+                        </div>
+                        <div class="ms-2">
+                            {% for subj in assigned_subjects %}
+                                {% if subj.classroom == cls %}
+                                <span class="badge bg-light text-dark border me-1 mb-1">
+                                    <i class="bi bi-book me-1 text-muted small"></i>{{ subj.name }}
+                                </span>
+                                {% endif %}
+                            {% empty %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center py-3">No classes assigned yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Exams -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-2">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-calendar-event text-warning me-2"></i>Upcoming Exams
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    {% for exam in upcoming_exams %}
+                    <div class="d-flex align-items-start gap-3 px-3 py-2 border-bottom">
+                        <div class="bg-warning bg-opacity-15 rounded-2 text-center px-2 py-1 flex-shrink-0">
+                            <div class="fw-bold text-warning lh-1" style="font-size:.7rem">
+                                {{ exam.date|date:"M" }}
+                            </div>
+                            <div class="fw-bold text-dark">{{ exam.date|date:"d" }}</div>
+                        </div>
+                        <div>
+                            <div class="fw-semibold small">{{ exam.name }}</div>
+                            <div class="text-muted" style="font-size:.75rem">{{ exam.classroom.name }}</div>
+                        </div>
+                        <span class="badge bg-secondary ms-auto align-self-center" style="font-size:.7rem">
+                            {{ exam.exam_type }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center py-4">No upcoming exams.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Results -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-2">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-graph-up-arrow text-info me-2"></i>Recent Results
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    {% for r in recent_results %}
+                    <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+                        <div class="avatar-sm rounded-circle bg-info bg-opacity-15 text-info d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                             style="width:32px;height:32px;font-size:.75rem">
+                            {{ r.student.full_name|slice:":1"|upper }}
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="fw-semibold small text-truncate">{{ r.student.full_name }}</div>
+                            <div class="text-muted" style="font-size:.72rem">{{ r.subject.name }}</div>
+                        </div>
+                        <span class="badge {% if r.marks >= 80 %}bg-success{% elif r.marks >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %} px-2">
+                            {{ r.marks }}%
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center py-4">No results recorded yet.</p>
+                    {% endfor %}
+                    {% if recent_results %}
+                    <div class="text-center py-2">
+                        <a href="{% url 'teacher_enter_results' %}" class="small text-primary">
+                            Enter more results →
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.action-card { transition: transform .15s ease, box-shadow .15s ease; cursor:pointer; }
+.action-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.12) !important; }
+.min-w-0 { min-width: 0; }
+.letter-spacing-1 { letter-spacing: .08em; }
+</style>
+
+<script>
+(function(){
+    const d = new Date();
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    const el = document.getElementById('tdDate');
+    if (el) el.textContent = d.toLocaleDateString('en-US', opts);
+})();
+</script>
 
 {% endblock %}

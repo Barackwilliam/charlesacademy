@@ -1,43 +1,114 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
+{% block page_title %}Edit Teacher{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h2>Edit Teacher</h2>
+<div class="container-fluid">
 
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="mb-3">
-            <label>First Name</label>
-            <input type="text" name="first_name" class="form-control"
-                   value="{{ teacher.first_name }}" required>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Edit Teacher</h1>
+            <p class="text-muted mb-0 small">{{ teacher.full_name }}</p>
         </div>
-
-        <div class="mb-3">
-            <label>Last Name</label>
-            <input type="text" name="last_name" class="form-control"
-                   value="{{ teacher.last_name }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label>Email</label>
-            <input type="email" name="email" class="form-control"
-                   value="{{ teacher.email }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label>Phone</label>
-            <input type="text" name="phone" class="form-control"
-                   value="{{ teacher.phone }}" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-            Update Teacher
-        </button>
-
-        <a href="{% url 'teacher_list' %}" class="btn btn-secondary">
-            Cancel
+        <a href="{% url 'teacher_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back
         </a>
-    </form>
+    </div>
+
+    {% if messages %}
+    <div class="mb-3">
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show py-2">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Personal Info -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-person-badge me-2"></i>Personal Information
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">First Name *</label>
+                                <input type="text" name="first_name" class="form-control"
+                                       value="{{ teacher.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Last Name *</label>
+                                <input type="text" name="last_name" class="form-control"
+                                       value="{{ teacher.last_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Email *</label>
+                                <input type="email" name="email" class="form-control"
+                                       value="{{ teacher.email }}" required>
+                                <div class="form-text">Changing email will update login username & reset password</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Phone *</label>
+                                <input type="text" name="phone" class="form-control"
+                                       value="{{ teacher.phone }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" name="is_available"
+                                           id="isAvailable" {% if teacher.is_available %}checked{% endif %}>
+                                    <label class="form-check-label fw-medium small" for="isAvailable">
+                                        Teacher is Available
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Classes & Subjects -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-building me-2"></i>Classes & Subjects
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Classes</label>
+                                <select name="classes" class="form-select" multiple size="5">
+                                    {% for c in classes %}
+                                    <option value="{{ c.id }}"
+                                        {% if c.id in assigned_class_ids %}selected{% endif %}>
+                                        {{ c.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Subjects</label>
+                                <select name="subjects" class="form-select" multiple size="5">
+                                    {% for s in subjects %}
+                                    <option value="{{ s.id }}"
+                                        {% if s.id in assigned_subject_ids %}selected{% endif %}>
+                                        {{ s.name }} ({{ s.classroom.name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-2 border-top">
+                            <a href="{% url 'teacher_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i>Update Teacher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,181 +1,204 @@
 {% extends 'base.html' %}
-{% block page_title %}Mark Student Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
 {% block content %}
+
 <div class="container-fluid px-0 px-sm-2">
+
     <!-- Header -->
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 gap-2">
-        <div class="flex-grow-1">
-            <h1 class="fw-bold mb-1 fs-4 fs-md-3">Mark Student Attendance</h1>
-            <p class="text-muted mb-0 fs-6">{{ today }}</p>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+        <div>
+            <h1 class="fw-bold mb-1 fs-4">
+                <i class="bi bi-calendar-check text-primary me-2"></i>Mark Attendance
+            </h1>
+            <p class="text-muted mb-0 small">
+                {% if subject_obj %}<span class="badge bg-primary me-1">{{ subject_obj.name }}</span>{% endif %}
+                {{ today|date:"l, F d, Y" }}
+            </p>
         </div>
-        <div class="w-100 w-sm-auto">
-            <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary d-block d-sm-inline-block">
-                <i class="bi bi-arrow-left me-1"></i> <span>View Records</span>
-            </a>
+        {% if is_teacher_view %}
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+        {% else %}
+        <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-list-check me-1"></i>View Records
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-3">
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show py-2" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form method="GET" id="filterForm">
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label class="form-label small fw-semibold mb-1">
+                            <i class="bi bi-building me-1 text-primary"></i>Class
+                        </label>
+                        <select name="class_id" class="form-select form-select-sm" id="classSelect">
+                            <option value="">-- All Classes --</option>
+                            {% for c in classes %}
+                            <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                                {{ c.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label class="form-label small fw-semibold mb-1">
+                            <i class="bi bi-book me-1 text-success"></i>Subject
+                        </label>
+                        <select name="subject_id" class="form-select form-select-sm">
+                            <option value="">-- General / All --</option>
+                            {% for s in subjects %}
+                            <option value="{{ s.id }}" {% if selected_subject == s.id|stringformat:"s" %}selected{% endif %}>
+                                {{ s.name }}{% if not is_teacher_view %} ({{ s.classroom.name }}){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label class="form-label small fw-semibold mb-1">
+                            <i class="bi bi-calendar3 me-1 text-warning"></i>Date
+                        </label>
+                        <input type="date" name="date" class="form-control form-control-sm"
+                               value="{{ selected_date }}" max="{{ today|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-2">
+                        <label class="form-label small fw-semibold mb-1">
+                            <i class="bi bi-search me-1 text-info"></i>Search
+                        </label>
+                        <input type="text" name="search" class="form-control form-control-sm"
+                               placeholder="Name / Reg No..." value="{{ search_query }}" id="liveSearch">
+                    </div>
+                    <div class="col-12 col-md-1">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="row row-cols-2 row-cols-sm-4 g-2 g-sm-3 mb-3 mb-sm-4">
+    <!-- Stats -->
+    <div class="row row-cols-2 row-cols-sm-4 g-2 mb-4">
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-2 p-sm-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="me-2">
-                            <h6 class="text-muted mb-0 fs-7">Total</h6>
-                            <h3 class="fw-bold mb-0 fs-5">{{ students|length }}</h3>
-                        </div>
-                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-1 p-sm-2">
-                            <i class="bi bi-people-fill text-primary fs-6"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="card border-0 shadow-sm text-center py-2">
+                <h2 class="fw-bold mb-0 text-primary" id="totalCount">{{ students|length }}</h2>
+                <small class="text-muted">Total</small>
             </div>
         </div>
-        
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-2 p-sm-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="me-2">
-                            <h6 class="text-muted mb-0 fs-7">Present</h6>
-                            <h3 class="fw-bold mb-0 fs-5" id="presentCount">0</h3>
-                        </div>
-                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-1 p-sm-2">
-                            <i class="bi bi-check-circle text-success fs-6"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="card border-0 shadow-sm text-center py-2">
+                <h2 class="fw-bold mb-0 text-success" id="presentCount">0</h2>
+                <small class="text-muted">Present</small>
             </div>
         </div>
-        
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-2 p-sm-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="me-2">
-                            <h6 class="text-muted mb-0 fs-7">Absent</h6>
-                            <h3 class="fw-bold mb-0 fs-5" id="absentCount">0</h3>
-                        </div>
-                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-circle p-1 p-sm-2">
-                            <i class="bi bi-x-circle text-danger fs-6"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="card border-0 shadow-sm text-center py-2">
+                <h2 class="fw-bold mb-0 text-danger" id="absentCount">0</h2>
+                <small class="text-muted">Absent</small>
             </div>
         </div>
-        
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-2 p-sm-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="me-2">
-                            <h6 class="text-muted mb-0 fs-7">Late</h6>
-                            <h3 class="fw-bold mb-0 fs-5" id="lateCount">0</h3>
-                        </div>
-                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-1 p-sm-2">
-                            <i class="bi bi-clock text-warning fs-6"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="card border-0 shadow-sm text-center py-2">
+                <h2 class="fw-bold mb-0 text-warning" id="lateCount">0</h2>
+                <small class="text-muted">Late</small>
             </div>
         </div>
     </div>
 
     <!-- Attendance Form -->
-    <div class="card border-0 shadow-lg overflow-hidden">
-        <div class="card-header bg-white border-0 py-2 py-sm-3">
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-                <div class="flex-grow-1">
-                    <h5 class="mb-0 fw-bold fs-5">
-                        <i class="bi bi-calendar-check text-primary me-1 me-sm-2"></i>
-                        <span>Attendance for {{ today|date:"F d, Y" }}</span>
-                    </h5>
-                    <small class="text-muted fs-7">Select attendance status for each student</small>
-                </div>
-                <div class="d-flex flex-wrap gap-1 w-100 w-sm-auto mt-1 mt-sm-0">
-                    <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 flex-sm-grow-0" id="markAllPresent">
-                        <i class="bi bi-check-all me-1"></i> <span class="d-none d-sm-inline">Mark All</span>
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 flex-sm-grow-0" id="resetAll">
-                        <i class="bi bi-arrow-clockwise me-1"></i> <span class="d-none d-sm-inline">Reset</span>
-                    </button>
-                </div>
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0 fw-bold">
+                    Attendance — {{ today|date:"F d, Y" }}
+                    {% if subject_obj %}<span class="badge bg-primary ms-2">{{ subject_obj.name }}</span>{% endif %}
+                </h5>
+                <small class="text-muted">
+                    {% if students %}{{ students|length }} student{{ students|length|pluralize }} found
+                    {% else %}Select a class to load students{% endif %}
+                </small>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-success btn-sm" id="markAllPresent">
+                    <i class="bi bi-check-all me-1"></i>All Present
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="resetAll">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                </button>
             </div>
         </div>
-        
+
         <form method="POST" id="attendanceForm">
             {% csrf_token %}
-            
+            <input type="hidden" name="class_id"        value="{{ selected_class }}">
+            <input type="hidden" name="subject_id"      value="{{ selected_subject }}">
+            <input type="hidden" name="attendance_date" value="{{ selected_date }}">
+            <input type="hidden" name="search"          value="{{ search_query }}">
+
             <div class="card-body p-0">
+                {% if students %}
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0" id="attendanceTable">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-2 ps-sm-3" style="width: 40px;">#</th>
+                                <th class="ps-3" style="width:44px">#</th>
                                 <th>Student</th>
                                 <th class="d-none d-md-table-cell">Class</th>
-                                <th style="min-width: 100px;">Status</th>
-                                <th class="text-end pe-2 pe-sm-3" style="min-width: 120px;">Actions</th>
+                                <th style="min-width:130px">Status</th>
+                                <th class="text-end pe-3" style="min-width:120px">Quick</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for student in students %}
-                            <tr class="attendance-row" data-student-id="{{ student.id }}">
-                                <td class="ps-2 ps-sm-3">{{ forloop.counter }}</td>
+                            <tr class="attendance-row" data-student-id="{{ student.id }}"
+                                data-name="{{ student.full_name|lower }}">
+                                <td class="ps-3 text-muted small">{{ forloop.counter }}</td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2 me-sm-3 flex-shrink-0" 
-                                             style="width: 36px; height: 36px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary bg-opacity-15 text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                             style="width:36px;height:36px;font-size:.85rem">
                                             {{ student.full_name|slice:":1"|upper }}
                                         </div>
-                                        <div class="min-w-0">
-                                            <h6 class="mb-0 fw-bold fs-6 text-truncate">{{ student.full_name }}</h6>
-                                            <small class="text-muted fs-7 d-block text-truncate">{{ student.registration_number }}</small>
+                                        <div>
+                                            <div class="fw-semibold small">{{ student.full_name }}</div>
+                                            <div class="text-muted" style="font-size:.75rem">{{ student.registration_number }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="d-none d-md-table-cell">
-                                    <span class="badge bg-secondary">{{ student.classroom.name|default:"N/A" }}</span>
+                                    <span class="badge bg-secondary bg-opacity-75">{{ student.classroom.name|default:"N/A" }}</span>
                                 </td>
                                 <td>
-                                    <div class="status-selector">
-                                        <select name="student_{{ student.id }}" 
-                                                class="form-select status-select py-1 py-sm-2" 
-                                                style="min-width: 100px; font-size: 0.875rem;">
-                                            <option value="PRESENT" selected>Present</option>
-                                            <option value="ABSENT">Absent</option>
-                                            <option value="LATE">Late</option>
-                                        </select>
-                                    </div>
+                                    <select name="student_{{ student.id }}"
+                                            class="form-select form-select-sm status-select"
+                                            style="max-width:130px"
+                                            id="sel_{{ student.id }}">
+                                        <option value="PRESENT">✅ Present</option>
+                                        <option value="ABSENT">❌ Absent</option>
+                                        <option value="LATE">🕐 Late</option>
+                                    </select>
                                 </td>
-                                <td class="text-end pe-2 pe-sm-3">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-outline-success set-present px-1 px-sm-2" 
-                                                data-id="{{ student.id }}" title="Mark Present">
-                                            <i class="bi bi-check d-sm-none"></i>
-                                            <span class="d-none d-sm-inline">Present</span>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger set-absent px-1 px-sm-2" 
-                                                data-id="{{ student.id }}" title="Mark Absent">
-                                            <i class="bi bi-x d-sm-none"></i>
-                                            <span class="d-none d-sm-inline">Absent</span>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-warning set-late px-1 px-sm-2" 
-                                                data-id="{{ student.id }}" title="Mark Late">
-                                            <i class="bi bi-clock d-sm-none"></i>
-                                            <span class="d-none d-sm-inline">Late</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-4 py-sm-5">
-                                    <div class="py-2 py-sm-4">
-                                        <i class="bi bi-people display-6 text-muted"></i>
-                                        <h5 class="mt-2 mt-sm-3 fs-5">No Students Found</h5>
-                                        <p class="text-muted fs-6 mb-0">There are no students to mark attendance for.</p>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-success set-status px-2" data-id="{{ student.id }}" data-val="PRESENT">P</button>
+                                        <button type="button" class="btn btn-outline-danger  set-status px-2" data-id="{{ student.id }}" data-val="ABSENT">A</button>
+                                        <button type="button" class="btn btn-outline-warning set-status px-2" data-id="{{ student.id }}" data-val="LATE">L</button>
                                     </div>
                                 </td>
                             </tr>
@@ -183,197 +206,128 @@
                         </tbody>
                     </table>
                 </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-people display-5 mb-3 d-block opacity-25"></i>
+                    <h6>No students found</h6>
+                    <p class="small">Select a class to load students.</p>
+                </div>
+                {% endif %}
             </div>
-            
-            <!-- Form Footer -->
-            <div class="card-footer bg-white border-0 py-2 py-sm-3">
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-                    <div class="order-2 order-sm-1 mt-1 mt-sm-0">
-                        <span class="text-muted fs-7">
-                            <span id="statsText">0 Present, 0 Absent, 0 Late</span>
-                        </span>
-                    </div>
-                    <div class="order-1 order-sm-2 d-flex flex-wrap gap-1 w-100 w-sm-auto">
-                        <a href="{% url 'attendance:student_attendance_list' %}" 
-                           class="btn btn-outline-secondary flex-grow-1 flex-sm-grow-0">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary px-3 px-sm-4 flex-grow-1 flex-sm-grow-0">
-                            <i class="bi bi-save me-1"></i> Save
-                        </button>
-                    </div>
+
+            {% if students %}
+            <div class="card-footer bg-white border-0 py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                <small class="text-muted" id="statsText">0 Present · 0 Absent · 0 Late</small>
+                <div class="d-flex gap-2">
+                    {% if is_teacher_view %}
+                    <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                    {% else %}
+                    <a href="{% url 'attendance:student_attendance_list' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary btn-sm px-4" id="saveBtn">
+                        <i class="bi bi-save me-1"></i>Save Attendance
+                    </button>
                 </div>
             </div>
+            {% endif %}
         </form>
     </div>
 </div>
 
 <style>
-    .min-w-0 { min-width: 0; }
-    .avatar { font-weight: 600; }
-    .table-hover tbody tr:hover { background-color: rgba(13, 110, 253, 0.05); }
-    .status-select { cursor: pointer; transition: all 0.2s; }
-    .btn-group .btn { border-radius: 0.25rem !important; }
-    
-    .status-select option[value="PRESENT"] { color: #198754; }
-    .status-select option[value="ABSENT"] { color: #dc3545; }
-    .status-select option[value="LATE"] { color: #fd7e14; }
-    
-    @media (max-width: 576px) {
-        .btn-group { flex-wrap: nowrap; }
-        .btn-group .btn { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
-        .table-responsive { border: 0; }
-        .table thead { display: none; }
-        .table tbody tr { display: block; margin-bottom: 1rem; border: 1px solid #dee2e6; border-radius: 0.375rem; }
-        .table tbody td { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: none; }
-        .table tbody td:before { content: attr(data-label); font-weight: 600; margin-right: 1rem; }
-        .table tbody td[data-label]:before { content: attr(data-label); }
-        .table tbody td:first-child { border-top-left-radius: 0.375rem; border-top-right-radius: 0.375rem; }
-        .table tbody td:last-child { border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; }
-        .attendance-row td:nth-child(1):before { content: "#"; }
-        .attendance-row td:nth-child(2):before { content: "Student"; }
-        .attendance-row td:nth-child(3):before { content: "Class"; }
-        .attendance-row td:nth-child(4):before { content: "Status"; }
-        .attendance-row td:nth-child(5):before { content: "Actions"; }
-        .table tbody td .status-select { width: 100%; max-width: 150px; }
-        .table tbody td .btn-group { width: 100%; justify-content: flex-end; }
-    }
-    
-    @media (max-width: 768px) {
-        .card-body { padding: 0.5rem !important; }
-        .btn { padding: 0.375rem 0.75rem; font-size: 0.875rem; }
-        .fs-6 { font-size: 0.875rem !important; }
-        .fs-7 { font-size: 0.75rem !important; }
-    }
-    
-    @media (max-width: 992px) {
-        .d-md-table-cell { display: table-cell !important; }
-    }
+.table-hover tbody tr:hover { background: rgba(13,110,253,.04); }
+tr.row-present { background: rgba(25,135,84,.06) !important; }
+tr.row-absent  { background: rgba(220,53,69,.06) !important; }
+tr.row-late    { background: rgba(255,193,7,.08) !important; }
+.btn-group .btn { font-weight:600; font-size:.75rem; }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Mobile table row transformation
-    function transformTableForMobile() {
-        if (window.innerWidth < 576) {
-            document.querySelectorAll('.attendance-row td').forEach((td, index) => {
-                const labels = ['#', 'Student', 'Class', 'Status', 'Actions'];
-                if (labels[index]) {
-                    td.setAttribute('data-label', labels[index]);
-                }
-            });
+// Pre-fill existing attendance from server
+const existingData = {{ existing_json|safe }};
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Pre-fill status selects
+    Object.keys(existingData).forEach(function(sid) {
+        const sel = document.getElementById('sel_' + sid);
+        if (sel) {
+            sel.value = existingData[sid];
+            highlightRow(sel);
         }
-    }
-
-    transformTableForMobile();
-    window.addEventListener('resize', transformTableForMobile);
-
-    // Initialize counters
+    });
     updateStats();
-    
-    // Event listeners for status changes
-    document.querySelectorAll('.status-select').forEach(select => {
-        select.addEventListener('change', function() {
-            updateRowHighlight(this);
-            updateStats();
-        });
-        updateRowHighlight(select);
+
+    // Auto-submit when class changes
+    document.getElementById('classSelect')?.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
     });
 
-    // Quick action buttons
-    document.querySelectorAll('.set-present').forEach(btn => {
+    // Live search
+    document.getElementById('liveSearch')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        document.querySelectorAll('.attendance-row').forEach(row => {
+            row.style.display = (!q || row.dataset.name.includes(q)) ? '' : 'none';
+        });
+        updateStats();
+    });
+
+    // Quick P/A/L buttons
+    document.querySelectorAll('.set-status').forEach(btn => {
         btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            const select = document.querySelector(`[name="student_${id}"]`);
-            if (select) {
-                select.value = 'PRESENT';
-                updateRowHighlight(select);
-                updateStats();
-            }
+            const sel = document.getElementById('sel_' + this.dataset.id);
+            if (sel) { sel.value = this.dataset.val; highlightRow(sel); updateStats(); }
         });
     });
 
-    document.querySelectorAll('.set-absent').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            const select = document.querySelector(`[name="student_${id}"]`);
-            if (select) {
-                select.value = 'ABSENT';
-                updateRowHighlight(select);
-                updateStats();
-            }
-        });
+    // Status select change
+    document.querySelectorAll('.status-select').forEach(sel => {
+        sel.addEventListener('change', function() { highlightRow(this); updateStats(); });
     });
 
-    document.querySelectorAll('.set-late').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            const select = document.querySelector(`[name="student_${id}"]`);
-            if (select) {
-                select.value = 'LATE';
-                updateRowHighlight(select);
-                updateStats();
-            }
-        });
-    });
-
-    // Bulk actions
+    // Mark all present
     document.getElementById('markAllPresent')?.addEventListener('click', function() {
-        document.querySelectorAll('.status-select').forEach(select => {
-            select.value = 'PRESENT';
-            updateRowHighlight(select);
-        });
+        document.querySelectorAll('.status-select').forEach(s => { s.value = 'PRESENT'; highlightRow(s); });
         updateStats();
     });
 
+    // Reset all
     document.getElementById('resetAll')?.addEventListener('click', function() {
-        document.querySelectorAll('.status-select').forEach(select => {
-            select.value = 'PRESENT';
-            updateRowHighlight(select);
-        });
+        document.querySelectorAll('.status-select').forEach(s => { s.value = 'PRESENT'; highlightRow(s); });
         updateStats();
     });
 
-    // Form submission
-    document.getElementById('attendanceForm')?.addEventListener('submit', function(e) {
-        const btn = this.querySelector('button[type="submit"]');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving';
-        btn.disabled = true;
+    // Save button spinner
+    document.getElementById('attendanceForm')?.addEventListener('submit', function() {
+        const btn = document.getElementById('saveBtn');
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…';
+            btn.disabled = true;
+        }
     });
-
-    function updateStats() {
-        let present = 0, absent = 0, late = 0;
-        
-        document.querySelectorAll('.status-select').forEach(select => {
-            switch(select.value) {
-                case 'PRESENT': present++; break;
-                case 'ABSENT': absent++; break;
-                case 'LATE': late++; break;
-            }
-        });
-        
-        document.getElementById('presentCount').textContent = present;
-        document.getElementById('absentCount').textContent = absent;
-        document.getElementById('lateCount').textContent = late;
-        
-        const statsText = document.getElementById('statsText');
-        if (statsText) {
-            statsText.textContent = `${present} Present, ${absent} Absent, ${late} Late`;
-        }
-    }
-
-    function updateRowHighlight(select) {
-        const row = select.closest('.attendance-row');
-        if (!row) return;
-        
-        row.classList.remove('table-success', 'table-danger', 'table-warning');
-        
-        switch(select.value) {
-            case 'PRESENT': row.classList.add('table-success'); break;
-            case 'ABSENT': row.classList.add('table-danger'); break;
-            case 'LATE': row.classList.add('table-warning'); break;
-        }
-    }
 });
+
+function highlightRow(sel) {
+    const row = sel.closest('.attendance-row');
+    if (!row) return;
+    row.classList.remove('row-present', 'row-absent', 'row-late');
+    if (sel.value === 'PRESENT') row.classList.add('row-present');
+    else if (sel.value === 'ABSENT') row.classList.add('row-absent');
+    else if (sel.value === 'LATE') row.classList.add('row-late');
+}
+
+function updateStats() {
+    let p = 0, a = 0, l = 0;
+    document.querySelectorAll('.attendance-row:not([style*="none"]) .status-select').forEach(s => {
+        if (s.value === 'PRESENT') p++;
+        else if (s.value === 'ABSENT') a++;
+        else if (s.value === 'LATE') l++;
+    });
+    document.getElementById('presentCount').textContent = p;
+    document.getElementById('absentCount').textContent  = a;
+    document.getElementById('lateCount').textContent    = l;
+    const st = document.getElementById('statsText');
+    if (st) st.textContent = `${p} Present · ${a} Absent · ${l} Late`;
+}
 </script>
 {% endblock %}

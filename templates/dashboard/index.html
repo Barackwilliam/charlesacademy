@@ -514,6 +514,157 @@
             </a>
         </div>
     </div>
+
+    <!-- ═══ TEACHER ACTIVITY SECTION ═══ -->
+    <div class="row g-3 mb-5 mt-2">
+
+        <!-- Today's Attendance Summary -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-2 d-flex align-items-center justify-content-between">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-calendar-check text-primary me-2"></i>Today's Attendance
+                    </h6>
+                    <a href="{% url 'attendance:student_attendance_list' %}" class="small text-primary">View all →</a>
+                </div>
+                <div class="card-body pt-1">
+                    <div class="row g-2 mb-3">
+                        <div class="col-4 text-center">
+                            <div class="fw-bold fs-3 text-success">{{ today_present }}</div>
+                            <small class="text-muted">Present</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="fw-bold fs-3 text-danger">{{ today_absent }}</div>
+                            <small class="text-muted">Absent</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="fw-bold fs-3 text-warning">{{ today_late }}</div>
+                            <small class="text-muted">Late</small>
+                        </div>
+                    </div>
+                    <a href="{% url 'attendance:mark_student_attendance' %}" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-plus-circle me-1"></i>Mark Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers Overview -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-2 d-flex align-items-center justify-content-between">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-person-badge text-success me-2"></i>Teachers Overview
+                    </h6>
+                    <a href="{% url 'teacher_list' %}" class="small text-primary">Manage →</a>
+                </div>
+                <div class="card-body p-0">
+                    {% for teacher in teachers|slice:":6" %}
+                    <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+                        <div class="rounded-circle bg-success bg-opacity-15 text-success d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                             style="width:34px;height:34px;font-size:.8rem">
+                            {{ teacher.first_name|slice:":1"|upper }}
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="fw-semibold small text-truncate">{{ teacher.full_name }}</div>
+                            <div style="font-size:.72rem">
+                                {% for c in teacher.classes.all|slice:":2" %}
+                                <span class="badge bg-primary bg-opacity-75 me-1" style="font-size:.65rem">{{ c.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <span class="badge {% if teacher.is_available %}bg-success{% else %}bg-secondary{% endif %} bg-opacity-75" style="font-size:.68rem">
+                            {% if teacher.is_available %}Active{% else %}Away{% endif %}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center py-3">No teachers registered.</p>
+                    {% endfor %}
+                    <div class="text-center py-2">
+                        <a href="{% url 'add_teacher' %}" class="small text-success">+ Add Teacher</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Results Entered by Teachers -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-2 d-flex align-items-center justify-content-between">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-graph-up text-warning me-2"></i>Recent Results
+                    </h6>
+                    <a href="{% url 'exams:exam_list' %}" class="small text-primary">View exams →</a>
+                </div>
+                <div class="card-body p-0">
+                    {% for r in recent_results %}
+                    <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+                        <div class="rounded-circle bg-warning bg-opacity-15 text-warning d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                             style="width:32px;height:32px;font-size:.75rem">
+                            {{ r.student.full_name|slice:":1"|upper }}
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="fw-semibold small text-truncate">{{ r.student.full_name }}</div>
+                            <div class="text-muted" style="font-size:.72rem">{{ r.subject.name }} — {{ r.exam.classroom.name }}</div>
+                        </div>
+                        <span class="badge {% if r.marks >= 80 %}bg-success{% elif r.marks >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %} px-2">
+                            {{ r.marks }}%
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center py-4">No results recorded yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Attendance Records (last 7 days) -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 pb-2 d-flex align-items-center justify-content-between">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-clock-history text-info me-2"></i>Recent Attendance (Last 7 Days)
+                    </h6>
+                    <a href="{% url 'attendance:student_attendance_list' %}" class="small text-primary">Full records →</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Student</th>
+                                <th>Class</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for att in recent_attendance %}
+                            <tr>
+                                <td class="ps-3 fw-semibold small">{{ att.student.full_name }}</td>
+                                <td><span class="badge bg-secondary bg-opacity-75 small">{{ att.student.classroom.name|default:"—" }}</span></td>
+                                <td class="small text-muted">{{ att.subject.name|default:"General" }}</td>
+                                <td class="small">{{ att.date|date:"d M Y" }}</td>
+                                <td>
+                                    <span class="badge {% if att.status == 'PRESENT' %}bg-success{% elif att.status == 'ABSENT' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                        {{ att.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3 small">
+                                    No attendance records in the last 7 days.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ END TEACHER ACTIVITY ═══ -->
 </div>
 
 <style>

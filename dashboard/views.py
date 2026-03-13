@@ -52,15 +52,39 @@ def index(request):
 
 @login_required
 def dashboard(request):
+    from attendance.models import StudentAttendance
+    from exams.models import Result
+    from django.utils import timezone as tz
+    import datetime
+
     total_students = Student.objects.count()
     total_teachers = Teacher.objects.count()
-    total_classes = ClassRoom.objects.count()
-    settings_obj = SchoolSettings.objects.first()
-
+    total_classes  = ClassRoom.objects.count()
+    settings_obj   = SchoolSettings.objects.first()
 
     fees_collected = FeePayment.objects.aggregate(
         total=Sum('amount_paid')
     )['total'] or 0
+
+    # Teacher activity — recent attendance entries (last 7 days)
+    week_ago = tz.now().date() - datetime.timedelta(days=7)
+    recent_attendance = StudentAttendance.objects.filter(
+        date__gte=week_ago
+    ).select_related('student__classroom', 'subject').order_by('-date')[:15]
+
+    # Recent results entered
+    recent_results = Result.objects.select_related(
+        'student', 'exam__classroom', 'subject'
+    ).order_by('-id')[:10]
+
+    # Teachers with their classes for the overview table
+    teachers = Teacher.objects.prefetch_related('classes', 'subjects').all()
+
+    # Today's attendance summary
+    today = tz.now().date()
+    today_present = StudentAttendance.objects.filter(date=today, status='PRESENT').count()
+    today_absent  = StudentAttendance.objects.filter(date=today, status='ABSENT').count()
+    today_late    = StudentAttendance.objects.filter(date=today, status='LATE').count()
 
     context = {
         'total_students': total_students,
@@ -68,7 +92,12 @@ def dashboard(request):
         'total_classes': total_classes,
         'fees_collected': fees_collected,
         'school_settings': settings_obj,
-
+        'recent_attendance': recent_attendance,
+        'recent_results': recent_results,
+        'teachers': teachers,
+        'today_present': today_present,
+        'today_absent': today_absent,
+        'today_late': today_late,
     }
 
     return render(request, 'dashboard/index.html', context)

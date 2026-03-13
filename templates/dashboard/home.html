@@ -1520,18 +1520,25 @@
             margin-bottom: 50px;
         }
 
-        .testimonial-slider {
-            max-width: 800px;
-            margin: 0 auto;
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        .testimonial {
-            background: rgba(255, 255, 255, 0.1);
+        .testimonial.t-card {
+            background: rgba(255,255,255,.12);
             backdrop-filter: blur(10px);
             border-radius: var(--radius-lg);
-            padding: 40px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 28px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,.2);
+            transition: var(--transition);
+        }
+
+        .testimonial.t-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,.18);
         }
 
         .testimonial-text {
@@ -1804,7 +1811,11 @@
     <header class="header">
         <div class="container nav-container">
             <a href="#" class="logo">
-                <div class="logo-icon">CA</div>
+                <div class="logo-icon" style="background:none;overflow:visible;">
+                    {% load static %}
+                    <img src="{% static 'images/logo.jpeg' %}" alt="Charles Academy Logo"
+                         style="width:50px;height:50px;object-fit:contain;border-radius:8px;">
+                </div>
                 <div class="logo-text">
                     <h1>Charles Academy</h1>
                     <span>Student Portal</span>
@@ -2222,29 +2233,82 @@
             
             <div class="events-grid">
                 <div class="event-card">
-                    <div class="event-date">Tomorrow, 3 PM</div>
-                    <h4>Science Fair</h4>
-                    <p>Student projects exhibition</p>
+                    <div class="event-date">Every Week</div>
+                    <h4>Skill Development Workshops</h4>
+                    <p>Hands-on sessions in IT, entrepreneurship, digital marketing, and creative fields. Join any week, work on real projects, and gain practical experience that complements classroom learning.</p>
                     <div class="event-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Online</span>
+                        <span><i class="fas fa-laptop"></i> IT & Creative Labs</span>
+                        <span><i class="fas fa-users"></i> All Students</span>
                     </div>
                 </div>
-                
+
                 <div class="event-card">
-                    <div class="event-date">Friday, 2 PM</div>
-                    <h4>Math session</h4>
-                    <p>Problem-solving session</p>
+                    <div class="event-date">Every Month</div>
+                    <h4>Career Guidance Webinar</h4>
+                    <p>Expert-led webinars on career growth, interview skills, CV writing, freelancing, and strategies to succeed in the workplace. Learn from professionals in your field.</p>
                     <div class="event-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Room 204</span>
+                        <span><i class="fas fa-chalkboard-teacher"></i> Online / Main Hall</span>
+                        <span><i class="fas fa-briefcase"></i> Career Focus</span>
                     </div>
                 </div>
-                
+
                 <div class="event-card">
-                    <div class="event-date">Next Monday</div>
-                    <h4>Exams Begin</h4>
-                    <p>Check your timetable</p>
+                    <div class="event-date">Every Quarter</div>
+                    <h4>Student Competitions</h4>
+                    <p>Showcase your skills through project presentations, coding challenges, business ideas, or creative design contests. Winners receive certificates, recognition, and mentorship opportunities.</p>
                     <div class="event-meta">
-                        <span><i class="fas fa-clock"></i> All Day</span>
+                        <span><i class="fas fa-trophy"></i> Main Hall</span>
+                        <span><i class="fas fa-medal"></i> Prizes & Certificates</span>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-date">Regular Sessions</div>
+                    <h4>Certificate Distribution Days</h4>
+                    <p>Celebrate your milestones! Students receive certificates for completed courses and achievements. A day to recognize hard work, stay motivated, and inspire continued growth.</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-certificate"></i> Auditorium</span>
+                        <span><i class="fas fa-users"></i> All Graduates</span>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-date">Ongoing</div>
+                    <h4>Community Outreach & Volunteering</h4>
+                    <p>Use your skills for social impact — teach digital literacy, organize awareness campaigns, or support community projects. Build leadership, teamwork, and a sense of responsibility.</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-hands-helping"></i> Community</span>
+                        <span><i class="fas fa-heart"></i> Social Impact</span>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-date">Alumni Series</div>
+                    <h4>Alumni Talks & Success Stories</h4>
+                    <p>Inspiring talks from past students sharing their journeys, challenges, and strategies for success. See real-world applications of your learning and stay motivated to achieve your goals.</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-microphone"></i> Main Hall</span>
+                        <span><i class="fas fa-star"></i> Inspirational</span>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-date">Debate Series</div>
+                    <h4>Debate Sessions</h4>
+                    <p>Structured discussions on technology trends, entrepreneurship, social issues, and ethical dilemmas. Sharpen critical thinking, communication, and public speaking skills through confident debate.</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-comments"></i> Debate Hall</span>
+                        <span><i class="fas fa-users"></i> All Classes</span>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-date">Open Competition</div>
+                    <h4>Poem Writing Competition</h4>
+                    <p>Express yourself through poetry on themes like culture, education, social issues, or personal growth. Winners are recognized with certificates and featured on the academy's platforms.</p>
+                    <div class="event-meta">
+                        <span><i class="fas fa-feather-alt"></i> Creative Writing</span>
+                        <span><i class="fas fa-certificate"></i> Certificate & Feature</span>
                     </div>
                 </div>
             </div>
@@ -2256,17 +2320,54 @@
         <div class="container">
             <h3>What Students Say</h3>
             
-            <div class="testimonial-slider">
-                <div class="testimonial">
-                    <div class="testimonial-text">
-                        "This portal changed how I study. Everything organized in one place!"
-                    </div>
+            <div class="testimonials-grid">
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"This portal changed how I study. Everything organized in one place!"</div>
                     <div class="testimonial-author">
-                        <div class="author-avatar">DK</div>
-                        <div class="author-info">
-                            <h4>David Kim</h4>
-                            <span>Graphic Designer</span>
-                        </div>
+                        <div class="author-avatar">AJ</div>
+                        <div class="author-info"><h4>Alice Jesca</h4><span>Graphic Design</span></div>
+                    </div>
+                </div>
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"Downloading my results and timetable instantly is amazing. Best system!"</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MK</div>
+                        <div class="author-info"><h4>Michael Kumburu</h4><span>Web Design</span></div>
+                    </div>
+                </div>
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"The attendance tracking helped me never miss a class again. Highly recommend!"</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SR</div>
+                        <div class="author-info"><h4>Sarah Roberts</h4><span>Entrepreneurship</span></div>
+                    </div>
+                </div>
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"I love how I can track my grades and see my progress every term."</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">BM</div>
+                        <div class="author-info"><h4>Baraka Mwamba</h4><span>Business Studies</span></div>
+                    </div>
+                </div>
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"Submitting assignments online saves so much time. This portal is a game changer."</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">FN</div>
+                        <div class="author-info"><h4>Fatuma Nkosi</h4><span>Computer Science</span></div>
+                    </div>
+                </div>
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"The English Debate section prepared me to speak with confidence!"</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">DM</div>
+                        <div class="author-info"><h4>Daniel Msuya</h4><span>Literature &amp; Language</span></div>
+                    </div>
+                </div>
+                <div class="testimonial t-card">
+                    <div class="testimonial-text">"Parent portal keeps my mum updated without calling the school daily. Perfect!"</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">GK</div>
+                        <div class="author-info"><h4>Grace Kariuki</h4><span>Science Track</span></div>
                     </div>
                 </div>
             </div>
@@ -2667,7 +2768,7 @@
         // Student profile
         const studentProfile = document.getElementById('studentProfile');
         studentProfile.addEventListener('click', () => {
-            alert('👤 Student Profile\n\nName: John Smith\nGrade: 11\nClass: Science\nAverage: 87%\nNext: Math - 10:00 AM');
+            alert('👤 Student Profile\n\nWelcome to Charles Academy!\nPlease login to view your profile.');
         });
 
         // Access cards interaction
