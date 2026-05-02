@@ -7,7 +7,7 @@ INSTALLATION:
 1. Add to the client's settings.py:
 
     JAMIITEK_API_KEY = "your-api-key-from-panel"
-    JAMIITEK_API_URL = "https://jamiitek.co.tz/api/site-status/"
+    JAMIITEK_API_URL = "https://jamiitek.com/api/site-status/"
 
     MIDDLEWARE = [
         ...
@@ -146,14 +146,14 @@ SUSPENSION_HTML = """<!DOCTYPE html>
   </div>
   <div class="cta-wrap">
     <a href="https://wa.me/255750910158?text=Hello,%20I%20would%20like%20to%20pay%20for%20my%20hosting" class="btn btn-primary" target="_blank">&#128172; Contact via WhatsApp</a>
-    <a href="mailto:info@jamiitek.co.tz?subject=Hosting%20Payment" class="btn btn-ghost">&#9993; Send Email</a>
+    <a href="mailto:info@jamiitek.com?subject=Hosting%20Payment" class="btn btn-ghost">&#9993; Send Email</a>
   </div>
   <div class="footer">
     <div class="footer-brand">Jamii<span>Tek</span></div>
     <div class="footer-tagline">Digital Solutions &middot; Tanzania</div>
     <div class="footer-links">
-      <a href="https://jamiitek.co.tz">jamiitek.co.tz</a>
-      <a href="mailto:info@jamiitek.co.tz">info@jamiitek.co.tz</a>
+      <a href="https://jamiitek.com">jamiitek.com</a>
+      <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
     </div>
   </div>
 </div>
@@ -202,7 +202,7 @@ class JamiiTekStatusMiddleware:
         self.api_key = getattr(settings, 'JAMIITEK_API_KEY', None)
         self.api_url = getattr(
             settings, 'JAMIITEK_API_URL',
-            'https://jamiitek.co.tz/api/site-status/'
+            'https://jamiitek.com/api/site-status/'
         )
 
     def __call__(self, request):

@@ -104,74 +104,21 @@
               {% if sub.marks %}<small class="text-muted">/100</small>{% endif %}
             </td>
             <td>
-              {% if sub.get_file_url %}
-                <a href="{{ sub.get_file_url }}" target="_blank"
+              {% if sub.file %}
+                <a href="{% url 'exams:download_submission_file' sub.id %}"
+                   target="_blank"
                    class="btn btn-sm btn-outline-primary">
                   <i class="bi bi-download"></i>
                 </a>
               {% else %}—{% endif %}
             </td>
             <td>
+              <!-- Trigger button only — modal is rendered outside the table below -->
               <button class="btn btn-sm btn-outline-success"
                       data-bs-toggle="modal"
                       data-bs-target="#gradeModal{{ sub.id }}">
                 <i class="bi bi-pencil me-1"></i>Grade
               </button>
-
-              <!-- Grade Modal -->
-              <div class="modal fade" id="gradeModal{{ sub.id }}" tabindex="-1">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <form method="post">
-                      {% csrf_token %}
-                      <input type="hidden" name="submission_id" value="{{ sub.id }}">
-                      <div class="modal-header">
-                        <h5 class="modal-title fw-bold">
-                          Grade — {{ sub.student.full_name }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body">
-                        {% if sub.comment %}
-                          <div class="alert alert-light mb-3">
-                            <small class="text-muted d-block mb-1">Student's comment:</small>
-                            {{ sub.comment }}
-                          </div>
-                        {% endif %}
-                        <div class="mb-3">
-                          <label class="form-label fw-semibold">Marks (out of 100)</label>
-                          <input type="number" name="marks" class="form-control form-control-lg"
-                                 min="0" max="100" value="{{ sub.marks|default:'' }}"
-                                 placeholder="e.g. 85">
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label fw-semibold">Feedback to Student</label>
-                          <textarea name="feedback" class="form-control" rows="3"
-                                    placeholder="Maoni yako...">{{ sub.feedback }}</textarea>
-                        </div>
-                        <div class="mb-2">
-                          <label class="form-label fw-semibold">Update Status</label>
-                          <select name="status" class="form-select">
-                            {% for val, label in sub.STATUS_CHOICES %}
-                              <option value="{{ val }}" {% if sub.status == val %}selected{% endif %}>
-                                {{ label }}
-                              </option>
-                            {% endfor %}
-                          </select>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="submit" class="btn btn-success px-4">
-                          <i class="bi bi-check-lg me-1"></i>Save Grade
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
             </td>
           </tr>
           {% endfor %}
@@ -184,9 +131,92 @@
   <div class="text-center py-5">
     <i class="bi bi-inbox display-1 text-muted"></i>
     <h5 class="fw-bold mt-3">No Submissions Yet</h5>
-    <p class="text-muted">Wanafunzi hawajasubmit bado.</p>
+    <p class="text-muted">No students have submitted this assignment yet.</p>
   </div>
   {% endif %}
 
 </div>
+
+<!--
+  GRADE MODALS
+  Rendered outside the table and container entirely.
+  Bootstrap modals rely on position:fixed to stay anchored to the viewport.
+  When a modal is nested inside a <td>, the table-hover CSS transform on <tr>
+  creates a new stacking context that breaks position:fixed — causing the modal
+  to shake/tremble whenever the mouse moves over table rows.
+  Moving all modals here (outside the table) fixes that completely.
+-->
+{% for sub in submissions %}
+<div class="modal fade" id="gradeModal{{ sub.id }}" tabindex="-1"
+     aria-labelledby="gradeModalLabel{{ sub.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="">
+        {% csrf_token %}
+        <input type="hidden" name="submission_id" value="{{ sub.id }}">
+
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="gradeModalLabel{{ sub.id }}">
+            <i class="bi bi-pencil-square me-2 text-success"></i>
+            Grade — {{ sub.student.full_name }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+
+          {% if sub.comment %}
+            <div class="alert alert-light border mb-3">
+              <small class="text-muted d-block mb-1 fw-semibold">
+                <i class="bi bi-chat-left-text me-1"></i>Student's comment:
+              </small>
+              {{ sub.comment }}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Marks <span class="text-muted fw-normal">(out of 100)</span>
+            </label>
+            <input type="number" name="marks" class="form-control form-control-lg"
+                   min="0" max="100"
+                   value="{{ sub.marks|default:'' }}"
+                   placeholder="e.g. 85"
+                   autocomplete="off">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Feedback to Student</label>
+            <textarea name="feedback" class="form-control" rows="3"
+                      placeholder="Write your feedback here...">{{ sub.feedback }}</textarea>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-semibold">Update Status</label>
+            <select name="status" class="form-select">
+              {% for val, label in sub.STATUS_CHOICES %}
+                <option value="{{ val }}" {% if sub.status == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="bi bi-check-lg me-1"></i>Save Grade
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
 {% endblock %}

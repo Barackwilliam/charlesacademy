@@ -43,8 +43,9 @@ class SubmissionInline(admin.TabularInline):
     timing.short_description = 'Timing'
 
     def view_file(self, obj):
-        url = obj.get_file_url()
-        if url:
+        if obj.file and obj.pk:
+            from django.urls import reverse
+            url = reverse('exams:download_submission_file', args=[obj.pk])
             return format_html(
                 '<a href="{}" target="_blank" style="background:#4361ee;color:#fff;'
                 'padding:3px 8px;border-radius:4px;font-size:11px;text-decoration:none;">⬇ View</a>',
@@ -127,8 +128,9 @@ class SubmissionAdmin(admin.ModelAdmin):
     timing.short_description = 'Timing'
 
     def view_file(self, obj):
-        url = obj.get_file_url()
-        if url:
+        if obj.file and obj.pk:
+            from django.urls import reverse
+            url = reverse('exams:download_submission_file', args=[obj.pk])
             return format_html(
                 '<a href="{}" target="_blank" style="background:#4361ee;color:#fff;'
                 'padding:3px 8px;border-radius:4px;font-size:11px;text-decoration:none;">⬇ View</a>',
