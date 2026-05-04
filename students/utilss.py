@@ -60,12 +60,17 @@ def create_student_user(student, password=None):
             # 1. CREATE USERNAME (kutoka kwa registration number, keep slashes)
             username = student.registration_number.strip().lower()
             
-            # Hakikisha username ni unique — ikiwa tayari ipo, rudi error wazi
-            if User.objects.filter(username=username).exists():
-                raise ValueError(
-                    f"Mwanafunzi mwenye namba '{student.registration_number}' tayari ana akaunti ya kuingia. "
-                    f"Tafadhali angalia kama mwanafunzi huyu alisajiliwa awali, au futa akaunti yake ya zamani kwanza."
-                )
+            # Hakikisha username ni unique
+            original_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{original_username}_{counter}"
+                counter += 1
+                if counter > 100:
+                    # Fallback: badilisha / kuwa _
+                    username = original_username.replace('/', '_')
+                    if User.objects.filter(username=username).exists():
+                        username = f"{username}_{counter}"
             
             # 2. CREATE PASSWORD
             if not password:
